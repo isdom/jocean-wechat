@@ -1,0 +1,23 @@
+apply from: 'http://git.medtap.cn/jocean/devconf/raw/master/devconf/build-lib.gradle'
+
+configurations {
+    all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    all*.exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+    all*.exclude group: 'log4j', module: 'log4j'
+    all*.exclude group: 'commons-logging', module: 'commons-logging'
+    all { resolutionStrategy.cacheChangingModulesFor 1, 'minutes' }
+}
+
+dependencies {
+    
+    compile 'com.alibaba:fastjson:1.2.17'
+    compile 'javax.ws.rs:javax.ws.rs-api:2.0'
+    compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonVersion}"
+    compile 'org.apache.commons:commons-lang3:3.5'
+        
+    compile 'org.jocean:jocean-idiom:0.1.4-SNAPSHOT'
+    compile 'org.jocean:jocean-http:0.0.2-SNAPSHOT'
+    
+    testCompile 'junit:junit:4.12'
+}
