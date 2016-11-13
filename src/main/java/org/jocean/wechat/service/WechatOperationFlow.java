@@ -8,17 +8,21 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.ws.rs.GET;
 
 import org.jocean.event.api.AbstractFlow;
 import org.jocean.event.api.BizStep;
 import org.jocean.event.api.EventUtils;
 import org.jocean.event.api.annotation.OnEvent;
+import org.jocean.http.Feature;
 import org.jocean.http.rosa.SignalClient;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.j2se.jmx.MBeanRegister;
 import org.jocean.j2se.jmx.MBeanRegisterAware;
 import org.jocean.j2se.jmx.MBeanUtil;
 import org.jocean.wechat.WechatOperation;
+import org.jocean.wechat.spi.DownloadMediaRequest;
+import org.jocean.wechat.spi.DownloadMediaResponse;
 import org.jocean.wechat.spi.FetchAccessTokenRequest;
 import org.jocean.wechat.spi.FetchAccessTokenResponse;
 import org.jocean.wechat.spi.FetchTicketRequest;
@@ -41,6 +45,25 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
 	
     private static final Logger LOG = 
             LoggerFactory.getLogger(WechatOperationFlow.class);
+    
+    @Override
+    public Observable<DownloadMediaResponse> downloadMedia(final String mediaId) {
+        return getAccessToken(false)
+            .flatMap(new Func1<String, Observable<DownloadMediaResponse>>() {
+                @Override
+                public Observable<DownloadMediaResponse> call(final String accessToken) {
+                    final DownloadMediaRequest req = new DownloadMediaRequest();
+                    req.setAccessToken(accessToken);
+                    req.setMediaId(mediaId);
+                    return _signalClient.<DownloadMediaResponse>defineInteraction(req, 
+                            Feature.ENABLE_LOGGING_OVER_SSL,
+                            Feature.ENABLE_COMPRESSOR,
+                            new SignalClient.UsingMethod(GET.class),
+                            new SignalClient.ConvertResponseTo(DownloadMediaResponse.class)
+                            );
+                }})
+            .timeout(5, TimeUnit.SECONDS);
+    }
     
     @Override
     public String getAppid() {
