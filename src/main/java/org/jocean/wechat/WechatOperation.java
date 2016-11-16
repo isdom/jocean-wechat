@@ -1,7 +1,7 @@
 
 package org.jocean.wechat;
 
-import org.jocean.wechat.spi.DownloadMediaResponse;
+import org.jocean.idiom.store.BlobRepo.Blob;
 
 import rx.Observable;
 
@@ -12,5 +12,5 @@ public interface WechatOperation {
     
     public String getAccessToken();
     
-    public Observable<DownloadMediaResponse> downloadMedia(final String mediaId);
+    public Observable<Blob> downloadMedia(final String mediaId);
 }

@@ -17,6 +17,7 @@ import org.jocean.event.api.annotation.OnEvent;
 import org.jocean.http.Feature;
 import org.jocean.http.rosa.SignalClient;
 import org.jocean.idiom.ExceptionUtils;
+import org.jocean.idiom.store.BlobRepo.Blob;
 import org.jocean.j2se.jmx.MBeanRegister;
 import org.jocean.j2se.jmx.MBeanRegisterAware;
 import org.jocean.j2se.jmx.MBeanUtil;
@@ -47,11 +48,11 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
             LoggerFactory.getLogger(WechatOperationFlow.class);
     
     @Override
-    public Observable<DownloadMediaResponse> downloadMedia(final String mediaId) {
+    public Observable<Blob> downloadMedia(final String mediaId) {
         return getAccessToken(false)
-            .flatMap(new Func1<String, Observable<DownloadMediaResponse>>() {
+            .flatMap(new Func1<String, Observable<Blob>>() {
                 @Override
-                public Observable<DownloadMediaResponse> call(final String accessToken) {
+                public Observable<Blob> call(final String accessToken) {
                     final DownloadMediaRequest req = new DownloadMediaRequest();
                     req.setAccessToken(accessToken);
                     req.setMediaId(mediaId);
@@ -60,7 +61,22 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                             Feature.ENABLE_COMPRESSOR,
                             new SignalClient.UsingMethod(GET.class),
                             new SignalClient.ConvertResponseTo(DownloadMediaResponse.class)
-                            );
+                            )
+                            .map(new Func1<DownloadMediaResponse, Blob>() {
+                                @Override
+                                public Blob call(final DownloadMediaResponse resp) {
+                                    return new Blob() {
+                                        @Override
+                                        public byte[] content() {
+                                            return resp.getMsgbody();
+                                        }
+                                        @Override
+                                        public String contentType() {
+                                            return resp.getContentType();
+                                        }
+                                        
+                                    };
+                                }});
                 }})
             .timeout(5, TimeUnit.SECONDS);
     }
