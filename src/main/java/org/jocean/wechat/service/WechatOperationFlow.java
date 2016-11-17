@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 
 import org.jocean.event.api.AbstractFlow;
 import org.jocean.event.api.BizStep;
@@ -28,11 +29,17 @@ import org.jocean.wechat.spi.FetchAccessTokenRequest;
 import org.jocean.wechat.spi.FetchAccessTokenResponse;
 import org.jocean.wechat.spi.FetchTicketRequest;
 import org.jocean.wechat.spi.FetchTicketResponse;
+import org.jocean.wechat.spi.UploadMediaRequest;
+import org.jocean.wechat.spi.UploadMediaResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
+import com.google.common.primitives.Bytes;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.util.CharsetUtil;
+import io.netty.util.internal.ThreadLocalRandom;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
@@ -77,8 +84,64 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                                         
                                     };
                                 }});
-                }})
-            .timeout(5, TimeUnit.SECONDS);
+                }});
+    }
+    
+    final static String CONTENT_DISPOSITION = "Content-Disposition";
+    
+    @Override
+    public Observable<String> uploadMedia(final Blob blob) {
+        return getAccessToken(false)
+            .flatMap(new Func1<String, Observable<String>>() {
+                @Override
+                public Observable<String> call(final String accessToken) {
+                    final UploadMediaRequest req = new UploadMediaRequest();
+                    req.setAccessToken(accessToken);
+                    
+                    final String contentType = blob.contentType();
+                    final String type = contentType.startsWith("image") ? "image" : "voice";
+                    req.setType(type);
+                    final String typeSuffix = contentType.substring(contentType.lastIndexOf('/') + 1);
+                    
+                    final String multipartDataBoundary = Long.toHexString(ThreadLocalRandom.current().nextLong()).toLowerCase();
+                    final String name = "media";
+                    
+                    final String part = "--" + multipartDataBoundary + "\r\n" +
+                                    CONTENT_DISPOSITION + ": form-data; name=\""+ name + "\"; filename=\"ossobj." + typeSuffix + "\"" + "\r\n" +
+//                                    CONTENT_LENGTH + ": " + file1.length() + "\r\n" +
+                                    HttpHeaderNames.CONTENT_TYPE + ": " + contentType + "\r\n" +
+                                    HttpHeaderNames.CONTENT_TRANSFER_ENCODING + ": binary" + "\r\n" +
+                                    "\r\n";
+                    final String end = "\r\n--" + multipartDataBoundary + "--\r\n";
+                    
+                    req.setBody( 
+                        Bytes.concat(part.getBytes(CharsetUtil.UTF_8), 
+                            blob.content(),
+                            end.getBytes(CharsetUtil.UTF_8))
+                            );
+                    
+                    req.setContentType("multipart/form-data; boundary=" + multipartDataBoundary);
+                    req.setContentLength(Integer.toString(req.getBody().length));
+                    
+                    return _signalClient.<UploadMediaResponse>defineInteraction(req,
+                            Feature.ENABLE_LOGGING_OVER_SSL,
+                            Feature.ENABLE_COMPRESSOR,
+                            new SignalClient.UsingMethod(POST.class),
+                            new SignalClient.ConvertResponseTo(UploadMediaResponse.class)
+                        )
+                        .flatMap(new Func1<UploadMediaResponse, Observable<String>>() {
+                            @Override
+                            public Observable<String> call(final UploadMediaResponse resp) {
+                                final String mediaId = resp.getErrormsg().getMediaid();
+                                if (null != mediaId) {
+                                    return Observable.just(mediaId);
+                                } else {
+                                }
+                                return Observable.error(new RuntimeException(resp.getErrormsg().toString()));
+                            }
+                        });
+                }
+            });
     }
     
     @Override
