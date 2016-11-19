@@ -42,7 +42,7 @@ public class UploadMediaResponse {
             builder.append("ErrorMsg [errcode=").append(_errcode)
                     .append(", errmsg=").append(_errmsg).append(", type=")
                     .append(_type).append(", media_id=").append(_mediaid)
-                    .append(", create_at=").append(_createat).append("]");
+                    .append(", create_at=").append(_createdat).append("]");
             return builder.toString();
         }
 
@@ -88,12 +88,12 @@ public class UploadMediaResponse {
 
         @JSONField(name="created_at")
         public Integer getCreateat() {
-            return _createat;
+            return _createdat;
         }
 
         @JSONField(name="created_at")
-        public void setCreateat(Integer createat) {
-            this._createat = createat;
+        public void setCreateat(final int createdat) {
+            this._createdat = new Integer(createdat);
         }
 
         private int _errcode = 0;
@@ -101,6 +101,6 @@ public class UploadMediaResponse {
         
         private String _type;
         private String _mediaid;
-        private Integer _createat;
+        private Integer _createdat;
     }
 }
