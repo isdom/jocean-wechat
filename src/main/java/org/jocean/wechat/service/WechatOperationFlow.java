@@ -16,8 +16,11 @@ import org.jocean.event.api.BizStep;
 import org.jocean.event.api.EventUtils;
 import org.jocean.event.api.annotation.OnEvent;
 import org.jocean.http.Feature;
+import org.jocean.http.TransportException;
 import org.jocean.http.rosa.SignalClient;
 import org.jocean.idiom.ExceptionUtils;
+import org.jocean.idiom.rx.RxObservables;
+import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.idiom.store.BlobRepo.Blob;
 import org.jocean.j2se.jmx.MBeanRegister;
 import org.jocean.j2se.jmx.MBeanRegisterAware;
@@ -67,23 +70,30 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                             Feature.ENABLE_LOGGING_OVER_SSL,
                             Feature.ENABLE_COMPRESSOR,
                             new SignalClient.UsingMethod(GET.class),
-                            new SignalClient.ConvertResponseTo(DownloadMediaResponse.class)
-                            )
-                            .map(new Func1<DownloadMediaResponse, Blob>() {
+                            new SignalClient.ConvertResponseTo(DownloadMediaResponse.class))
+                        .retryWhen(RxObservables.retryWith(new RetryPolicy<Object>() {
+                            @Override
+                            public Observable<Object> call(final Observable<Throwable> errors) {
+                                return errors.compose(RxObservables.retryIfMatch(TransportException.class))
+                                        .compose(RxObservables.retryMaxTimes(_maxRetryTimes))
+                                        .compose(RxObservables.retryDelayTo(_retryIntervalBase))
+                                        ;
+                            }}))
+                        .map(new Func1<DownloadMediaResponse, Blob>() {
+                        @Override
+                        public Blob call(final DownloadMediaResponse resp) {
+                            return new Blob() {
                                 @Override
-                                public Blob call(final DownloadMediaResponse resp) {
-                                    return new Blob() {
-                                        @Override
-                                        public byte[] content() {
-                                            return resp.getMsgbody();
-                                        }
-                                        @Override
-                                        public String contentType() {
-                                            return resp.getContentType();
-                                        }
-                                        
-                                    };
-                                }});
+                                public byte[] content() {
+                                    return resp.getMsgbody();
+                                }
+                                @Override
+                                public String contentType() {
+                                    return resp.getContentType();
+                                }
+                                
+                            };
+                        }});
                 }});
     }
     
@@ -405,7 +415,15 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
     public String getAppsecret() {
         return _appsecret;
     }
+    
+    public void setMaxRetryTimes(final int maxRetryTimes) {
+        this._maxRetryTimes = maxRetryTimes;
+    }
 
+    public void setRetryIntervalBase(final int retryIntervalBase) {
+        this._retryIntervalBase = retryIntervalBase;
+    }
+    
     private void handleFetchAccessTokenSubscriber(
             final Subscriber<? super String> subscriber) {
         if (!subscriber.isUnsubscribed()) {
@@ -441,6 +459,9 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
     private final List<Subscriber<? super String>> _subscribers4ticket = Lists.newCopyOnWriteArrayList();
     
     private boolean _fetchingJsapiTicket = false;
+    
+    private int _maxRetryTimes = 3;
+    private int _retryIntervalBase = 2;
 }
 
 /*
