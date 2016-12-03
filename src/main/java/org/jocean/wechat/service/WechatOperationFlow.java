@@ -137,8 +137,15 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                             Feature.ENABLE_LOGGING_OVER_SSL,
                             Feature.ENABLE_COMPRESSOR,
                             new SignalClient.UsingMethod(POST.class),
-                            new SignalClient.ConvertResponseTo(UploadMediaResponse.class)
-                        )
+                            new SignalClient.ConvertResponseTo(UploadMediaResponse.class))
+                        .retryWhen(RxObservables.retryWith(new RetryPolicy<Object>() {
+                            @Override
+                            public Observable<Object> call(final Observable<Throwable> errors) {
+                                return errors.compose(RxObservables.retryIfMatch(TransportException.class))
+                                        .compose(RxObservables.retryMaxTimes(_maxRetryTimes))
+                                        .compose(RxObservables.retryDelayTo(_retryIntervalBase))
+                                        ;
+                            }}))
                         .flatMap(new Func1<UploadMediaResponse, Observable<String>>() {
                             @Override
                             public Observable<String> call(final UploadMediaResponse resp) {
