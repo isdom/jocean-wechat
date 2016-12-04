@@ -71,14 +71,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                             Feature.ENABLE_COMPRESSOR,
                             new SignalClient.UsingMethod(GET.class),
                             new SignalClient.ConvertResponseTo(DownloadMediaResponse.class))
-                        .retryWhen(RxObservables.retryWith(new RetryPolicy<Object>() {
-                            @Override
-                            public Observable<Object> call(final Observable<Throwable> errors) {
-                                return errors.compose(RxObservables.retryIfMatch(TransportException.class))
-                                        .compose(RxObservables.retryMaxTimes(_maxRetryTimes))
-                                        .compose(RxObservables.retryDelayTo(_retryIntervalBase))
-                                        ;
-                            }}))
+                        .retryWhen(retryPolicy())
                         .map(new Func1<DownloadMediaResponse, Blob>() {
                         @Override
                         public Blob call(final DownloadMediaResponse resp) {
@@ -138,14 +131,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                             Feature.ENABLE_COMPRESSOR,
                             new SignalClient.UsingMethod(POST.class),
                             new SignalClient.ConvertResponseTo(UploadMediaResponse.class))
-                        .retryWhen(RxObservables.retryWith(new RetryPolicy<Object>() {
-                            @Override
-                            public Observable<Object> call(final Observable<Throwable> errors) {
-                                return errors.compose(RxObservables.retryIfMatch(TransportException.class))
-                                        .compose(RxObservables.retryMaxTimes(_maxRetryTimes))
-                                        .compose(RxObservables.retryDelayTo(_retryIntervalBase))
-                                        ;
-                            }}))
+                        .retryWhen(retryPolicy())
                         .flatMap(new Func1<UploadMediaResponse, Observable<String>>() {
                             @Override
                             public Observable<String> call(final UploadMediaResponse resp) {
@@ -442,6 +428,17 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                     _subscribers4accessToken.remove(subscriber);
                 }}));
         }
+    }
+
+    private Func1<? super Observable<? extends Throwable>, ? extends Observable<?>> retryPolicy() {
+        return RxObservables.retryWith(new RetryPolicy<Object>() {
+            @Override
+            public Observable<Object> call(final Observable<Throwable> errors) {
+                return errors.compose(RxObservables.retryIfMatch(TransportException.class))
+                        .compose(RxObservables.retryMaxTimes(_maxRetryTimes))
+                        .compose(RxObservables.retryDelayTo(_retryIntervalBase))
+                        ;
+            }});
     }
 
     @Inject
