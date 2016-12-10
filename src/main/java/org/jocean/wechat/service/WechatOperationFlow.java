@@ -84,6 +84,16 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                                 public String contentType() {
                                     return resp.getContentType();
                                 }
+                                @Override
+                                public String name() {
+                                    // TODO return valid name
+                                    return null;
+                                }
+                                @Override
+                                public String filename() {
+                                    // TODO return valid filename
+                                    return null;
+                                }
                                 
                             };
                         }});
