@@ -12,6 +12,8 @@ public interface WechatOperation {
     
     public String getAccessToken();
     
+    public Observable<Blob> downloadMedia(final String accessToken, final String mediaId);
+    
     //  input mediaId (see : https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1444738726&token=&lang=zh_CN)
     //  output Blob : media download
     public Observable<Blob> downloadMedia(final String mediaId);

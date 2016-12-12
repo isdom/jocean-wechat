@@ -57,46 +57,52 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
     private static final Logger LOG = 
             LoggerFactory.getLogger(WechatOperationFlow.class);
     
+    public Observable<Blob> downloadMedia(final String accessToken, final String mediaId) {
+        final DownloadMediaRequest req = new DownloadMediaRequest();
+        req.setAccessToken(accessToken);
+        req.setMediaId(mediaId);
+        return _signalClient.<DownloadMediaResponse>defineInteraction(req, 
+                Feature.ENABLE_LOGGING_OVER_SSL,
+                Feature.ENABLE_COMPRESSOR,
+                new SignalClient.UsingMethod(GET.class),
+                new SignalClient.ConvertResponseTo(DownloadMediaResponse.class))
+            .retryWhen(retryPolicy())
+            .map(new Func1<DownloadMediaResponse, Blob>() {
+            @Override
+            public Blob call(final DownloadMediaResponse resp) {
+                final byte[] content = resp.getMsgbody();
+                final String contentType = resp.getContentType();
+                return new Blob() {
+                    @Override
+                    public byte[] content() {
+                        return content;
+                    }
+                    @Override
+                    public String contentType() {
+                        return contentType;
+                    }
+                    @Override
+                    public String name() {
+                        // TODO return valid name
+                        return null;
+                    }
+                    @Override
+                    public String filename() {
+                        // TODO return valid filename
+                        return null;
+                    }
+                    
+                };
+            }});
+    }
+    
     @Override
     public Observable<Blob> downloadMedia(final String mediaId) {
         return getAccessToken(false)
             .flatMap(new Func1<String, Observable<Blob>>() {
                 @Override
                 public Observable<Blob> call(final String accessToken) {
-                    final DownloadMediaRequest req = new DownloadMediaRequest();
-                    req.setAccessToken(accessToken);
-                    req.setMediaId(mediaId);
-                    return _signalClient.<DownloadMediaResponse>defineInteraction(req, 
-                            Feature.ENABLE_LOGGING_OVER_SSL,
-                            Feature.ENABLE_COMPRESSOR,
-                            new SignalClient.UsingMethod(GET.class),
-                            new SignalClient.ConvertResponseTo(DownloadMediaResponse.class))
-                        .retryWhen(retryPolicy())
-                        .map(new Func1<DownloadMediaResponse, Blob>() {
-                        @Override
-                        public Blob call(final DownloadMediaResponse resp) {
-                            return new Blob() {
-                                @Override
-                                public byte[] content() {
-                                    return resp.getMsgbody();
-                                }
-                                @Override
-                                public String contentType() {
-                                    return resp.getContentType();
-                                }
-                                @Override
-                                public String name() {
-                                    // TODO return valid name
-                                    return null;
-                                }
-                                @Override
-                                public String filename() {
-                                    // TODO return valid filename
-                                    return null;
-                                }
-                                
-                            };
-                        }});
+                    return downloadMedia(accessToken, mediaId);
                 }});
     }
     
