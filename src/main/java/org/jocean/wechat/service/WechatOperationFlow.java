@@ -447,9 +447,9 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
     }
 
     private Func1<? super Observable<? extends Throwable>, ? extends Observable<?>> retryPolicy() {
-        return RxObservables.retryWith(new RetryPolicy<Object>() {
+        return RxObservables.retryWith(new RetryPolicy<Integer>() {
             @Override
-            public Observable<Object> call(final Observable<Throwable> errors) {
+            public Observable<Integer> call(final Observable<Throwable> errors) {
                 return errors.compose(RxObservables.retryIfMatch(TransportException.class))
                         .compose(RxObservables.retryMaxTimes(_maxRetryTimes))
                         .compose(RxObservables.retryDelayTo(_retryIntervalBase))
