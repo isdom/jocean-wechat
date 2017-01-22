@@ -61,11 +61,14 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
         final DownloadMediaRequest req = new DownloadMediaRequest();
         req.setAccessToken(accessToken);
         req.setMediaId(mediaId);
-        return _signalClient.<DownloadMediaResponse>defineInteraction(req, 
-                Feature.ENABLE_LOGGING_OVER_SSL,
-                Feature.ENABLE_COMPRESSOR,
-                new SignalClient.UsingMethod(GET.class),
-                new SignalClient.ConvertResponseTo(DownloadMediaResponse.class))
+        
+        return _signalClient.interaction()
+            .request(req)
+            .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+            .feature(Feature.ENABLE_COMPRESSOR)
+            .feature(new SignalClient.UsingMethod(GET.class))
+            .feature(new SignalClient.ConvertResponseTo(DownloadMediaResponse.class))
+            .<DownloadMediaResponse>build()
             .retryWhen(retryPolicy())
             .map(new Func1<DownloadMediaResponse, Blob>() {
             @Override
@@ -142,11 +145,13 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                     req.setContentType("multipart/form-data; boundary=" + multipartDataBoundary);
                     req.setContentLength(Integer.toString(req.getBody().length));
                     
-                    return _signalClient.<UploadMediaResponse>defineInteraction(req,
-                            Feature.ENABLE_LOGGING_OVER_SSL,
-                            Feature.ENABLE_COMPRESSOR,
-                            new SignalClient.UsingMethod(POST.class),
-                            new SignalClient.ConvertResponseTo(UploadMediaResponse.class))
+                    return _signalClient.interaction()
+                        .request(req)
+                        .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                        .feature(Feature.ENABLE_COMPRESSOR)
+                        .feature(new SignalClient.UsingMethod(POST.class))
+                        .feature(new SignalClient.ConvertResponseTo(UploadMediaResponse.class))
+                        .<UploadMediaResponse>build()
                         .retryWhen(retryPolicy())
                         .flatMap(new Func1<UploadMediaResponse, Observable<String>>() {
                             @Override
@@ -345,7 +350,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
         
         fetchAccessTokenReq.setAppid(this._appid);
         fetchAccessTokenReq.setSecret(this._appsecret);
-        this._signalClient.defineInteraction(fetchAccessTokenReq)
+        this._signalClient.<FetchAccessTokenResponse>defineInteraction(fetchAccessTokenReq)
             .doOnTerminate(new Action0(){
                 @Override
                 public void call() {
