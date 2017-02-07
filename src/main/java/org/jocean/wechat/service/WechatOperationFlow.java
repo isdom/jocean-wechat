@@ -21,7 +21,7 @@ import org.jocean.http.rosa.SignalClient;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
-import org.jocean.idiom.store.BlobRepo.Blob;
+import org.jocean.netty.BlobRepo.Blob;
 import org.jocean.j2se.jmx.MBeanRegister;
 import org.jocean.j2se.jmx.MBeanRegisterAware;
 import org.jocean.j2se.jmx.MBeanUtil;
