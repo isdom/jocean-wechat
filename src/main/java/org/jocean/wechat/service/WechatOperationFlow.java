@@ -131,6 +131,10 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                     public InputStream inputStream() {
                         return new ByteArrayInputStream(content);
                     }
+                    @Override
+                    public int contentLength() {
+                        return content.length;
+                    }
                     
                 };
             }});
