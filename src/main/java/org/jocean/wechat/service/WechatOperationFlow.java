@@ -3,6 +3,9 @@
  */
 package org.jocean.wechat.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -38,10 +41,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
+import com.google.common.io.ByteStreams;
 import com.google.common.primitives.Bytes;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.util.CharsetUtil;
+import io.netty.util.ReferenceCounted;
 import io.netty.util.internal.ThreadLocalRandom;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
@@ -76,10 +81,10 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                 final byte[] content = resp.getMsgbody();
                 final String contentType = resp.getContentType();
                 return new Blob() {
-                    @Override
-                    public byte[] content() {
-                        return content;
-                    }
+//                    @Override
+//                    public byte[] content() {
+//                        return content;
+//                    }
                     @Override
                     public String contentType() {
                         return contentType;
@@ -93,6 +98,38 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                     public String filename() {
                         // TODO return valid filename
                         return null;
+                    }
+                    @Override
+                    public int refCnt() {
+                        return 1;
+                    }
+                    @Override
+                    public ReferenceCounted retain() {
+                        return this;
+                    }
+                    @Override
+                    public ReferenceCounted retain(int increment) {
+                        return this;
+                    }
+                    @Override
+                    public ReferenceCounted touch() {
+                        return this;
+                    }
+                    @Override
+                    public ReferenceCounted touch(Object hint) {
+                        return this;
+                    }
+                    @Override
+                    public boolean release() {
+                        return false;
+                    }
+                    @Override
+                    public boolean release(int decrement) {
+                        return false;
+                    }
+                    @Override
+                    public InputStream inputStream() {
+                        return new ByteArrayInputStream(content);
                     }
                     
                 };
@@ -136,11 +173,17 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                                     "\r\n";
                     final String end = "\r\n--" + multipartDataBoundary + "--\r\n";
                     
-                    req.setBody( 
-                        Bytes.concat(part.getBytes(CharsetUtil.UTF_8), 
-                            blob.content(),
-                            end.getBytes(CharsetUtil.UTF_8))
-                            );
+                    //  TODO, fix by io stream 
+                    try(final InputStream is = blob.inputStream()) {
+                        req.setBody( 
+                            Bytes.concat(part.getBytes(CharsetUtil.UTF_8), 
+                                ByteStreams.toByteArray(is),
+                                end.getBytes(CharsetUtil.UTF_8))
+                                );
+                    } catch (IOException e) {
+                        LOG.warn("exception when ByteStreams.toByteArray, detail: {}", 
+                            ExceptionUtils.exception2detail(e));
+                    }
                     
                     req.setContentType("multipart/form-data; boundary=" + multipartDataBoundary);
                     req.setContentLength(Integer.toString(req.getBody().length));
