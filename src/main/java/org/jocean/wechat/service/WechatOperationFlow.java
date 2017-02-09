@@ -3,7 +3,6 @@
  */
 package org.jocean.wechat.service;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -24,10 +23,10 @@ import org.jocean.http.rosa.SignalClient;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
-import org.jocean.netty.BlobRepo.Blob;
 import org.jocean.j2se.jmx.MBeanRegister;
 import org.jocean.j2se.jmx.MBeanRegisterAware;
 import org.jocean.j2se.jmx.MBeanUtil;
+import org.jocean.netty.BlobRepo.Blob;
 import org.jocean.wechat.WechatOperation;
 import org.jocean.wechat.spi.DownloadMediaRequest;
 import org.jocean.wechat.spi.DownloadMediaResponse;
@@ -46,7 +45,6 @@ import com.google.common.primitives.Bytes;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.util.CharsetUtil;
-import io.netty.util.ReferenceCounted;
 import io.netty.util.internal.ThreadLocalRandom;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
@@ -80,63 +78,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
             public Blob call(final DownloadMediaResponse resp) {
                 final byte[] content = resp.getMsgbody();
                 final String contentType = resp.getContentType();
-                return new Blob() {
-//                    @Override
-//                    public byte[] content() {
-//                        return content;
-//                    }
-                    @Override
-                    public String contentType() {
-                        return contentType;
-                    }
-                    @Override
-                    public String name() {
-                        // TODO return valid name
-                        return null;
-                    }
-                    @Override
-                    public String filename() {
-                        // TODO return valid filename
-                        return null;
-                    }
-                    @Override
-                    public int refCnt() {
-                        return 1;
-                    }
-                    @Override
-                    public ReferenceCounted retain() {
-                        return this;
-                    }
-                    @Override
-                    public ReferenceCounted retain(int increment) {
-                        return this;
-                    }
-                    @Override
-                    public ReferenceCounted touch() {
-                        return this;
-                    }
-                    @Override
-                    public ReferenceCounted touch(Object hint) {
-                        return this;
-                    }
-                    @Override
-                    public boolean release() {
-                        return false;
-                    }
-                    @Override
-                    public boolean release(int decrement) {
-                        return false;
-                    }
-                    @Override
-                    public InputStream inputStream() {
-                        return new ByteArrayInputStream(content);
-                    }
-                    @Override
-                    public int contentLength() {
-                        return content.length;
-                    }
-                    
-                };
+                return Blob.Util.fromByteArray(content, contentType, null, null);
             }});
     }
     
