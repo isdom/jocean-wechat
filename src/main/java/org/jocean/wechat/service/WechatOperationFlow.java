@@ -339,7 +339,8 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
         
         fetchAccessTokenReq.setAppid(this._appid);
         fetchAccessTokenReq.setSecret(this._appsecret);
-        this._signalClient.<FetchAccessTokenResponse>defineInteraction(fetchAccessTokenReq)
+        this._signalClient.interaction().request(fetchAccessTokenReq)
+            .<FetchAccessTokenResponse>build()
             .doOnTerminate(new Action0(){
                 @Override
                 public void call() {
@@ -366,7 +367,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                 final FetchTicketRequest fetchTicketRequest = new FetchTicketRequest();
                 fetchTicketRequest.setAccessToken(accessToken);
                 fetchTicketRequest.setType("jsapi");
-                return _signalClient.<FetchTicketResponse>defineInteraction(fetchTicketRequest);
+                return _signalClient.interaction().request(fetchTicketRequest).build();
             }})
         .doOnTerminate(new Action0() {
             @Override
