@@ -476,7 +476,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
     private boolean _fetchingJsapiTicket = false;
     
     private int _maxRetryTimes = 3;
-    private int _retryIntervalBase = 2;
+    private int _retryIntervalBase = 100; // 100 ms
 }
 
 /*
