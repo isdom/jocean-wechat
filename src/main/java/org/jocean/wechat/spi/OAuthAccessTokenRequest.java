@@ -8,7 +8,7 @@ import javax.ws.rs.QueryParam;
 
 
 /**
- * https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421140842&token=&lang=zh_CN
+ * https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421140842
  *
  * 第二步：通过code换取网页授权access_token
  * 首先请注意，这里通过code换取的是一个特殊的网页授权access_token,
