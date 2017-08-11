@@ -5,11 +5,14 @@ package org.jocean.wechat.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.net.ssl.SSLException;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 
@@ -44,6 +47,7 @@ import com.google.common.io.ByteStreams;
 import com.google.common.primitives.Bytes;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.util.CharsetUtil;
 import io.netty.util.internal.ThreadLocalRandom;
 import rx.Observable;
@@ -164,13 +168,13 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
     
 
     @Override
-    public void setMBeanRegister(MBeanRegister register) {
+    public void setMBeanRegister(final MBeanRegister register) {
         register.registerMBean("name=wcop", MBeanUtil.createAndConfigureMBean(this));
     }
     
     @Override
     public Observable<String> getAccessToken(final boolean forceRefresh) {
-        return Observable.create(new OnSubscribe<String>() {
+        return Observable.unsafeCreate(new OnSubscribe<String>() {
             @Override
             public void call(final Subscriber<? super String> subscriber) {
                 selfEventReceiver().acceptEvent("onSubscribeAccessToken", subscriber, forceRefresh);
@@ -187,7 +191,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
     
     @Override
     public Observable<String> getJsapiTicket() {
-        return Observable.create(new OnSubscribe<String>() {
+        return Observable.unsafeCreate(new OnSubscribe<String>() {
             @Override
             public void call(final Subscriber<? super String> subscriber) {
                 selfEventReceiver().acceptEvent("onSubscribeTicket", subscriber);
@@ -206,7 +210,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
         @OnEvent(event = "onSubscribeAccessToken")
         private BizStep onSubscribeAccessToken(
                 final Subscriber<? super String> subscriber, 
-                final boolean forceRefresh) {
+                final boolean forceRefresh) throws Exception {
             LOG.info("onSubscribeAccessToken {}", subscriber);
             if (isAccessTokenValid() && !forceRefresh) {
                 if (!subscriber.isUnsubscribed()) {
@@ -331,7 +335,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
     }
     .freeze();
     
-    private void startFetchAccessToken() {
+    private void startFetchAccessToken() throws SSLException, URISyntaxException {
         
         this._fetchingAccessToken = true;
         clearAccessToken();
@@ -340,6 +344,11 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
         fetchAccessTokenReq.setAppid(this._appid);
         fetchAccessTokenReq.setSecret(this._appsecret);
         this._signalClient.interaction().request(fetchAccessTokenReq)
+            .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+            .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
+            .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com/cgi-bin")))
+            .feature(new SignalClient.UsingPath("/token"))
+            .feature(new SignalClient.DecodeResponseBodyAs(FetchAccessTokenResponse.class))
             .<FetchAccessTokenResponse>build()
             .doOnTerminate(new Action0(){
                 @Override
@@ -367,7 +376,18 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                 final FetchTicketRequest fetchTicketRequest = new FetchTicketRequest();
                 fetchTicketRequest.setAccessToken(accessToken);
                 fetchTicketRequest.setType("jsapi");
-                return _signalClient.interaction().request(fetchTicketRequest).build();
+                try {
+                    return _signalClient.interaction().request(fetchTicketRequest)
+                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                    .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
+                    .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com/cgi-bin")))
+                    .feature(new SignalClient.UsingPath("/ticket/getticket"))
+                    .feature(new SignalClient.DecodeResponseBodyAs(FetchTicketResponse.class))
+                    .<FetchTicketResponse>build();
+                } catch (Exception e) {
+                    LOG.warn("exception when fetchTicket, detail: {}", ExceptionUtils.exception2detail(e));
+                    return Observable.error(e);
+                }
             }})
         .doOnTerminate(new Action0() {
             @Override
