@@ -37,6 +37,8 @@ import org.jocean.wechat.spi.FetchAccessTokenRequest;
 import org.jocean.wechat.spi.FetchAccessTokenResponse;
 import org.jocean.wechat.spi.FetchTicketRequest;
 import org.jocean.wechat.spi.FetchTicketResponse;
+import org.jocean.wechat.spi.OAuthAccessTokenRequest;
+import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.UploadMediaRequest;
 import org.jocean.wechat.spi.UploadMediaResponse;
 import org.jocean.wechat.spi.UserInfoRequest;
@@ -94,6 +96,25 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                 return req;
             }})
         .flatMap(GET_USERINFO);
+    }
+    
+    public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final String code) {
+        final OAuthAccessTokenRequest req = new OAuthAccessTokenRequest();
+        req.setCode(code);
+        req.setAppid(this._appid);
+        req.setSecret(this._appsecret);
+        
+        try {
+            return this._signalClient.interaction().request(req)
+                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
+                .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com")))
+                .feature(new SignalClient.UsingPath("/sns/oauth2/access_token"))
+                .feature(new SignalClient.DecodeResponseBodyAs(OAuthAccessTokenResponse.class))
+                .<OAuthAccessTokenResponse>build();
+        } catch (Exception e) {
+            return Observable.error(e);
+        }
     }
     
     public Observable<Blob> downloadMedia(final String accessToken, final String mediaId) {
