@@ -39,6 +39,8 @@ import org.jocean.wechat.spi.FetchTicketRequest;
 import org.jocean.wechat.spi.FetchTicketResponse;
 import org.jocean.wechat.spi.UploadMediaRequest;
 import org.jocean.wechat.spi.UploadMediaResponse;
+import org.jocean.wechat.spi.UserInfoRequest;
+import org.jocean.wechat.spi.UserInfoResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +65,36 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
 	
     private static final Logger LOG = 
             LoggerFactory.getLogger(WechatOperationFlow.class);
+    
+    final Func1<UserInfoRequest, Observable<UserInfoResponse>> GET_USERINFO = 
+        new Func1<UserInfoRequest, Observable<UserInfoResponse>>() {
+        @Override
+        public Observable<UserInfoResponse> call(final UserInfoRequest req) {
+            try {
+                return _signalClient.interaction().request(req)
+                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                    .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
+                    .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com/cgi-bin")))
+                    .feature(new SignalClient.UsingPath("/user/info"))
+                    .feature(new SignalClient.DecodeResponseBodyAs(UserInfoResponse.class))
+                    .<UserInfoResponse>build();
+            } catch (Exception e) {
+                return Observable.error(e);
+            }
+        }};
+        
+    public Observable<UserInfoResponse> getUserInfo(final String openid) {
+        return getAccessToken(false)
+        .map(new Func1<String, UserInfoRequest>() {
+            @Override
+            public UserInfoRequest call(final String accessToken) {
+                final UserInfoRequest req = new UserInfoRequest();
+                req.setAccessToken(accessToken);
+                req.setOpenid(openid);
+                return req;
+            }})
+        .flatMap(GET_USERINFO);
+    }
     
     public Observable<Blob> downloadMedia(final String accessToken, final String mediaId) {
         final DownloadMediaRequest req = new DownloadMediaRequest();
