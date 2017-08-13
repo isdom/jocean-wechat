@@ -29,6 +29,7 @@ import io.netty.handler.ssl.SslContextBuilder;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.subscriptions.Subscriptions;
@@ -68,15 +69,25 @@ public class DefaultWXTokenSource implements WXTokenSource {
     }
 
     private void doGetAccessToken(final Subscriber<? super String> tokenSubscriber) {
-        this._updateTokenLock.readLock().lock();
-        try {
-            final Action1<Subscriber<? super String>> policy = this._getTokenPolicy;
-            policy.call(tokenSubscriber);
-        } finally {
-            this._updateTokenLock.readLock().unlock();
-        }
+        final Action1<Subscriber<? super String>> policy = this._getTokenPolicy;
+        policy.call(tokenSubscriber);
     }
     
+    private final Action1<Subscriber<? super String>> WAIT_FOR_UPDATE = 
+        new Action1<Subscriber<? super String>>() {
+            @Override
+            public void call(final Subscriber<? super String> subscriber) {
+                addToPendings(subscriber);
+                subscriber.add(removerFromPendings(subscriber));
+            }};
+            
+    private final Action1<Subscriber<? super String>> USE_CURRENT = 
+        new Action1<Subscriber<? super String>>() {
+            @Override
+            public void call(final Subscriber<? super String> subscriber) {
+                pushCurrentToken(subscriber);
+            }};
+            
     private void startToUpdateToken() throws Exception {
         this._getTokenPolicy = WAIT_FOR_UPDATE;
             
@@ -96,12 +107,46 @@ public class DefaultWXTokenSource implements WXTokenSource {
                 @Override
                 public void call(final FetchAccessTokenResponse resp) {
                     onAccessTokenResponse(resp);
+                    scheduleUpdateToken(Long.parseLong(resp.getExpiresIn()) - 30);
                 }}, new Action1<Throwable>() {
                 @Override
                 public void call(final Throwable error) {
                     onAccessTokenError(error);
+                    // wait 10s, and retry
+                    scheduleUpdateToken(10);
                 }})
             ;
+    }
+
+    private void scheduleUpdateToken(final long delayInSeconds) {
+        Observable.timer(delayInSeconds, TimeUnit.SECONDS)
+        .subscribe(new Action1<Long>() {
+            @Override
+            public void call(final Long unused) {
+                try {
+                    startToUpdateToken();
+                } catch (Exception e) {
+                    LOG.warn("exception when start to update, detail: {}",
+                        ExceptionUtils.exception2detail(e));
+                }
+            }});
+    }
+
+    private void addToPendings(final Subscriber<? super String> subscriber) {
+        this._pendingsLock.readLock().lock();
+        try {
+            this._subscribers4accessToken.add(subscriber);
+        } finally {
+            this._pendingsLock.readLock().unlock();
+        }
+    }
+
+    private Subscription removerFromPendings(final Subscriber<? super String> subscriber) {
+        return Subscriptions.create(new Action0() {
+            @Override
+            public void call() {
+                _subscribers4accessToken.remove(subscriber);
+            }});
     }
 
     private void onAccessTokenResponse(final FetchAccessTokenResponse resp) {
@@ -111,27 +156,27 @@ public class DefaultWXTokenSource implements WXTokenSource {
         LOG.info("on fetch access token response {}, update token {} and expires timestamp in {}", 
                 resp, _accessToken, new Date(_accessTokenExpireInMs));
         
-        this._updateTokenLock.writeLock().lock();
+        this._pendingsLock.writeLock().lock();
         try {
+            this._getTokenPolicy = USE_CURRENT;
             for (Subscriber<? super String> subscriber : this._subscribers4accessToken) {
                 pushCurrentToken(subscriber);
             }
             this._subscribers4accessToken.clear();
-            this._getTokenPolicy = USE_CURRENT; 
         } finally {
-            this._updateTokenLock.writeLock().unlock();
+            this._pendingsLock.writeLock().unlock();
         }
     }
 
     private void onAccessTokenError(final Throwable error) {
-        this._updateTokenLock.writeLock().lock();
+        this._pendingsLock.writeLock().lock();
         try {
             for (Subscriber<? super String> subscriber : this._subscribers4accessToken) {
                 pushCurrentTokenWithError(subscriber, error);
             }
             this._subscribers4accessToken.clear();
         } finally {
-            this._updateTokenLock.writeLock().unlock();
+            this._pendingsLock.writeLock().unlock();
         }
     }
 
@@ -147,7 +192,8 @@ public class DefaultWXTokenSource implements WXTokenSource {
         }
     }
 
-    private void pushCurrentTokenWithError(final Subscriber<? super String> subscriber, final Throwable error) {
+    private void pushCurrentTokenWithError(final Subscriber<? super String> subscriber, 
+            final Throwable error) {
         if (!subscriber.isUnsubscribed()) {
             try {
                 subscriber.onError(error);
@@ -200,28 +246,9 @@ public class DefaultWXTokenSource implements WXTokenSource {
     private final List<Subscriber<? super String>> _subscribers4accessToken = 
             Lists.newCopyOnWriteArrayList();
     
-    private final Action1<Subscriber<? super String>> WAIT_FOR_UPDATE = 
-        new Action1<Subscriber<? super String>>() {
-        @Override
-        public void call(final Subscriber<? super String> subscriber) {
-            _subscribers4accessToken.add(subscriber);
-            subscriber.add(Subscriptions.create(new Action0() {
-                @Override
-                public void call() {
-                    _subscribers4accessToken.remove(subscriber);
-                }}));
-        }};
-        
-    private final Action1<Subscriber<? super String>> USE_CURRENT = 
-        new Action1<Subscriber<? super String>>() {
-        @Override
-        public void call(final Subscriber<? super String> subscriber) {
-            pushCurrentToken(subscriber);
-        }};
-        
     private volatile Action1<Subscriber<? super String>> _getTokenPolicy = WAIT_FOR_UPDATE;
     
-    private ReadWriteLock _updateTokenLock = new ReentrantReadWriteLock(false);
+    private ReadWriteLock _pendingsLock = new ReentrantReadWriteLock(false);
     
     @Inject
     private SignalClient _signalClient;
