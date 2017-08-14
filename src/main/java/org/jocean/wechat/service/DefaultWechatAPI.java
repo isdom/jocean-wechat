@@ -12,7 +12,7 @@ import org.jocean.http.TransportException;
 import org.jocean.http.rosa.SignalClient;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
-import org.jocean.wechat.WXAPI;
+import org.jocean.wechat.WechatAPI;
 import org.jocean.wechat.spi.UserInfoRequest;
 import org.jocean.wechat.spi.UserInfoResponse;
 import org.slf4j.Logger;
@@ -23,10 +23,10 @@ import rx.Observable;
 import rx.functions.Func1;
 
 
-public class DefaultWXAPI implements WXAPI {
+public class DefaultWechatAPI implements WechatAPI {
 	
     private static final Logger LOG = 
-            LoggerFactory.getLogger(DefaultWXAPI.class);
+            LoggerFactory.getLogger(DefaultWechatAPI.class);
     
     public Observable<UserInfoResponse> getUserInfo(final String openid) {
         return getUserInfo(this._accessToken, openid);

@@ -5,7 +5,7 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd">
         
     <bean id="wxapi"
-        class="org.jocean.wechat.service.DefaultWXAPI">
+        class="org.jocean.wechat.service.DefaultWechatAPI">
         <property name="accessToken" value="${wechat.token}"/>
         <property name="maxRetryTimes" value="${wechat.retrytimes:3}"/>
         <property name="retryIntervalBase" value="${wechat.retryintervalbase:2}"/>
