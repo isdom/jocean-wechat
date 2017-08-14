@@ -6,7 +6,8 @@
         
     <bean id="wxtoken" 
         class="org.jocean.wechat.service.DefaultWXTokenSource"
-        destroy-method="start">
+        init-method="start"
+        destroy-method="stop">
         <property name="appid" value="${wechat.appid}"/>
         <property name="secret" value="${wechat.appsecret}"/>
     </bean>
