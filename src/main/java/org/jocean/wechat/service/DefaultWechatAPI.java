@@ -28,6 +28,11 @@ public class DefaultWechatAPI implements WechatAPI {
     private static final Logger LOG = 
             LoggerFactory.getLogger(DefaultWechatAPI.class);
     
+    @Override
+    public String getAppid() {
+        return this._appid;
+    }
+    
     public Observable<UserInfoResponse> getUserInfo(final String openid) {
         return getUserInfo(this._accessToken, openid);
     }
@@ -48,6 +53,10 @@ public class DefaultWechatAPI implements WechatAPI {
         } catch (Exception e) {
             return Observable.error(e);
         }
+    }
+    
+    public void setAppid(final String appid) {
+        this._appid = appid;
     }
     
     public void setAccessToken(final String accessToken) {
@@ -75,6 +84,8 @@ public class DefaultWechatAPI implements WechatAPI {
 
     @Inject
     private SignalClient _signalClient;
+    
+    private String _appid;
     
     private String _accessToken;
     

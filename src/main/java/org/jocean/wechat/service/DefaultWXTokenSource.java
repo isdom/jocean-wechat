@@ -165,11 +165,17 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
 
     private void updateMBean(final String token) {
         if (null!=this._register) {
-            this._register.unregisterMBean("info=token");
-            this._register.registerMBean("info=token", new TokenInfoMXBean() {
+            this._register.unregisterMBean("info=wechat");
+            this._register.registerMBean("info=wechat", new WechatInfoMXBean() {
+                
                 @Override
                 public String getAccessToken() {
                     return token;
+                }
+
+                @Override
+                public String getAppid() {
+                    return _appid;
                 }});
         }
     }
