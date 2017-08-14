@@ -4,6 +4,13 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
         
+    <bean id="wxtoken" 
+        class="org.jocean.wechat.service.DefaultWXTokenSource"
+        destroy-method="start">
+        <property name="appid" value="${wechat.appid}"/>
+        <property name="secret" value="${wechat.appsecret}"/>
+    </bean>
+    
     <bean id="wechatOperation" 
         class="org.jocean.wechat.service.WechatOperationFlow"
         destroy-method="stop">

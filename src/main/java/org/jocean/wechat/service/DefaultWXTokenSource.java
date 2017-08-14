@@ -15,6 +15,8 @@ import javax.inject.Inject;
 import org.jocean.http.Feature;
 import org.jocean.http.rosa.SignalClient;
 import org.jocean.idiom.ExceptionUtils;
+import org.jocean.j2se.jmx.MBeanRegister;
+import org.jocean.j2se.jmx.MBeanRegisterAware;
 import org.jocean.wechat.WXTokenSource;
 import org.jocean.wechat.spi.FetchAccessTokenRequest;
 import org.jocean.wechat.spi.FetchAccessTokenResponse;
@@ -38,13 +40,24 @@ import rx.subscriptions.Subscriptions;
  * @author isdom
  *
  */
-public class DefaultWXTokenSource implements WXTokenSource {
+public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
 
     private static final Logger LOG = 
             LoggerFactory.getLogger(DefaultWXTokenSource.class);
     
     public void start() throws Exception {
         startToUpdateToken();
+    }
+    
+    public void stop() {
+        if (this._isActive) {
+            this._isActive = false;
+            final Subscription timer = this._timer;
+            if (null!=timer) {
+                timer.unsubscribe();
+                this._timer = null;
+            }
+        }
     }
     
     /* (non-Javadoc)
@@ -69,8 +82,13 @@ public class DefaultWXTokenSource implements WXTokenSource {
     }
 
     private void doGetAccessToken(final Subscriber<? super String> tokenSubscriber) {
-        final Action1<Subscriber<? super String>> policy = this._getTokenPolicy;
-        policy.call(tokenSubscriber);
+        this._tokenLock.readLock().lock();
+        try {
+            final Action1<Subscriber<? super String>> policy = this._getTokenPolicy;
+            policy.call(tokenSubscriber);
+        } finally {
+            this._tokenLock.readLock().unlock();
+        }
     }
     
     private final Action1<Subscriber<? super String>> WAIT_FOR_UPDATE = 
@@ -78,7 +96,6 @@ public class DefaultWXTokenSource implements WXTokenSource {
             @Override
             public void call(final Subscriber<? super String> subscriber) {
                 addToPendings(subscriber);
-                subscriber.add(removerFromPendings(subscriber));
             }};
             
     private final Action1<Subscriber<? super String>> USE_CURRENT = 
@@ -107,46 +124,54 @@ public class DefaultWXTokenSource implements WXTokenSource {
                 @Override
                 public void call(final FetchAccessTokenResponse resp) {
                     onAccessTokenResponse(resp);
-                    scheduleUpdateToken(Long.parseLong(resp.getExpiresIn()) - 30);
+                    scheduleUpdateToken(Long.parseLong(resp.getExpiresIn()) - 30, TimeUnit.SECONDS);
                 }}, new Action1<Throwable>() {
                 @Override
                 public void call(final Throwable error) {
                     onAccessTokenError(error);
                     // wait 10s, and retry
-                    scheduleUpdateToken(10);
+                    scheduleUpdateToken(10, TimeUnit.SECONDS);
                 }})
             ;
     }
 
-    private void scheduleUpdateToken(final long delayInSeconds) {
-        Observable.timer(delayInSeconds, TimeUnit.SECONDS)
-        .subscribe(new Action1<Long>() {
-            @Override
-            public void call(final Long unused) {
-                try {
-                    startToUpdateToken();
-                } catch (Exception e) {
-                    LOG.warn("exception when start to update, detail: {}",
-                        ExceptionUtils.exception2detail(e));
-                }
-            }});
-    }
-
-    private void addToPendings(final Subscriber<? super String> subscriber) {
-        this._pendingsLock.readLock().lock();
-        try {
-            this._subscribers4accessToken.add(subscriber);
-        } finally {
-            this._pendingsLock.readLock().unlock();
+    private void scheduleUpdateToken(final long delayInSeconds, final TimeUnit unit) {
+        if (this._isActive) {
+            this._timer = Observable.timer(delayInSeconds, unit)
+            .subscribe(new Action1<Long>() {
+                @Override
+                public void call(final Long unused) {
+                    _timer = null;
+                    try {
+                        startToUpdateToken();
+                    } catch (Exception e) {
+                        LOG.warn("exception when start to update, detail: {}",
+                            ExceptionUtils.exception2detail(e));
+                    }
+                }});
+        } else {
+            LOG.warn("wxtokensouce unactived, ignore scheduleUpdateToken.");
         }
     }
 
-    private Subscription removerFromPendings(final Subscriber<? super String> subscriber) {
-        return Subscriptions.create(new Action0() {
+    private void addToPendings(final Subscriber<? super String> subscriber) {
+        this._subscribers4accessToken.add(subscriber);
+        subscriber.add(Subscriptions.create(new Action0() {
             @Override
             public void call() {
                 _subscribers4accessToken.remove(subscriber);
-            }});
+            }}));
+    }
+
+    private void updateMBean(final String token) {
+        if (null!=this._register) {
+            this._register.unregisterMBean("info=token");
+            this._register.registerMBean("info=token", new TokenInfoMXBean() {
+                @Override
+                public String getAccessToken() {
+                    return token;
+                }});
+        }
     }
 
     private void onAccessTokenResponse(final FetchAccessTokenResponse resp) {
@@ -156,7 +181,9 @@ public class DefaultWXTokenSource implements WXTokenSource {
         LOG.info("on fetch access token response {}, update token {} and expires timestamp in {}", 
                 resp, _accessToken, new Date(_accessTokenExpireInMs));
         
-        this._pendingsLock.writeLock().lock();
+        updateMBean(resp.getAccessToken());
+        
+        this._tokenLock.writeLock().lock();
         try {
             this._getTokenPolicy = USE_CURRENT;
             for (Subscriber<? super String> subscriber : this._subscribers4accessToken) {
@@ -164,19 +191,19 @@ public class DefaultWXTokenSource implements WXTokenSource {
             }
             this._subscribers4accessToken.clear();
         } finally {
-            this._pendingsLock.writeLock().unlock();
+            this._tokenLock.writeLock().unlock();
         }
     }
 
     private void onAccessTokenError(final Throwable error) {
-        this._pendingsLock.writeLock().lock();
+        this._tokenLock.writeLock().lock();
         try {
             for (Subscriber<? super String> subscriber : this._subscribers4accessToken) {
                 pushCurrentTokenWithError(subscriber, error);
             }
             this._subscribers4accessToken.clear();
         } finally {
-            this._pendingsLock.writeLock().unlock();
+            this._tokenLock.writeLock().unlock();
         }
     }
 
@@ -227,6 +254,11 @@ public class DefaultWXTokenSource implements WXTokenSource {
         }
     }
 
+    @Override
+    public void setMBeanRegister(final MBeanRegister register) {
+        this._register = register;
+    }
+    
     public void setAppid(final String appid) {
         this._appid = appid;
     }
@@ -248,12 +280,18 @@ public class DefaultWXTokenSource implements WXTokenSource {
     
     private volatile Action1<Subscriber<? super String>> _getTokenPolicy = WAIT_FOR_UPDATE;
     
-    private ReadWriteLock _pendingsLock = new ReentrantReadWriteLock(false);
+    private ReadWriteLock _tokenLock = new ReentrantReadWriteLock(false);
     
     @Inject
     private SignalClient _signalClient;
     
+    private volatile boolean _isActive = true;
+    
+    private volatile Subscription _timer;
+    
     private String _appid;
     
     private String _secret;
+    
+    private MBeanRegister _register;
 }
