@@ -12,7 +12,7 @@ public interface WechatOperation {
     public Observable<String> getAccessToken(final boolean forceRefresh);
     public Observable<String> getJsapiTicket();
     
-    public Observable<UserInfoResponse> getUserInfo(final String openid);
+    public Observable<UserInfoResponse> getUserInfo(final String accessToken, final String openid);
     public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final String code);
     
     public String getAccessToken();
