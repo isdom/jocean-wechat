@@ -5,4 +5,6 @@ public interface WechatInfoMXBean {
     public String getAppid();
     
     public String getAccessToken();
+    
+    public String getExpireTime();
 }

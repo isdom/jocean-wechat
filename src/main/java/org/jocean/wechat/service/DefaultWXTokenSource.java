@@ -4,6 +4,8 @@
 package org.jocean.wechat.service;
 
 import java.net.URI;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -163,8 +165,11 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
             }}));
     }
 
-    private void updateMBean(final String token) {
+    private void updateMBean(final String token, final long expireTime) {
         if (null!=this._register) {
+            final String expireTimeAsString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                    .format(new Date(expireTime));
+            
             this._register.unregisterMBean("info=wechat");
             this._register.registerMBean("info=wechat", new WechatInfoMXBean() {
                 
@@ -176,6 +181,11 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
                 @Override
                 public String getAppid() {
                     return _appid;
+                }
+
+                @Override
+                public String getExpireTime() {
+                    return expireTimeAsString;
                 }});
         }
     }
@@ -187,7 +197,8 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
         LOG.info("on fetch access token response {}, update token {} and expires timestamp in {}", 
                 resp, _accessToken, new Date(_accessTokenExpireInMs));
         
-        updateMBean(resp.getAccessToken());
+        updateMBean(resp.getAccessToken(), 
+            System.currentTimeMillis() + Long.parseLong(resp.getExpiresIn()) * 1000L);
         
         this._tokenLock.writeLock().lock();
         try {
