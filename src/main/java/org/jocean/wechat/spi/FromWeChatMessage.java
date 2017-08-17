@@ -107,18 +107,22 @@ public class FromWeChatMessage {
 
     private String _msgId; //消息id，64位整型
 
+    @JacksonXmlProperty(localName="Event")
     public String getEvent() {
 		return Event;
 	}
 
+    @JacksonXmlProperty(localName="Event")
 	public void setEvent(String event) {
 		Event = event;
 	}
 
+    @JacksonXmlProperty(localName="EventKey")
 	public String getEventKey() {
 		return EventKey;
 	}
 
+    @JacksonXmlProperty(localName="EventKey")
 	public void setEventKey(String eventKey) {
 		EventKey = eventKey;
 	}
