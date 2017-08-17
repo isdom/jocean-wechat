@@ -42,6 +42,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @Consumes({"application/xml","text/xml"})
 @JacksonXmlRootElement(localName="xml")
 public class FromWeChatMessage {
+    
+    private String _msgId; //消息id，64位整型
     private String _toUserName; //开发者微信号 
     private String _fromUserName; //发送方帐号（一个OpenID） 
     private Integer _createTime; //消息发送时间  the number of seconds since January 1, 1970, 00:00:00 GMT
@@ -66,6 +68,7 @@ public class FromWeChatMessage {
     private String Longitude;// 	地理位置经度
     private String Precision;// 	地理位置精度
     private String ArticleCount;
+    private String MenuId;      // 指菜单ID，如果是个性化菜单，则可以通过这个字段，知道是哪个规则的菜单被点击了
 
     //订单相关
     private String OrderId;
@@ -105,7 +108,15 @@ public class FromWeChatMessage {
         ProductId = productId;
     }
 
-    private String _msgId; //消息id，64位整型
+    @JacksonXmlProperty(localName="MenuId")
+    public String getMenuId() {
+        return MenuId;
+    }
+
+    @JacksonXmlProperty(localName="MenuId")
+    public void setMenuId(String menuId) {
+        MenuId = menuId;
+    }
 
     @JacksonXmlProperty(localName="Event")
     public String getEvent() {
