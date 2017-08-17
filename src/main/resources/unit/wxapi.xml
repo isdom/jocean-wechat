@@ -8,6 +8,7 @@
         class="org.jocean.wechat.service.DefaultWechatAPI">
         <property name="appid" value="${wechat.appid}"/>
         <property name="accessToken" value="${wechat.token}"/>
+        <property name="ticket" value="${wechat.ticket}"/>
         <property name="maxRetryTimes" value="${wechat.retrytimes:3}"/>
         <property name="retryIntervalBase" value="${wechat.retryintervalbase:2}"/>
     </bean>

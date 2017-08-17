@@ -27,10 +27,15 @@ public class DefaultWechatAPI implements WechatAPI {
 	
     private static final Logger LOG = 
             LoggerFactory.getLogger(DefaultWechatAPI.class);
-    
+
     @Override
     public String getAppid() {
         return this._appid;
+    }
+    
+    @Override
+    public String getJsapiTicket() {
+        return this._ticket;
     }
     
     public Observable<UserInfoResponse> getUserInfo(final String openid) {
@@ -63,6 +68,10 @@ public class DefaultWechatAPI implements WechatAPI {
         this._accessToken = accessToken;
     }
     
+    public void setTicket(final String ticket) {
+        this._ticket = ticket;
+    }
+    
     public void setMaxRetryTimes(final int maxRetryTimes) {
         this._maxRetryTimes = maxRetryTimes;
     }
@@ -88,6 +97,7 @@ public class DefaultWechatAPI implements WechatAPI {
     private String _appid;
     
     private String _accessToken;
+    private String _ticket;
     
     private int _maxRetryTimes = 3;
     private int _retryIntervalBase = 100; // 100 ms
