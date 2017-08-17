@@ -108,12 +108,12 @@ public class FromWeChatMessage {
         ProductId = productId;
     }
 
-    @JacksonXmlProperty(localName="MenuId")
+//    @JacksonXmlProperty(localName="MenuId")
     public String getMenuId() {
         return MenuId;
     }
 
-    @JacksonXmlProperty(localName="MenuId")
+//    @JacksonXmlProperty(localName="MenuId")
     public void setMenuId(String menuId) {
         MenuId = menuId;
     }
