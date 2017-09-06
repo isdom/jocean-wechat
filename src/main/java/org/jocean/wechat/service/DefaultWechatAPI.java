@@ -4,8 +4,10 @@
 package org.jocean.wechat.service;
 
 import java.net.URI;
+import java.net.URLEncoder;
 
 import javax.inject.Inject;
+import javax.ws.rs.GET;
 
 import org.jocean.http.Feature;
 import org.jocean.http.TransportException;
@@ -25,6 +27,7 @@ import rx.functions.Func1;
 
 public class DefaultWechatAPI implements WechatAPI {
 	
+    @SuppressWarnings("unused")
     private static final Logger LOG = 
             LoggerFactory.getLogger(DefaultWechatAPI.class);
 
@@ -53,6 +56,26 @@ public class DefaultWechatAPI implements WechatAPI {
                 .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
                 .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com/cgi-bin")))
                 .feature(new SignalClient.UsingPath("/user/info"))
+                .feature(new SignalClient.DecodeResponseBodyAs(UserInfoResponse.class))
+                .<UserInfoResponse>build();
+        } catch (Exception e) {
+            return Observable.error(e);
+        }
+    }
+    
+    public Observable<UserInfoResponse> getSnsapiUserInfo(final String snsapiAccessToken, final String openid) {
+        try {
+            return _signalClient.interaction()
+                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
+                .feature(new SignalClient.UsingMethod(GET.class))
+                .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com")))
+                .feature(new SignalClient.UsingPath("/sns/userinfo?access_token=" 
+                        + URLEncoder.encode(snsapiAccessToken, "UTF-8")
+                        + "&openid="
+                        + URLEncoder.encode(openid, "UTF-8")
+                        + "&lang=zh_CN"
+                        ))
                 .feature(new SignalClient.DecodeResponseBodyAs(UserInfoResponse.class))
                 .<UserInfoResponse>build();
         } catch (Exception e) {
