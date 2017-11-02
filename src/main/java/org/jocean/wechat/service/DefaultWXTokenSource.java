@@ -28,6 +28,7 @@ import org.jocean.wechat.spi.OAuthAccessTokenRequest;
 import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.collect.Lists;
 
@@ -220,6 +221,11 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
             this._register.registerMBean("info=wechat", new WechatInfoMXBean() {
                 
                 @Override
+                public String getName() {
+                    return _wpa;
+                }
+
+                @Override
                 public String getAccessToken() {
                     return token;
                 }
@@ -324,14 +330,6 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
         this._register = register;
     }
     
-    public void setAppid(final String appid) {
-        this._appid = appid;
-    }
-
-    public void setSecret(final String secret) {
-        this._secret = secret;
-    }
-
     public String getSecret() {
         return _secret;
     }
@@ -354,9 +352,14 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
     
     private volatile Subscription _timer;
     
-    private String _appid;
+    @Value("${wechat.wpa}")
+    String _wpa;
     
-    private String _secret;
+    @Value("${wechat.appid}")
+    String _appid;
+    
+    @Value("${${wechat.secret}}")
+    String _secret;
     
     private MBeanRegister _register;
 }
