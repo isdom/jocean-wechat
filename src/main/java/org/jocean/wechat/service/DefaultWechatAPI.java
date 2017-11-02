@@ -19,6 +19,7 @@ import org.jocean.wechat.spi.UserInfoRequest;
 import org.jocean.wechat.spi.UserInfoResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import io.netty.handler.ssl.SslContextBuilder;
 import rx.Observable;
@@ -31,6 +32,11 @@ public class DefaultWechatAPI implements WechatAPI {
     private static final Logger LOG = 
             LoggerFactory.getLogger(DefaultWechatAPI.class);
 
+    @Override
+    public String getName() {
+        return this._name;
+    }
+    
     @Override
     public String getAppid() {
         return this._appid;
@@ -116,6 +122,9 @@ public class DefaultWechatAPI implements WechatAPI {
 
     @Inject
     private SignalClient _signalClient;
+    
+    @Value("${wechat.wpa}")
+    String _name;
     
     private String _appid;
     

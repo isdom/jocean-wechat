@@ -7,6 +7,8 @@ import rx.Observable;
 
 public interface WechatAPI {
     
+    public String getName();
+    
     public String getAppid();
     public String getJsapiTicket();
     
