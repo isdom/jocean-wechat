@@ -1,6 +1,7 @@
 
 package org.jocean.wechat;
 
+import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.UserInfoResponse;
 
 import rx.Observable;
@@ -17,4 +18,6 @@ public interface WechatAPI {
     public Observable<UserInfoResponse> getUserInfo(final String openid);
 
     public Observable<UserInfoResponse> getSnsapiUserInfo(final String snsapiAccessToken, final String openid);
+    
+    public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final String code);
 }

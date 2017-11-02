@@ -15,6 +15,8 @@ import org.jocean.http.rosa.SignalClient;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.wechat.WechatAPI;
+import org.jocean.wechat.spi.OAuthAccessTokenRequest;
+import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.UserInfoRequest;
 import org.jocean.wechat.spi.UserInfoResponse;
 import org.slf4j.Logger;
@@ -89,18 +91,26 @@ public class DefaultWechatAPI implements WechatAPI {
         }
     }
     
-    public void setAppid(final String appid) {
-        this._appid = appid;
+    @Override
+    public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final String code) {
+        final OAuthAccessTokenRequest req = new OAuthAccessTokenRequest();
+        req.setCode(code);
+        req.setAppid(this._appid);
+        req.setSecret(this._secret);
+        
+        try {
+            return this._signalClient.interaction().request(req)
+                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
+                .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com")))
+                .feature(new SignalClient.UsingPath("/sns/oauth2/access_token"))
+                .feature(new SignalClient.DecodeResponseBodyAs(OAuthAccessTokenResponse.class))
+                .<OAuthAccessTokenResponse>build();
+        } catch (Exception e) {
+            return Observable.error(e);
+        }
     }
-    
-    public void setAccessToken(final String accessToken) {
-        this._accessToken = accessToken;
-    }
-    
-    public void setTicket(final String ticket) {
-        this._ticket = ticket;
-    }
-    
+
     public void setMaxRetryTimes(final int maxRetryTimes) {
         this._maxRetryTimes = maxRetryTimes;
     }
@@ -126,10 +136,17 @@ public class DefaultWechatAPI implements WechatAPI {
     @Value("${wechat.wpa}")
     String _name;
     
-    private String _appid;
+    @Value("${wechat.appid}")
+    String _appid;
     
-    private String _accessToken;
-    private String _ticket;
+    @Value("${wechat.secret}")
+    String _secret;
+
+    @Value("${wechat.token}")
+    String _accessToken;
+    
+    @Value("${wechat.ticket}")
+    String _ticket;
     
     private int _maxRetryTimes = 3;
     private int _retryIntervalBase = 100; // 100 ms

@@ -6,6 +6,8 @@ public interface WechatInfoMXBean {
     
     public String getAppid();
     
+    public String getSecret();
+    
     public String getAccessToken();
     
     public String getTicket();

@@ -24,8 +24,6 @@ import org.jocean.wechat.spi.FetchAccessTokenRequest;
 import org.jocean.wechat.spi.FetchAccessTokenResponse;
 import org.jocean.wechat.spi.FetchTicketRequest;
 import org.jocean.wechat.spi.FetchTicketResponse;
-import org.jocean.wechat.spi.OAuthAccessTokenRequest;
-import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -236,6 +234,11 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
                 }
 
                 @Override
+                public String getSecret() {
+                    return _secret;
+                }
+                
+                @Override
                 public String getExpireTime() {
                     return expireTimeAsString;
                 }
@@ -302,29 +305,6 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
         }
     }
     
-    /* (non-Javadoc)
-     * @see org.jocean.wechat.WXTokenSource#getOAuthAccessToken(java.lang.String)
-     */
-    @Override
-    public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final String code) {
-        final OAuthAccessTokenRequest req = new OAuthAccessTokenRequest();
-        req.setCode(code);
-        req.setAppid(this._appid);
-        req.setSecret(this._secret);
-        
-        try {
-            return this._signalClient.interaction().request(req)
-                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
-                .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com")))
-                .feature(new SignalClient.UsingPath("/sns/oauth2/access_token"))
-                .feature(new SignalClient.DecodeResponseBodyAs(OAuthAccessTokenResponse.class))
-                .<OAuthAccessTokenResponse>build();
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
-    }
-
     @Override
     public void setMBeanRegister(final MBeanRegister register) {
         this._register = register;
@@ -358,7 +338,7 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
     @Value("${wechat.appid}")
     String _appid;
     
-    @Value("${${wechat.secret}}")
+    @Value("${wechat.secret}")
     String _secret;
     
     private MBeanRegister _register;
