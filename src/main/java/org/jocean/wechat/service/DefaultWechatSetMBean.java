@@ -1,5 +1,5 @@
 
-package org.jocean.wechat.mbean;
+package org.jocean.wechat.service;
 
 import java.util.Map;
 
