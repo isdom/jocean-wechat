@@ -5,6 +5,8 @@ package org.jocean.wechat.service;
 
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -30,6 +32,17 @@ import rx.functions.Func1;
 
 public class DefaultWechatAPI implements WechatAPI {
 	
+    Map<String, String> info() {
+        final Map<String, String> info = new HashMap<>();
+        
+        info.put("name", this._name);
+        info.put("appid", this._appid);
+        info.put("token", this._accessToken);
+        info.put("ticket", this._ticket);
+        
+        return info;
+    }
+
     @SuppressWarnings("unused")
     private static final Logger LOG = 
             LoggerFactory.getLogger(DefaultWechatAPI.class);
