@@ -12,11 +12,11 @@ import org.jocean.j2se.jmx.MBeanRegister;
 import org.jocean.j2se.jmx.MBeanRegisterAware;
 import org.jocean.wechat.WechatAPI;
 import org.jocean.wechat.WechatSet;
-import org.jocean.wechat.mbean.WechatSetMBean;
+import org.jocean.wechat.mbean.DefaultWechatSetMBean;
 
 import com.google.common.eventbus.EventBus;
 
-public class DefaultWechatSet implements WechatSet, EventBusAware, WechatSetMBean, MBeanRegisterAware {
+public class DefaultWechatSet implements WechatSet, EventBusAware, DefaultWechatSetMBean, MBeanRegisterAware {
 
     @Override
     public Map<String, Map<String, String>> getWxApis() {
