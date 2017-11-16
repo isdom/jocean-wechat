@@ -39,6 +39,7 @@ public class DefaultWechatAPI implements WechatAPI {
         info.put("appid", this._appid);
         info.put("token", this._accessToken);
         info.put("ticket", this._ticket);
+        info.put("expire", this._expire);
         
         return info;
     }
@@ -161,6 +162,9 @@ public class DefaultWechatAPI implements WechatAPI {
     @Value("${wechat.ticket}")
     String _ticket;
     
+    @Value("${token.expire}")
+    String _expire;
+            
     private int _maxRetryTimes = 3;
     private int _retryIntervalBase = 100; // 100 ms
 }
