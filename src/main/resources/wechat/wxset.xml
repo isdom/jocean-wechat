@@ -4,12 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
         
-    <!-- ${wechat.appid}
-        ${wechat.token}
-        ${wechat.ticket}
-        ${wechat.secret}
-    -->
-
+    <bean id="wxapis" class="java.util.concurrent.CopyOnWriteArrayList"/>
     <bean id="wxs" class="org.jocean.wechat.service.DefaultWechatSet"/>
     
 </beans>
