@@ -9,8 +9,7 @@
     ${wechat.secret}
     -->
     
-    <bean id="wxtoken" class="org.jocean.wechat.service.DefaultWXTokenSource"
+    <bean class="org.jocean.wechat.service.DefaultWXTokenSource"
         init-method="start"
         destroy-method="stop"/>
-    <alias name="wxtoken" alias="${wechat.wpa}"/>
 </beans>

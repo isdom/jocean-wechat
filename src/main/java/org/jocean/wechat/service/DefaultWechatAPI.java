@@ -5,8 +5,6 @@ package org.jocean.wechat.service;
 
 import java.net.URI;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -16,6 +14,8 @@ import org.jocean.http.TransportException;
 import org.jocean.http.rosa.SignalClient;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
+import org.jocean.j2se.jmx.MBeanRegister;
+import org.jocean.j2se.jmx.MBeanRegisterAware;
 import org.jocean.wechat.WechatAPI;
 import org.jocean.wechat.spi.OAuthAccessTokenRequest;
 import org.jocean.wechat.spi.OAuthAccessTokenResponse;
@@ -30,24 +30,46 @@ import rx.Observable;
 import rx.functions.Func1;
 
 
-public class DefaultWechatAPI implements WechatAPI {
+public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
 	
-    Map<String, String> info() {
-        final Map<String, String> info = new HashMap<>();
-        
-        info.put("name", this._name);
-        info.put("appid", this._appid);
-        info.put("token", this._accessToken);
-        info.put("ticket", this._ticket);
-        info.put("expire", this._expire);
-        
-        return info;
-    }
-
     @SuppressWarnings("unused")
     private static final Logger LOG = 
             LoggerFactory.getLogger(DefaultWechatAPI.class);
 
+    @Override
+    public void setMBeanRegister(final MBeanRegister register) {
+        register.registerMBean("name=wxapi", new WechatInfoMXBean() {
+            @Override
+            public String getName() {
+                return _name;
+            }
+
+            @Override
+            public String getAppid() {
+                return _appid;
+            }
+
+            @Override
+            public String getSecret() {
+                return "***";
+            }
+
+            @Override
+            public String getAccessToken() {
+                return _accessToken;
+            }
+
+            @Override
+            public String getTicket() {
+                return _ticket;
+            }
+
+            @Override
+            public String getExpireTime() {
+                return _expire;
+            }});
+    }
+    
     @Override
     public String getName() {
         return this._name;

@@ -11,16 +11,10 @@
         ${wechat.secret}
     -->
 
-    <bean class="org.jocean.idiom.rx.RxActions"
-        factory-method="doAdd"
-        destroy-method="call">
-        <constructor-arg ref="wxapis"/>
-        <constructor-arg>
-            <bean class="org.jocean.wechat.service.DefaultWechatAPI">
-                <property name="maxRetryTimes" value="${wechat.retrytimes:3}"/>
-                <property name="retryIntervalBase" value="${wechat.retryintervalbase:2}"/>
-            </bean>
-        </constructor-arg>
+    <bean id="wxapi" class="org.jocean.wechat.service.DefaultWechatAPI">
+        <property name="maxRetryTimes" value="${wechat.retrytimes:3}"/>
+        <property name="retryIntervalBase" value="${wechat.retryintervalbase:2}"/>
     </bean>
+    <alias name="wxapi" alias="${wechat.wpa}"/>
     
 </beans>
