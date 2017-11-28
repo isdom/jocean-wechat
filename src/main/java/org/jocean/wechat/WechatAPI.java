@@ -1,6 +1,7 @@
 
 package org.jocean.wechat;
 
+import org.jocean.wechat.spi.DownloadMediaResponse;
 import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.UserInfoResponse;
 
@@ -20,4 +21,8 @@ public interface WechatAPI {
     public Observable<UserInfoResponse> getSnsapiUserInfo(final String snsapiAccessToken, final String openid);
     
     public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final String code);
+    
+    //  input mediaId (see : https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1444738726&token=&lang=zh_CN)
+    //  output Blob : media download
+    public Observable<DownloadMediaResponse> downloadMedia(final String mediaId);
 }

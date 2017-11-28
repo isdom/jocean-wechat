@@ -17,6 +17,8 @@ import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.wechat.WechatAPI;
+import org.jocean.wechat.spi.DownloadMediaRequest;
+import org.jocean.wechat.spi.DownloadMediaResponse;
 import org.jocean.wechat.spi.OAuthAccessTokenRequest;
 import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.UserInfoRequest;
@@ -147,6 +149,28 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         }
     }
 
+    @Override
+    public Observable<DownloadMediaResponse> downloadMedia(final String mediaId) {
+        final DownloadMediaRequest req = new DownloadMediaRequest();
+        req.setAccessToken(this._accessToken);
+        req.setMediaId(mediaId);
+        
+        try {
+            return this._signalClient.interaction().request(req)
+                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                .feature(Feature.ENABLE_COMPRESSOR)
+                .feature(new SignalClient.UsingMethod(GET.class))
+                .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
+                .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com")))
+                .feature(new SignalClient.UsingPath("/cgi-bin/media/get"))
+                .feature(new SignalClient.ConvertResponseTo(DownloadMediaResponse.class))
+                .<DownloadMediaResponse>build()
+                .retryWhen(retryPolicy());
+        } catch (Exception e) {
+            return Observable.error(e);
+        }
+    }
+    
     public void setMaxRetryTimes(final int maxRetryTimes) {
         this._maxRetryTimes = maxRetryTimes;
     }

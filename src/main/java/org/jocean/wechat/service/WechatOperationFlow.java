@@ -129,12 +129,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
     
     @Override
     public Observable<Blob> downloadMedia(final String mediaId) {
-        return getAccessToken(false)
-            .flatMap(new Func1<String, Observable<Blob>>() {
-                @Override
-                public Observable<Blob> call(final String accessToken) {
-                    return downloadMedia(accessToken, mediaId);
-                }});
+        return getAccessToken(false).flatMap(accessToken -> downloadMedia(accessToken, mediaId));
     }
     
     final static String CONTENT_DISPOSITION = "Content-Disposition";
