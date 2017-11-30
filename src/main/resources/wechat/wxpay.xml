@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+        
+    <!--${wechat.wpa} 
+        ${wechat.appid}
+    -->
+
+    <bean id="wxpay" class="org.jocean.wechat.service.DefaultWechatPayAPI">
+        <property name="maxRetryTimes" value="${wechat.retrytimes:3}"/>
+        <property name="retryIntervalBase" value="${wechat.retryintervalbase:2}"/>
+    </bean>
+    <alias name="wxpay" alias="${wechat.wpa}"/>
+    
+</beans>
