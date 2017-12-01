@@ -19,7 +19,6 @@ import javax.ws.rs.POST;
 import org.jocean.http.Feature;
 import org.jocean.http.TransportException;
 import org.jocean.http.rosa.SignalClient;
-import org.jocean.idiom.BeanFinder;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.Md5;
 import org.jocean.idiom.Proxys;
@@ -101,8 +100,8 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                     final SslContext ctx = SslContextBuilder.forClient().keyManager(kmf).build();
                     
                     final URI apiuri = new URI("https://api.mch.weixin.qq.com");
-                    return  _finder.find(SignalClient.class).flatMap(signal ->
-                        signal.interaction().request(req)
+                    return  //_finder.find(SignalClient.class).flatMap(signal ->
+                        _signalClient.interaction().request(req)
                         .feature(new SignalClient.UsingMethod(POST.class))
                         .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                         .feature(new Feature.ENABLE_SSL(ctx))
@@ -111,8 +110,8 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                         .feature(new SignalClient.DecodeResponseBodyAs(SendRedpackResponse.class))
                         .<SendRedpackResponse>build()
                         .retryWhen(retryPolicy())
-                        .map(resp -> Proxys.delegate(SendRedpackResult.class, resp))
-                    );
+                        .map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
+//                    );
                 } catch (Exception e) {
                     LOG.warn("exception when sendRedpack {}, detail: {}", req, ExceptionUtils.exception2detail(e));
                     return Observable.error(e);
@@ -145,8 +144,10 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
             }});
     }
 
+//    @Inject
+//    private BeanFinder _finder;
     @Inject
-    private BeanFinder _finder;
+    private SignalClient _signalClient;
     
     @Value("${wechat.wpa}")
     String _name;
