@@ -88,6 +88,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
             public Observable<SendRedpackResult> call() {
                 req.setMchId(_mch_id);
                 req.setWxappid(_appid);
+                LOG.debug("in sendRedpack {}", req);
                 sign(req);
                 
                 try {
@@ -113,6 +114,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                         .map(resp -> Proxys.delegate(SendRedpackResult.class, resp))
                     );
                 } catch (Exception e) {
+                    LOG.warn("exception when sendRedpack {}, detail: {}", req, ExceptionUtils.exception2detail(e));
                     return Observable.error(e);
                 }
             }};
