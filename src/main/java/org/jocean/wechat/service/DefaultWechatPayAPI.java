@@ -87,19 +87,27 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
             public Observable<SendRedpackResult> call() {
                 req.setMchId(_mch_id);
                 req.setWxappid(_appid);
-                LOG.debug("in sendRedpack {}", req);
                 sign(req);
+                LOG.debug("in sendRedpack {} after sign", req);
                 
                 try {
                     final KeyStore ks = KeyStore.getInstance("PKCS12");
                     ks.load(new ByteArrayInputStream(BaseEncoding.base64().decode(_certAsBase64)), 
                             _password.toCharArray());
                     
+                    LOG.debug("load ks {}", ks);
+                    
                     final KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
                     kmf.init(ks, _password.toCharArray());
+                    
+                    LOG.debug("init kmf {}", kmf);
+                    
                     final SslContext ctx = SslContextBuilder.forClient().keyManager(kmf).build();
                     
                     final URI apiuri = new URI("https://api.mch.weixin.qq.com");
+                    
+                    LOG.debug("send signal with client {}", _signalClient);
+                    
                     return  //_finder.find(SignalClient.class).flatMap(signal ->
                         _signalClient.interaction().request(req)
                         .feature(new SignalClient.UsingMethod(POST.class))
