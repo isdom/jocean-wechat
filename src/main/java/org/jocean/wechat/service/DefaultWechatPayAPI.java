@@ -19,6 +19,7 @@ import javax.ws.rs.POST;
 import org.jocean.http.Feature;
 import org.jocean.http.TransportException;
 import org.jocean.http.rosa.SignalClient;
+import org.jocean.idiom.BeanFinder;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.Md5;
 import org.jocean.idiom.Proxys;
@@ -88,28 +89,20 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                 req.setMchId(_mch_id);
                 req.setWxappid(_appid);
                 sign(req);
-                LOG.debug("in sendRedpack {} after sign", req);
                 
                 try {
                     final KeyStore ks = KeyStore.getInstance("PKCS12");
                     ks.load(new ByteArrayInputStream(BaseEncoding.base64().decode(_certAsBase64)), 
                             _password.toCharArray());
                     
-                    LOG.debug("load ks {}", ks);
-                    
                     final KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
                     kmf.init(ks, _password.toCharArray());
-                    
-                    LOG.debug("init kmf {}", kmf);
                     
                     final SslContext ctx = SslContextBuilder.forClient().keyManager(kmf).build();
                     
                     final URI apiuri = new URI("https://api.mch.weixin.qq.com");
-                    
-                    LOG.debug("send signal with client {}", _signalClient);
-                    
-                    return  //_finder.find(SignalClient.class).flatMap(signal ->
-                        _signalClient.interaction().request(req)
+                    return  _finder.find(SignalClient.class).flatMap(signal ->
+                        signal.interaction().request(req)
                         .feature(new SignalClient.UsingMethod(POST.class))
                         .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                         .feature(new Feature.ENABLE_SSL(ctx))
@@ -118,8 +111,8 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                         .feature(new SignalClient.DecodeResponseBodyAs(SendRedpackResponse.class))
                         .<SendRedpackResponse>build()
                         .retryWhen(retryPolicy())
-                        .map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
-//                    );
+                        .map(resp -> Proxys.delegate(SendRedpackResult.class, resp))
+                    );
                 } catch (Exception e) {
                     LOG.warn("exception when sendRedpack {}, detail: {}", req, ExceptionUtils.exception2detail(e));
                     return Observable.error(e);
@@ -152,10 +145,8 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
             }});
     }
 
-//    @Inject
-//    private BeanFinder _finder;
     @Inject
-    private SignalClient _signalClient;
+    private BeanFinder _finder;
     
     @Value("${wechat.wpa}")
     String _name;
