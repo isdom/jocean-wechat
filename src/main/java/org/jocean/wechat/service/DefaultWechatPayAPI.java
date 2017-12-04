@@ -23,6 +23,7 @@ import org.jocean.idiom.BeanFinder;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.Md5;
 import org.jocean.idiom.Proxys;
+import org.jocean.idiom.Proxys.RET;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
@@ -118,7 +119,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                     return Observable.error(e);
                 }
             }};
-        return Proxys.delegate(SendRedpackContext.class, req, action);
+        return Proxys.delegate(SendRedpackContext.class, new Object[]{req, action}, new RET[]{RET.SELF, RET.PASSTHROUGH});
     }
     
     @Override
