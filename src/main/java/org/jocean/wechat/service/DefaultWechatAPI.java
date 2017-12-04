@@ -12,6 +12,7 @@ import javax.ws.rs.GET;
 import org.jocean.http.Feature;
 import org.jocean.http.TransportException;
 import org.jocean.http.rosa.SignalClient;
+import org.jocean.idiom.BeanFinder;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import rx.Observable;
 import rx.functions.Func1;
@@ -97,13 +99,18 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             req.setAccessToken(accessToken);
             req.setOpenid(openid);
             
-            return _signalClient.interaction().request(req)
-                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
-                .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com/cgi-bin")))
-                .feature(new SignalClient.UsingPath("/user/info"))
-                .feature(new SignalClient.DecodeResponseBodyAs(UserInfoResponse.class))
-                .<UserInfoResponse>build();
+            final SslContext sslctx = SslContextBuilder.forClient().build();
+            final URI uri = new URI("https://api.weixin.qq.com/cgi-bin");
+            
+            return this._finder.find(SignalClient.class).flatMap(signal ->
+                signal.interaction().request(req)
+                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                    .feature(new Feature.ENABLE_SSL(sslctx))
+                    .feature(new SignalClient.UsingUri(uri))
+                    .feature(new SignalClient.UsingPath("/user/info"))
+                    .feature(new SignalClient.DecodeResponseBodyAs(UserInfoResponse.class))
+                    .<UserInfoResponse>build()
+            );
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -111,19 +118,26 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     
     public Observable<UserInfoResponse> getSnsapiUserInfo(final String snsapiAccessToken, final String openid) {
         try {
-            return _signalClient.interaction()
-                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
-                .feature(new SignalClient.UsingMethod(GET.class))
-                .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com")))
-                .feature(new SignalClient.UsingPath("/sns/userinfo?access_token=" 
-                        + URLEncoder.encode(snsapiAccessToken, "UTF-8")
-                        + "&openid="
-                        + URLEncoder.encode(openid, "UTF-8")
-                        + "&lang=zh_CN"
-                        ))
-                .feature(new SignalClient.DecodeResponseBodyAs(UserInfoResponse.class))
-                .<UserInfoResponse>build();
+            final SslContext sslctx = SslContextBuilder.forClient().build();
+            final URI uri = new URI("https://api.weixin.qq.com");
+            final String tokenencoded = URLEncoder.encode(snsapiAccessToken, "UTF-8");
+            final String openidencoded = URLEncoder.encode(openid, "UTF-8");
+            
+            return this._finder.find(SignalClient.class).flatMap(signal ->
+                    signal.interaction()
+                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                    .feature(new Feature.ENABLE_SSL(sslctx))
+                    .feature(new SignalClient.UsingMethod(GET.class))
+                    .feature(new SignalClient.UsingUri(uri))
+                    .feature(new SignalClient.UsingPath("/sns/userinfo?access_token=" 
+                            + tokenencoded
+                            + "&openid="
+                            + openidencoded
+                            + "&lang=zh_CN"
+                            ))
+                    .feature(new SignalClient.DecodeResponseBodyAs(UserInfoResponse.class))
+                    .<UserInfoResponse>build()
+                );
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -137,13 +151,16 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         req.setSecret(this._secret);
         
         try {
-            return this._signalClient.interaction().request(req)
+            final SslContext sslctx = SslContextBuilder.forClient().build();
+            final URI uri = new URI("https://api.weixin.qq.com");
+            return this._finder.find(SignalClient.class).flatMap(signal ->
+                signal.interaction().request(req)
                 .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
-                .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com")))
+                .feature(new Feature.ENABLE_SSL(sslctx))
+                .feature(new SignalClient.UsingUri(uri))
                 .feature(new SignalClient.UsingPath("/sns/oauth2/access_token"))
                 .feature(new SignalClient.DecodeResponseBodyAs(OAuthAccessTokenResponse.class))
-                .<OAuthAccessTokenResponse>build();
+                .<OAuthAccessTokenResponse>build());
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -156,16 +173,19 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         req.setMediaId(mediaId);
         
         try {
-            return this._signalClient.interaction().request(req)
+            final SslContext sslctx = SslContextBuilder.forClient().build();
+            final URI uri = new URI("https://api.weixin.qq.com");
+            return this._finder.find(SignalClient.class).flatMap(signal ->
+                signal.interaction().request(req)
                 .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                 .feature(Feature.ENABLE_COMPRESSOR)
                 .feature(new SignalClient.UsingMethod(GET.class))
-                .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
-                .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com")))
+                .feature(new Feature.ENABLE_SSL(sslctx))
+                .feature(new SignalClient.UsingUri(uri))
                 .feature(new SignalClient.UsingPath("/cgi-bin/media/get"))
                 .feature(new SignalClient.ConvertResponseTo(DownloadMediaResponse.class))
                 .<DownloadMediaResponse>build()
-                .retryWhen(retryPolicy());
+                .retryWhen(retryPolicy()));
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -191,7 +211,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     }
 
     @Inject
-    private SignalClient _signalClient;
+    private BeanFinder _finder;
     
     @Value("${wechat.wpa}")
     String _name;
