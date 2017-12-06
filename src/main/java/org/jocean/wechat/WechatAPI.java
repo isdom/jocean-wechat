@@ -2,6 +2,7 @@
 package org.jocean.wechat;
 
 import org.jocean.http.MessageDecoder;
+import org.jocean.idiom.TerminateAware;
 import org.jocean.wechat.spi.DownloadMediaResponse;
 import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.UserInfoResponse;
@@ -27,5 +28,5 @@ public interface WechatAPI {
     //  output Blob : media download
     public Observable<DownloadMediaResponse> downloadMedia(final String mediaId);
 
-    public Observable<MessageDecoder> downloadMedia2(final String mediaId);
+    public Observable<MessageDecoder> downloadMedia2(final TerminateAware<?> terminateAware, final String mediaId);
 }

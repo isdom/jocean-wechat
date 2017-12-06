@@ -14,6 +14,7 @@ import org.jocean.http.MessageDecoder;
 import org.jocean.http.TransportException;
 import org.jocean.http.rosa.SignalClient;
 import org.jocean.idiom.BeanFinder;
+import org.jocean.idiom.TerminateAware;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
@@ -193,7 +194,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     }
     
     @Override
-    public Observable<MessageDecoder> downloadMedia2(final String mediaId) {
+    public Observable<MessageDecoder> downloadMedia2(final TerminateAware<?> terminateAware, final String mediaId) {
         final DownloadMediaRequest req = new DownloadMediaRequest();
         req.setAccessToken(this._accessToken);
         req.setMediaId(mediaId);
@@ -202,7 +203,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             final SslContext sslctx = SslContextBuilder.forClient().build();
             final URI uri = new URI("https://api.weixin.qq.com");
             return this._finder.find(SignalClient.class).flatMap(signal ->
-                signal.interaction2().request(req)
+                signal.interaction2(terminateAware).request(req)
                 .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                 .feature(Feature.ENABLE_COMPRESSOR)
                 .feature(new SignalClient.UsingMethod(GET.class))
