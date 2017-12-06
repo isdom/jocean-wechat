@@ -192,7 +192,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             return Observable.error(e);
         }
     }
-    
+
     @Override
     public Observable<MessageDecoder> downloadMedia2(final TerminateAware<?> terminateAware, final String mediaId) {
         final DownloadMediaRequest req = new DownloadMediaRequest();
