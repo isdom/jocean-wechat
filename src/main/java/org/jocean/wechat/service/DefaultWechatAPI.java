@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 
 import org.jocean.http.Feature;
+import org.jocean.http.MessageDecoder;
 import org.jocean.http.TransportException;
 import org.jocean.http.rosa.SignalClient;
 import org.jocean.idiom.BeanFinder;
@@ -185,6 +186,30 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                 .feature(new SignalClient.UsingPath("/cgi-bin/media/get"))
                 .feature(new SignalClient.ConvertResponseTo(DownloadMediaResponse.class))
                 .<DownloadMediaResponse>build()
+                .retryWhen(retryPolicy()));
+        } catch (Exception e) {
+            return Observable.error(e);
+        }
+    }
+    
+    @Override
+    public Observable<MessageDecoder> downloadMedia2(final String mediaId) {
+        final DownloadMediaRequest req = new DownloadMediaRequest();
+        req.setAccessToken(this._accessToken);
+        req.setMediaId(mediaId);
+        
+        try {
+            final SslContext sslctx = SslContextBuilder.forClient().build();
+            final URI uri = new URI("https://api.weixin.qq.com");
+            return this._finder.find(SignalClient.class).flatMap(signal ->
+                signal.interaction2().request(req)
+                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                .feature(Feature.ENABLE_COMPRESSOR)
+                .feature(new SignalClient.UsingMethod(GET.class))
+                .feature(new Feature.ENABLE_SSL(sslctx))
+                .feature(new SignalClient.UsingUri(uri))
+                .feature(new SignalClient.UsingPath("/cgi-bin/media/get"))
+                .build()
                 .retryWhen(retryPolicy()));
         } catch (Exception e) {
             return Observable.error(e);
