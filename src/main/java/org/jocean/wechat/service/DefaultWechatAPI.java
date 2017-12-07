@@ -21,7 +21,6 @@ import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.wechat.WechatAPI;
 import org.jocean.wechat.spi.DownloadMediaRequest;
-import org.jocean.wechat.spi.DownloadMediaResponse;
 import org.jocean.wechat.spi.OAuthAccessTokenRequest;
 import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.UserInfoRequest;
@@ -169,32 +168,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     }
 
     @Override
-    public Observable<DownloadMediaResponse> downloadMedia(final String mediaId) {
-        final DownloadMediaRequest req = new DownloadMediaRequest();
-        req.setAccessToken(this._accessToken);
-        req.setMediaId(mediaId);
-        
-        try {
-            final SslContext sslctx = SslContextBuilder.forClient().build();
-            final URI uri = new URI("https://api.weixin.qq.com");
-            return this._finder.find(SignalClient.class).flatMap(signal ->
-                signal.interaction().request(req)
-                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                .feature(Feature.ENABLE_COMPRESSOR)
-                .feature(new SignalClient.UsingMethod(GET.class))
-                .feature(new Feature.ENABLE_SSL(sslctx))
-                .feature(new SignalClient.UsingUri(uri))
-                .feature(new SignalClient.UsingPath("/cgi-bin/media/get"))
-                .feature(new SignalClient.ConvertResponseTo(DownloadMediaResponse.class))
-                .<DownloadMediaResponse>build()
-                .retryWhen(retryPolicy()));
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
-    }
-
-    @Override
-    public Observable<MessageDecoder> downloadMedia2(final TerminateAware<?> terminateAware, final String mediaId) {
+    public Observable<MessageDecoder> downloadMedia(final TerminateAware<?> terminateAware, final String mediaId) {
         final DownloadMediaRequest req = new DownloadMediaRequest();
         req.setAccessToken(this._accessToken);
         req.setMediaId(mediaId);
