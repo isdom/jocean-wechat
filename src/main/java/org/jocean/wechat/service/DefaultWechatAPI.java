@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 
 import org.jocean.http.Feature;
-import org.jocean.http.MessageUnit;
+import org.jocean.http.MessageBody;
 import org.jocean.http.TransportException;
 import org.jocean.http.rosa.SignalClient;
 import org.jocean.idiom.BeanFinder;
@@ -168,7 +168,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     }
 
     @Override
-    public Observable<MessageUnit> downloadMedia(final TerminateAware<?> terminateAware, final String mediaId) {
+    public Observable<MessageBody> downloadMedia(final TerminateAware<?> terminateAware, final String mediaId) {
         final DownloadMediaRequest req = new DownloadMediaRequest();
         req.setAccessToken(this._accessToken);
         req.setMediaId(mediaId);
