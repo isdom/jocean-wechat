@@ -16,7 +16,7 @@ import org.jocean.http.TransportException;
 import org.jocean.http.client.HttpClient;
 import org.jocean.http.rosa.SignalClient;
 import org.jocean.idiom.BeanFinder;
-import org.jocean.idiom.TerminateAware;
+import org.jocean.idiom.Terminable;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
@@ -171,7 +171,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     }
 
     @Override
-    public Observable<MessageBody> downloadMedia(final TerminateAware<?> terminateAware, final String mediaId) {
+    public Observable<MessageBody> downloadMedia(final Terminable terminable, final String mediaId) {
 //        final DownloadMediaRequest req = new DownloadMediaRequest();
 //        req.setAccessToken(this._accessToken);
 //        req.setMediaId(mediaId);
@@ -191,7 +191,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                             // SignalClient.UsingPath("/cgi-bin/media/get"))
                             .build())
                     .flatMap(initiator -> {
-                        terminateAware.doOnTerminate(initiator.closer());
+                        terminable.doOnTerminate(initiator.closer());
                         return initiator.defineInteraction(
                                 MessageUtil.fullRequestWithoutBody(HttpVersion.HTTP_1_1, HttpMethod.GET)
                                 .doOnNext(MessageUtil.host(uri))
