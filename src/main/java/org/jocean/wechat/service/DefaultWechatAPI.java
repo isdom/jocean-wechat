@@ -185,10 +185,6 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                             .feature(Feature.ENABLE_COMPRESSOR)
                             .feature(new Feature.ENABLE_SSL(sslctx))
-                            // .feature(new SignalClient.UsingMethod(GET.class))
-                            // .feature(new SignalClient.UsingUri(uri))
-                            // .feature(new
-                            // SignalClient.UsingPath("/cgi-bin/media/get"))
                             .build())
                     .flatMap(initiator -> {
                         terminable.doOnTerminate(initiator.closer());
