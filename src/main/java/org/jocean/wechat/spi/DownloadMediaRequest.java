@@ -11,7 +11,7 @@ import javax.ws.rs.QueryParam;
  * @author isdom
  *
  */
-@Path("/media/get")
+@Path("/cgi-bin/media/get")
 public class DownloadMediaRequest {
     
     /* (non-Javadoc)
