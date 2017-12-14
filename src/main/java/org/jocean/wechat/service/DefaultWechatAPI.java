@@ -22,6 +22,7 @@ import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.wechat.WechatAPI;
+import org.jocean.wechat.spi.DownloadMediaRequest;
 import org.jocean.wechat.spi.OAuthAccessTokenRequest;
 import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.UserInfoRequest;
@@ -177,14 +178,13 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
 
     @Override
     public Observable<MessageBody> downloadMedia(final Terminable terminable, final String mediaId) {
-//        final DownloadMediaRequest req = new DownloadMediaRequest();
-//        req.setAccessToken(this._accessToken);
-//        req.setMediaId(mediaId);
+        final DownloadMediaRequest req = new DownloadMediaRequest();
+        req.setAccessToken(this._accessToken);
+        req.setMediaId(mediaId);
 
         try {
             final SslContext sslctx = SslContextBuilder.forClient().build();
             final URI uri = new URI("https://api.weixin.qq.com");
-            final String path = "/cgi-bin/media/get?access_token=" + this._accessToken + "&media_id=" + mediaId;
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> client.initiator().remoteAddress(MessageUtil.uri2addr(uri))
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL)
@@ -196,7 +196,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                         return initiator.defineInteraction(
                                 MessageUtil.fullRequestWithoutBody(HttpVersion.HTTP_1_1, HttpMethod.GET)
                                 .doOnNext(MessageUtil.host(uri))
-                                .doOnNext(MessageUtil.path(path))
+                                .doOnNext(MessageUtil.request("/cgi-bin/media/get", req))
                                 );
                     }).retryWhen(retryPolicy()).compose(MessageUtil.asMessageBody());
         } catch (Exception e) {
