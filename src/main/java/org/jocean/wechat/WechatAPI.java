@@ -15,6 +15,8 @@ public interface WechatAPI {
     public String getAppid();
     public String getJsapiTicket();
     
+    public String getAccessToken();
+    
     public Observable<UserInfoResponse> getUserInfo(final String accessToken, final String openid);
     
     public Observable<UserInfoResponse> getUserInfo(final String openid);

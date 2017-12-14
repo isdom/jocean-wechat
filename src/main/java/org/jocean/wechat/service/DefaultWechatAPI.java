@@ -93,6 +93,11 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         return this._ticket;
     }
     
+    @Override
+    public String getAccessToken() {
+        return this._accessToken;
+    }
+    
     public Observable<UserInfoResponse> getUserInfo(final String openid) {
         return getUserInfo(this._accessToken, openid);
     }
