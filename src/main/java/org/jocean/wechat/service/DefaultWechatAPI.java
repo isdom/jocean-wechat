@@ -31,8 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import rx.Observable;
@@ -184,20 +182,15 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
 
         try {
             final SslContext sslctx = SslContextBuilder.forClient().build();
-            final URI uri = new URI("https://api.weixin.qq.com");
             return this._finder.find(HttpClient.class)
-                    .flatMap(client -> client.initiator().remoteAddress(MessageUtil.uri2addr(uri))
+                    .flatMap(client -> client.initiator().remoteAddress(MessageUtil.bean2addr(req))
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                             .feature(Feature.ENABLE_COMPRESSOR)
                             .feature(new Feature.ENABLE_SSL(sslctx))
                             .build())
                     .flatMap(initiator -> {
                         terminable.doOnTerminate(initiator.closer());
-                        return initiator.defineInteraction(
-                                MessageUtil.fullRequestWithoutBody(HttpVersion.HTTP_1_1, HttpMethod.GET)
-                                .doOnNext(MessageUtil.host(uri))
-                                .doOnNext(MessageUtil.request("/cgi-bin/media/get", req))
-                                );
+                        return initiator.defineInteraction(MessageUtil.fullRequest(req));
                     }).retryWhen(retryPolicy()).compose(MessageUtil.asMessageBody());
         } catch (Exception e) {
             return Observable.error(e);

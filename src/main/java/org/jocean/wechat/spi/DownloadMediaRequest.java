@@ -11,7 +11,7 @@ import javax.ws.rs.QueryParam;
  * @author isdom
  *
  */
-@Path("/cgi-bin/media/get")
+@Path("https://api.weixin.qq.com/cgi-bin/media/get")
 public class DownloadMediaRequest {
     
     /* (non-Javadoc)
@@ -30,7 +30,7 @@ public class DownloadMediaRequest {
         return _accessToken;
     }
 
-    public void setAccessToken(String accessToken) {
+    public void setAccessToken(final String accessToken) {
         this._accessToken = accessToken;
     }
 
@@ -38,7 +38,7 @@ public class DownloadMediaRequest {
         return _mediaId;
     }
 
-    public void setMediaId(String mediaId) {
+    public void setMediaId(final String mediaId) {
         this._mediaId = mediaId;
     }
 
