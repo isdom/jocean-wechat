@@ -20,10 +20,10 @@ import javax.ws.rs.QueryParam;
  *
  * https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
  *
- * @author bluces
+ * @author isdom
  *
  */
-@Path("/oauth2/access_token")
+@Path("https://api.weixin.qq.com/sns/oauth2/access_token")
 public class OAuthAccessTokenRequest {
     @QueryParam("appid")
     private  String appid;//公众号的唯一标识
