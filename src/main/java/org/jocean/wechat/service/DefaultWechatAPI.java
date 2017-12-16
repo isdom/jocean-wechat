@@ -176,22 +176,16 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
 
     @Override
     public Observable<MessageBody> downloadMedia(final Terminable terminable, final String mediaId) {
-        final DownloadMediaRequest req = new DownloadMediaRequest();
-        req.setAccessToken(this._accessToken);
-        req.setMediaId(mediaId);
+        final DownloadMediaRequest reqbean = new DownloadMediaRequest();
+        reqbean.setAccessToken(this._accessToken);
+        reqbean.setMediaId(mediaId);
 
         try {
             final SslContext sslctx = SslContextBuilder.forClient().build();
             return this._finder.find(HttpClient.class)
-                    .flatMap(client -> client.initiator().remoteAddress(MessageUtil.bean2addr(req))
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                            .feature(Feature.ENABLE_COMPRESSOR)
-                            .feature(new Feature.ENABLE_SSL(sslctx))
-                            .build())
-                    .flatMap(initiator -> {
-                        terminable.doOnTerminate(initiator.closer());
-                        return initiator.defineInteraction(MessageUtil.fullRequest(req));
-                    }).retryWhen(retryPolicy()).compose(MessageUtil.asMessageBody());
+                    .flatMap(client -> MessageUtil.interaction(client, terminable, reqbean,
+                            Feature.ENABLE_LOGGING_OVER_SSL, Feature.ENABLE_COMPRESSOR, new Feature.ENABLE_SSL(sslctx)))
+                    .retryWhen(retryPolicy()).compose(MessageUtil.asMessageBody());
         } catch (Exception e) {
             return Observable.error(e);
         }
