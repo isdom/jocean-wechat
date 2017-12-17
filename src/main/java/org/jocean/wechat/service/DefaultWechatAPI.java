@@ -3,18 +3,13 @@
  */
 package org.jocean.wechat.service;
 
-import java.net.URI;
-import java.net.URLEncoder;
-
 import javax.inject.Inject;
-import javax.ws.rs.GET;
 
 import org.jocean.http.Feature;
 import org.jocean.http.MessageBody;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
 import org.jocean.http.client.HttpClient;
-import org.jocean.http.rosa.SignalClient;
 import org.jocean.http.util.ParamUtil;
 import org.jocean.idiom.BeanFinder;
 import org.jocean.idiom.Terminable;
@@ -99,27 +94,17 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     }
     
     public Observable<UserInfoResponse> getUserInfo(final String openid) {
-        return getUserInfo(this._accessToken, openid);
-    }
-    
-    public Observable<UserInfoResponse> getUserInfo(final String accessToken, final String openid) {
         try {
-            final UserInfoRequest req = new UserInfoRequest();
-            req.setAccessToken(accessToken);
-            req.setOpenid(openid);
-            
+            final UserInfoRequest reqbean = new UserInfoRequest();
+            reqbean.setAccessToken(this._accessToken);
+            reqbean.setOpenid(openid);
+
             final SslContext sslctx = SslContextBuilder.forClient().build();
-            final URI uri = new URI("https://api.weixin.qq.com/cgi-bin");
-            
-            return this._finder.find(SignalClient.class).flatMap(signal ->
-                signal.interaction().request(req)
-                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                    .feature(new Feature.ENABLE_SSL(sslctx))
-                    .feature(new SignalClient.UsingUri(uri))
-                    .feature(new SignalClient.UsingPath("/user/info"))
-                    .feature(new SignalClient.DecodeResponseBodyAs(UserInfoResponse.class))
-                    .<UserInfoResponse>build()
-            );
+
+            return this._finder.find(HttpClient.class)
+                    .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
+                            .responseAs(UserInfoResponse.class, ParamUtil::parseContentAsJson));
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -128,25 +113,16 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     public Observable<UserInfoResponse> getSnsapiUserInfo(final String snsapiAccessToken, final String openid) {
         try {
             final SslContext sslctx = SslContextBuilder.forClient().build();
-            final URI uri = new URI("https://api.weixin.qq.com");
-            final String tokenencoded = URLEncoder.encode(snsapiAccessToken, "UTF-8");
-            final String openidencoded = URLEncoder.encode(openid, "UTF-8");
-            
-            return this._finder.find(SignalClient.class).flatMap(signal ->
-                    signal.interaction()
-                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                    .feature(new Feature.ENABLE_SSL(sslctx))
-                    .feature(new SignalClient.UsingMethod(GET.class))
-                    .feature(new SignalClient.UsingUri(uri))
-                    .feature(new SignalClient.UsingPath("/sns/userinfo?access_token=" 
-                            + tokenencoded
-                            + "&openid="
-                            + openidencoded
-                            + "&lang=zh_CN"
-                            ))
-                    .feature(new SignalClient.DecodeResponseBodyAs(UserInfoResponse.class))
-                    .<UserInfoResponse>build()
-                );
+
+            return this._finder.find(HttpClient.class)
+                    .flatMap(client -> MessageUtil.interaction(client)
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
+                            .uri("https://api.weixin.qq.com")
+                            .path("/sns/userinfo")
+                            .paramAsQuery("access_token", snsapiAccessToken)
+                            .paramAsQuery("openid", openid)
+                            .paramAsQuery("lang", "zh_CN")
+                            .responseAs(UserInfoResponse.class, ParamUtil::parseContentAsJson));
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -163,10 +139,9 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             final SslContext sslctx = SslContextBuilder.forClient().build();
 
             return this._finder.find(HttpClient.class)
-                    .flatMap(client -> MessageUtil.interaction(client, reqbean, OAuthAccessTokenResponse.class,
-                            ParamUtil::parseContentAsJson, 
-                            Feature.ENABLE_LOGGING_OVER_SSL,
-                            new Feature.ENABLE_SSL(sslctx)));
+                    .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
+                            .responseAs(OAuthAccessTokenResponse.class, ParamUtil::parseContentAsJson));
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -181,8 +156,10 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         try {
             final SslContext sslctx = SslContextBuilder.forClient().build();
             return this._finder.find(HttpClient.class)
-                    .flatMap(client -> MessageUtil.interaction(client, terminable, reqbean,
-                            Feature.ENABLE_LOGGING_OVER_SSL, Feature.ENABLE_COMPRESSOR, new Feature.ENABLE_SSL(sslctx)))
+                    .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
+                            .feature(Feature.ENABLE_COMPRESSOR)
+                            .responseAs(terminable))
                     .retryWhen(retryPolicy()).compose(MessageUtil.asMessageBody());
         } catch (Exception e) {
             return Observable.error(e);

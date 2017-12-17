@@ -11,7 +11,7 @@ import javax.ws.rs.QueryParam;
  * @author isdom
  *
  */
-@Path("/ticket/getticket")
+@Path("https://api.weixin.qq.com/cgi-bin/ticket/getticket")
 public class FetchTicketRequest {
 
     @Override

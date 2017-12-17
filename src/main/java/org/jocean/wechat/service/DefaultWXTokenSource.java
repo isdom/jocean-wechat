@@ -3,7 +3,6 @@
  */
 package org.jocean.wechat.service;
 
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -14,7 +13,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.inject.Inject;
 
 import org.jocean.http.Feature;
-import org.jocean.http.rosa.SignalClient;
+import org.jocean.http.MessageUtil;
+import org.jocean.http.client.HttpClient;
+import org.jocean.http.util.ParamUtil;
+import org.jocean.idiom.BeanFinder;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
@@ -29,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.collect.Lists;
 
+import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import rx.Observable;
 import rx.Subscriber;
@@ -178,38 +181,34 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
     }
 
     private Observable<FetchAccessTokenResponse> fetchAccessTokenFromWXOpenAPI() {
-        final FetchAccessTokenRequest fetchAccessTokenReq = new FetchAccessTokenRequest();
-        
-        fetchAccessTokenReq.setAppid(this._appid);
-        fetchAccessTokenReq.setSecret(this._secret);
+        final FetchAccessTokenRequest reqbean = new FetchAccessTokenRequest();
+
+        reqbean.setAppid(this._appid);
+        reqbean.setSecret(this._secret);
         try {
-            return this._signalClient.interaction().request(fetchAccessTokenReq)
-                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
-                .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com/cgi-bin")))
-                .feature(new SignalClient.UsingPath("/token"))
-                .feature(new SignalClient.DecodeResponseBodyAs(FetchAccessTokenResponse.class))
-                .<FetchAccessTokenResponse>build()
-                .timeout(10, TimeUnit.SECONDS);
+            final SslContext sslctx = SslContextBuilder.forClient().build();
+            return this._finder.find(HttpClient.class)
+                    .<FetchAccessTokenResponse>flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
+                            .responseAs(FetchAccessTokenResponse.class, ParamUtil::parseContentAsJson))
+                    .timeout(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             return Observable.error(e);
         }
     }
 
     private Observable<FetchTicketResponse> fetchTicketFromWXOpenAPI() {
-        final FetchTicketRequest fetchTicketRequest = new FetchTicketRequest();
+        final FetchTicketRequest reqbean = new FetchTicketRequest();
         
-        fetchTicketRequest.setAccessToken(this._accessToken);
-        fetchTicketRequest.setType("jsapi");
+        reqbean.setAccessToken(this._accessToken);
+        reqbean.setType("jsapi");
         try {
-            return this._signalClient.interaction().request(fetchTicketRequest)
-                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
-                .feature(new SignalClient.UsingUri(new URI("https://api.weixin.qq.com/cgi-bin")))
-                .feature(new SignalClient.UsingPath("/ticket/getticket"))
-                .feature(new SignalClient.DecodeResponseBodyAs(FetchTicketResponse.class))
-                .<FetchTicketResponse>build()
-                .timeout(10, TimeUnit.SECONDS);
+            final SslContext sslctx = SslContextBuilder.forClient().build();
+            return this._finder.find(HttpClient.class)
+                    .<FetchTicketResponse>flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
+                                .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
+                                .responseAs(FetchTicketResponse.class, ParamUtil::parseContentAsJson)
+                    ).timeout(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -302,7 +301,7 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
     private volatile Func1<Subscriber<? super String>, Boolean> _getTokenPolicy;
     
     @Inject
-    private SignalClient _signalClient;
+    private BeanFinder _finder;
     
     private volatile boolean _isActive = true;
     

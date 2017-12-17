@@ -11,7 +11,7 @@ import javax.ws.rs.QueryParam;
  * @author isdom
  *
  */
-@Path("/token")
+@Path("https://api.weixin.qq.com/cgi-bin/token")
 public class FetchAccessTokenRequest {
 
     @Override

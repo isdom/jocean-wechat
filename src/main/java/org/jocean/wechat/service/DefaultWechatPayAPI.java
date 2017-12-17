@@ -83,13 +83,13 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
     
     @Override
     public SendRedpackContext sendRedpack() {
-        final SendRedpackRequest req = new SendRedpackRequest();
+        final SendRedpackRequest reqbean = new SendRedpackRequest();
         final Func0<Observable<SendRedpackResult>> action = new Func0<Observable<SendRedpackResult>>() {
             @Override
             public Observable<SendRedpackResult> call() {
-                req.setMchId(_mch_id);
-                req.setWxappid(_appid);
-                sign(req);
+                reqbean.setMchId(_mch_id);
+                reqbean.setWxappid(_appid);
+                sign(reqbean);
                 
                 try {
                     final KeyStore ks = KeyStore.getInstance("PKCS12");
@@ -103,7 +103,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                     
                     final URI apiuri = new URI("https://api.mch.weixin.qq.com");
                     return  _finder.find(SignalClient.class).flatMap(signal ->
-                        signal.interaction().request(req)
+                        signal.interaction().request(reqbean)
                         .feature(new SignalClient.UsingMethod(POST.class))
                         .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                         .feature(new Feature.ENABLE_SSL(ctx))
@@ -115,11 +115,11 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                         .map(resp -> Proxys.delegate(SendRedpackResult.class, resp))
                     );
                 } catch (Exception e) {
-                    LOG.warn("exception when sendRedpack {}, detail: {}", req, ExceptionUtils.exception2detail(e));
+                    LOG.warn("exception when sendRedpack {}, detail: {}", reqbean, ExceptionUtils.exception2detail(e));
                     return Observable.error(e);
                 }
             }};
-        return Proxys.delegate(SendRedpackContext.class, new Object[]{req, action}, new RET[]{RET.SELF, RET.PASSTHROUGH});
+        return Proxys.delegate(SendRedpackContext.class, new Object[]{reqbean, action}, new RET[]{RET.SELF, RET.PASSTHROUGH});
     }
     
     @Override

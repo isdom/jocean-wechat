@@ -1,7 +1,9 @@
 package org.jocean.wechat.spi;
 
+import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+@Path("https://api.weixin.qq.com/cgi-bin/user/info")
 public class UserInfoRequest {
     @QueryParam("access_token")
     private  String accessToken;
