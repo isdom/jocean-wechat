@@ -15,6 +15,7 @@ import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
 import org.jocean.http.client.HttpClient;
 import org.jocean.http.rosa.SignalClient;
+import org.jocean.http.util.ParamUtil;
 import org.jocean.idiom.BeanFinder;
 import org.jocean.idiom.Terminable;
 import org.jocean.idiom.jmx.MBeanRegister;
@@ -153,22 +154,19 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     
     @Override
     public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final String code) {
-        final OAuthAccessTokenRequest req = new OAuthAccessTokenRequest();
-        req.setCode(code);
-        req.setAppid(this._appid);
-        req.setSecret(this._secret);
-        
+        final OAuthAccessTokenRequest reqbean = new OAuthAccessTokenRequest();
+        reqbean.setCode(code);
+        reqbean.setAppid(this._appid);
+        reqbean.setSecret(this._secret);
+
         try {
             final SslContext sslctx = SslContextBuilder.forClient().build();
-            final URI uri = new URI("https://api.weixin.qq.com");
-            return this._finder.find(SignalClient.class).flatMap(signal ->
-                signal.interaction().request(req)
-                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                .feature(new Feature.ENABLE_SSL(sslctx))
-                .feature(new SignalClient.UsingUri(uri))
-                .feature(new SignalClient.UsingPath("/sns/oauth2/access_token"))
-                .feature(new SignalClient.DecodeResponseBodyAs(OAuthAccessTokenResponse.class))
-                .<OAuthAccessTokenResponse>build());
+
+            return this._finder.find(HttpClient.class)
+                    .flatMap(client -> MessageUtil.interaction(client, reqbean, OAuthAccessTokenResponse.class,
+                            ParamUtil::parseContentAsJson, 
+                            Feature.ENABLE_LOGGING_OVER_SSL,
+                            new Feature.ENABLE_SSL(sslctx)));
         } catch (Exception e) {
             return Observable.error(e);
         }
