@@ -99,14 +99,14 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                     final KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
                     kmf.init(ks, _password.toCharArray());
                     
-                    final SslContext ctx = SslContextBuilder.forClient().keyManager(kmf).build();
+                    final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
                     
                     final URI apiuri = new URI("https://api.mch.weixin.qq.com");
                     return  _finder.find(SignalClient.class).flatMap(signal ->
                         signal.interaction().request(reqbean)
                         .feature(new SignalClient.UsingMethod(POST.class))
                         .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                        .feature(new Feature.ENABLE_SSL(ctx))
+                        .feature(new Feature.ENABLE_SSL(sslctx))
                         .feature(new SignalClient.UsingUri(apiuri))
                         .feature(new SignalClient.UsingPath("/mmpaymkttransfers/sendredpack"))
                         .feature(new SignalClient.DecodeResponseBodyAs(SendRedpackResponse.class))

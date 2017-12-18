@@ -1,5 +1,6 @@
 package org.jocean.wechat.spi;
 
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @Produces({MediaType.APPLICATION_XML})
 @JacksonXmlRootElement(localName="xml")
+@Path("https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack")
 public class SendRedpackRequest {
 	private String nonce_str;
 	private String sign;
