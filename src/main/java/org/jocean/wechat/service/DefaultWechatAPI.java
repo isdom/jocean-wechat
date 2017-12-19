@@ -160,7 +160,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
                             .feature(Feature.ENABLE_COMPRESSOR)
                             .responseAs(terminable))
-                    .retryWhen(retryPolicy()).compose(MessageUtil.asMessageBody());
+                    .retryWhen(retryPolicy()).compose(MessageUtil.asBody());
         } catch (Exception e) {
             return Observable.error(e);
         }
