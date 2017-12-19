@@ -5,7 +5,6 @@ package org.jocean.wechat.service;
 
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
-import java.net.URI;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -14,11 +13,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.net.ssl.KeyManagerFactory;
-import javax.ws.rs.POST;
+import javax.ws.rs.core.MediaType;
 
 import org.jocean.http.Feature;
+import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
-import org.jocean.http.rosa.SignalClient;
+import org.jocean.http.client.HttpClient;
+import org.jocean.http.util.ParamUtil;
 import org.jocean.idiom.BeanFinder;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.Md5;
@@ -38,6 +39,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.google.common.base.Charsets;
 import com.google.common.io.BaseEncoding;
 
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import rx.Observable;
@@ -83,13 +85,13 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
     
     @Override
     public SendRedpackContext sendRedpack() {
-        final SendRedpackRequest reqbean = new SendRedpackRequest();
+        final SendRedpackRequest reqAndBody = new SendRedpackRequest();
         final Func0<Observable<SendRedpackResult>> action = new Func0<Observable<SendRedpackResult>>() {
             @Override
             public Observable<SendRedpackResult> call() {
-                reqbean.setMchId(_mch_id);
-                reqbean.setWxappid(_appid);
-                sign(reqbean);
+                reqAndBody.setMchId(_mch_id);
+                reqAndBody.setWxappid(_appid);
+                sign(reqAndBody);
                 
                 try {
                     final KeyStore ks = KeyStore.getInstance("PKCS12");
@@ -101,25 +103,18 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                     
                     final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
                     
-                    final URI apiuri = new URI("https://api.mch.weixin.qq.com");
-                    return  _finder.find(SignalClient.class).flatMap(signal ->
-                        signal.interaction().request(reqbean)
-                        .feature(new SignalClient.UsingMethod(POST.class))
-                        .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                        .feature(new Feature.ENABLE_SSL(sslctx))
-                        .feature(new SignalClient.UsingUri(apiuri))
-                        .feature(new SignalClient.UsingPath("/mmpaymkttransfers/sendredpack"))
-                        .feature(new SignalClient.DecodeResponseBodyAs(SendRedpackResponse.class))
-                        .<SendRedpackResponse>build()
-                        .retryWhen(retryPolicy())
-                        .map(resp -> Proxys.delegate(SendRedpackResult.class, resp))
-                    );
+                    return _finder.find(HttpClient.class).flatMap(client -> MessageUtil.interaction(client)
+                            .method(HttpMethod.POST).reqbean(reqAndBody)
+                            .body(MessageUtil.asBody(reqAndBody, MediaType.APPLICATION_XML, ParamUtil::serializeToXml))
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
+                            .responseAs(SendRedpackResponse.class, ParamUtil::parseContentAsXml))
+                            .retryWhen(retryPolicy()).map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
                 } catch (Exception e) {
-                    LOG.warn("exception when sendRedpack {}, detail: {}", reqbean, ExceptionUtils.exception2detail(e));
+                    LOG.warn("exception when sendRedpack {}, detail: {}", reqAndBody, ExceptionUtils.exception2detail(e));
                     return Observable.error(e);
                 }
             }};
-        return Proxys.delegate(SendRedpackContext.class, new Object[]{reqbean, action}, new RET[]{RET.SELF, RET.PASSTHROUGH});
+        return Proxys.delegate(SendRedpackContext.class, new Object[]{reqAndBody, action}, new RET[]{RET.SELF, RET.PASSTHROUGH});
     }
     
     @Override
