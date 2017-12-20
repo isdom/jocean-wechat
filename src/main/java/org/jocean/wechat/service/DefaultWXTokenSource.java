@@ -31,8 +31,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.collect.Lists;
 
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
@@ -186,10 +184,9 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
         reqbean.setAppid(this._appid);
         reqbean.setSecret(this._secret);
         try {
-            final SslContext sslctx = SslContextBuilder.forClient().build();
             return this._finder.find(HttpClient.class)
                     .<FetchAccessTokenResponse>flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                             .responseAs(FetchAccessTokenResponse.class, ParamUtil::parseContentAsJson))
                     .timeout(10, TimeUnit.SECONDS);
         } catch (Exception e) {
@@ -203,10 +200,9 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
         reqbean.setAccessToken(this._accessToken);
         reqbean.setType("jsapi");
         try {
-            final SslContext sslctx = SslContextBuilder.forClient().build();
             return this._finder.find(HttpClient.class)
                     .<FetchTicketResponse>flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                                .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
+                                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                                 .responseAs(FetchTicketResponse.class, ParamUtil::parseContentAsJson)
                     ).timeout(10, TimeUnit.SECONDS);
         } catch (Exception e) {

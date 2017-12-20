@@ -27,8 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -99,11 +97,9 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             reqbean.setAccessToken(this._accessToken);
             reqbean.setOpenid(openid);
 
-            final SslContext sslctx = SslContextBuilder.forClient().build();
-
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                             .responseAs(UserInfoResponse.class, ParamUtil::parseContentAsJson));
         } catch (Exception e) {
             return Observable.error(e);
@@ -112,11 +108,9 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     
     public Observable<UserInfoResponse> getSnsapiUserInfo(final String snsapiAccessToken, final String openid) {
         try {
-            final SslContext sslctx = SslContextBuilder.forClient().build();
-
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                             .uri("https://api.weixin.qq.com")
                             .path("/sns/userinfo")
                             .paramAsQuery("access_token", snsapiAccessToken)
@@ -136,11 +130,9 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         reqbean.setSecret(this._secret);
 
         try {
-            final SslContext sslctx = SslContextBuilder.forClient().build();
-
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                             .responseAs(OAuthAccessTokenResponse.class, ParamUtil::parseContentAsJson));
         } catch (Exception e) {
             return Observable.error(e);
@@ -154,10 +146,9 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         reqbean.setMediaId(mediaId);
 
         try {
-            final SslContext sslctx = SslContextBuilder.forClient().build();
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                             .feature(Feature.ENABLE_COMPRESSOR)
                             .responseAs(terminable))
                     .retryWhen(retryPolicy()).compose(MessageUtil.asBody());
