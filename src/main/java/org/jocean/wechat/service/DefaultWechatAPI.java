@@ -148,10 +148,11 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         try {
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                            .feature(Feature.ENABLE_COMPRESSOR)
-                            .responseAs(terminable))
-                    .retryWhen(retryPolicy()).compose(MessageUtil.asBody());
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL).feature(Feature.ENABLE_COMPRESSOR).execution())
+                    .flatMap(execution -> {
+                        terminable.doOnTerminate(execution.initiator().closer());
+                        return execution.execute();
+                    }).retryWhen(retryPolicy()).compose(MessageUtil.asBody());
         } catch (Exception e) {
             return Observable.error(e);
         }
