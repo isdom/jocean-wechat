@@ -106,7 +106,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                     return _finder.find(HttpClient.class).flatMap(client -> MessageUtil.interaction(client)
                             .method(HttpMethod.POST)
                             .reqbean(reqAndBody)
-                            .body(MessageUtil.beanToBody(reqAndBody, MediaType.APPLICATION_XML, ParamUtil::serializeToXml))
+                            .body(MessageUtil.toBody(reqAndBody, MediaType.APPLICATION_XML, ParamUtil::serializeToXml))
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx))
                             .responseAs(SendRedpackResponse.class, ParamUtil::parseContentAsXml))
                             .retryWhen(retryPolicy()).map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
