@@ -99,8 +99,8 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
 
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                            .responseAs(UserInfoResponse.class, ParamUtil::parseContentAsJson));
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
+                    .compose(MessageUtil.responseAs(UserInfoResponse.class, ParamUtil::parseContentAsJson));
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -116,7 +116,8 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                             .paramAsQuery("access_token", snsapiAccessToken)
                             .paramAsQuery("openid", openid)
                             .paramAsQuery("lang", "zh_CN")
-                            .responseAs(UserInfoResponse.class, ParamUtil::parseContentAsJson));
+                            .execution())
+                    .compose(MessageUtil.responseAs(UserInfoResponse.class, ParamUtil::parseContentAsJson));
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -132,8 +133,8 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         try {
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                            .responseAs(OAuthAccessTokenResponse.class, ParamUtil::parseContentAsJson));
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
+                    .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, ParamUtil::parseContentAsJson));
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -149,9 +150,9 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL).feature(Feature.ENABLE_COMPRESSOR).execution())
-                    .flatMap(execution -> {
-                        terminable.doOnTerminate(execution.initiator().closer());
-                        return execution.execute();
+                    .flatMap(interaction -> {
+                        terminable.doOnTerminate(interaction.initiator().closer());
+                        return interaction.execute();
                     }).retryWhen(retryPolicy()).compose(MessageUtil.asBody());
         } catch (Exception e) {
             return Observable.error(e);

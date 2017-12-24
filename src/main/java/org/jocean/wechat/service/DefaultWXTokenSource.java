@@ -185,9 +185,9 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
         reqbean.setSecret(this._secret);
         try {
             return this._finder.find(HttpClient.class)
-                    .<FetchAccessTokenResponse>flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                            .responseAs(FetchAccessTokenResponse.class, ParamUtil::parseContentAsJson))
+                    .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
+                    .compose(MessageUtil.responseAs(FetchAccessTokenResponse.class, ParamUtil::parseContentAsJson))
                     .timeout(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             return Observable.error(e);
@@ -201,10 +201,10 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
         reqbean.setType("jsapi");
         try {
             return this._finder.find(HttpClient.class)
-                    .<FetchTicketResponse>flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                                .responseAs(FetchTicketResponse.class, ParamUtil::parseContentAsJson)
-                    ).timeout(10, TimeUnit.SECONDS);
+                    .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
+                                .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
+                    .compose(MessageUtil.responseAs(FetchTicketResponse.class, ParamUtil::parseContentAsJson))
+                    .timeout(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             return Observable.error(e);
         }
