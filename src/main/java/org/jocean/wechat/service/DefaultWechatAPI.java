@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import io.netty.handler.ssl.SslContextBuilder;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -131,9 +132,10 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         reqbean.setSecret(this._secret);
 
         try {
+            final Feature ssl = new Feature.ENABLE_SSL(SslContextBuilder.forClient().build());
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL).feature(ssl).execution())
                     .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, ParamUtil::parseContentAsJson));
         } catch (Exception e) {
             return Observable.error(e);
