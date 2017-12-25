@@ -91,6 +91,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         return this._accessToken;
     }
     
+    @Override
     public Observable<UserInfoResponse> getUserInfo(final String openid) {
         try {
             final UserInfoRequest reqbean = new UserInfoRequest();
@@ -106,15 +107,14 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         }
     }
     
-    public Observable<UserInfoResponse> getSnsapiUserInfo(final String snsapiAccessToken, final String openid) {
+    @Override
+    public Observable<UserInfoResponse> getSnsapiUserInfo(final String snsapiToken, final String openid) {
         try {
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client)
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                            .uri("https://api.weixin.qq.com")
-                            .path("/sns/userinfo")
-                            .paramAsQuery("access_token", snsapiAccessToken)
-                            .paramAsQuery("openid", openid)
+                            .uri("https://api.weixin.qq.com").path("/sns/userinfo")
+                            .paramAsQuery("access_token", snsapiToken).paramAsQuery("openid", openid)
                             .paramAsQuery("lang", "zh_CN")
                             .execution())
                     .compose(MessageUtil.responseAs(UserInfoResponse.class, ParamUtil::parseContentAsJson));
