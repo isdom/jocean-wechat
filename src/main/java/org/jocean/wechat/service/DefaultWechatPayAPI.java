@@ -19,7 +19,6 @@ import org.jocean.http.Feature;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
 import org.jocean.http.client.HttpClient;
-import org.jocean.http.util.ParamUtil;
 import org.jocean.idiom.BeanFinder;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.Md5;
@@ -106,9 +105,9 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                     return _finder.find(HttpClient.class).flatMap(client -> MessageUtil.interaction(client)
                             .method(HttpMethod.POST)
                             .reqbean(reqAndBody)
-                            .body(MessageUtil.toBody(reqAndBody, MediaType.APPLICATION_XML, ParamUtil::serializeToXml))
+                            .body(MessageUtil.toBody(reqAndBody, MediaType.APPLICATION_XML, MessageUtil::serializeToXml))
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx)).execution())
-                            .compose(MessageUtil.responseAs(SendRedpackResponse.class, ParamUtil::parseContentAsXml))
+                            .compose(MessageUtil.responseAs(SendRedpackResponse.class, MessageUtil::unserializeAsXml))
                             .retryWhen(retryPolicy()).map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
                 } catch (Exception e) {
                     LOG.warn("exception when sendRedpack {}, detail: {}", reqAndBody, ExceptionUtils.exception2detail(e));

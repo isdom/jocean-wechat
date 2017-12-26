@@ -15,7 +15,6 @@ import javax.inject.Inject;
 import org.jocean.http.Feature;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.client.HttpClient;
-import org.jocean.http.util.ParamUtil;
 import org.jocean.idiom.BeanFinder;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.jmx.MBeanRegister;
@@ -187,7 +186,7 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
-                    .compose(MessageUtil.responseAs(FetchAccessTokenResponse.class, ParamUtil::parseContentAsJson))
+                    .compose(MessageUtil.responseAs(FetchAccessTokenResponse.class, MessageUtil::unserializeAsJson))
                     .timeout(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             return Observable.error(e);
@@ -203,7 +202,7 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
                                 .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
-                    .compose(MessageUtil.responseAs(FetchTicketResponse.class, ParamUtil::parseContentAsJson))
+                    .compose(MessageUtil.responseAs(FetchTicketResponse.class, MessageUtil::unserializeAsJson))
                     .timeout(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             return Observable.error(e);

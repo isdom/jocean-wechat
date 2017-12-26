@@ -10,7 +10,6 @@ import org.jocean.http.MessageBody;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
 import org.jocean.http.client.HttpClient;
-import org.jocean.http.util.ParamUtil;
 import org.jocean.idiom.BeanFinder;
 import org.jocean.idiom.Terminable;
 import org.jocean.idiom.jmx.MBeanRegister;
@@ -101,7 +100,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
-                    .compose(MessageUtil.responseAs(UserInfoResponse.class, ParamUtil::parseContentAsJson));
+                    .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson));
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -117,7 +116,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                             .paramAsQuery("access_token", snsapiToken).paramAsQuery("openid", openid)
                             .paramAsQuery("lang", "zh_CN")
                             .execution())
-                    .compose(MessageUtil.responseAs(UserInfoResponse.class, ParamUtil::parseContentAsJson));
+                    .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson));
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -134,7 +133,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
-                    .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, ParamUtil::parseContentAsJson));
+                    .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson));
         } catch (Exception e) {
             return Observable.error(e);
         }
