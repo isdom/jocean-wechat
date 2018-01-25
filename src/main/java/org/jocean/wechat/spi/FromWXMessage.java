@@ -36,12 +36,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  *    4 自定义菜单事件
  *    5 点击菜单拉取消息时的事件推送
  *    6 点击菜单跳转链接时的事件推送
-
- * Created by bluces on 2015/8/6.
+ *
  */
 @Consumes({"application/xml","text/xml"})
 @JacksonXmlRootElement(localName="xml")
-public class FromWeChatMessage {
+public class FromWXMessage {
     
     private String _msgId; //消息id，64位整型
     private String _toUserName; //开发者微信号 
@@ -351,7 +350,7 @@ public class FromWeChatMessage {
                 + "</xml>";
         final ObjectMapper mapper = new XmlMapper();
         
-        final FromWeChatMessage msg = mapper.readValue(xmlsrc, FromWeChatMessage.class);
+        final FromWXMessage msg = mapper.readValue(xmlsrc, FromWXMessage.class);
         System.out.println("msg:" + msg);
         System.out.println("as Xml:" + mapper.writeValueAsString(msg) );
         
