@@ -104,7 +104,7 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
     @Value("${mina.secret}")
     String _secret;
 
-    @Value("${mina.retrycnt}")
+    @Value("${mina.retrytimes}")
     private int _maxRetryTimes = 3;
     
     @Value("${mina.retryinterval}")

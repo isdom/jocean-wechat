@@ -8,10 +8,7 @@
         ${wechat.appid}
     -->
 
-    <bean id="wxpay" class="org.jocean.wechat.service.DefaultWechatPayAPI">
-        <property name="maxRetryTimes" value="${wechat.retrytimes:3}"/>
-        <property name="retryIntervalBase" value="${wechat.retryintervalbase:2}"/>
-    </bean>
+    <bean id="wxpay" class="org.jocean.wechat.service.DefaultWechatPayAPI"/>
     <alias name="wxpay" alias="${wechat.wpa}"/>
     
 </beans>

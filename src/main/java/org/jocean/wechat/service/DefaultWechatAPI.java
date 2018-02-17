@@ -158,14 +158,6 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         }
     }
     
-    public void setMaxRetryTimes(final int maxRetryTimes) {
-        this._maxRetryTimes = maxRetryTimes;
-    }
-
-    public void setRetryIntervalBase(final int retryIntervalBase) {
-        this._retryIntervalBase = retryIntervalBase;
-    }
-    
     private Func1<? super Observable<? extends Throwable>, ? extends Observable<?>> retryPolicy() {
         return RxObservables.retryWith(new RetryPolicy<Integer>() {
             @Override
@@ -198,6 +190,9 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     @Value("${token.expire}")
     String _expire;
             
+    @Value("${wechat.retrytimes}")
     private int _maxRetryTimes = 3;
+    
+    @Value("${wechat.retryinterval}")
     private int _retryIntervalBase = 100; // 100 ms
 }

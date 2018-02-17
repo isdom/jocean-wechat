@@ -11,10 +11,7 @@
         ${wechat.secret}
     -->
 
-    <bean id="wxapi" class="org.jocean.wechat.service.DefaultWechatAPI">
-        <property name="maxRetryTimes" value="${wechat.retrytimes:3}"/>
-        <property name="retryIntervalBase" value="${wechat.retryintervalbase:2}"/>
-    </bean>
+    <bean id="wxapi" class="org.jocean.wechat.service.DefaultWechatAPI"/>
     <alias name="wxapi" alias="${wechat.wpa}"/>
     
 </beans>
