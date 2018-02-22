@@ -107,8 +107,10 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                             .reqbean(reqAndBody)
                             .body(MessageUtil.toBody(reqAndBody, MediaType.APPLICATION_XML, MessageUtil::serializeToXml))
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx)).execution())
-                            .compose(MessageUtil.responseAs(SendRedpackResponse.class, MessageUtil::unserializeAsXml))
-                            .retryWhen(retryPolicy()).map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
+                        // TODO try setFlushPerWrite true
+                        .doOnNext(interaction -> interaction.initiator().writeCtrl().setFlushPerWrite(true))
+                        .compose(MessageUtil.responseAs(SendRedpackResponse.class, MessageUtil::unserializeAsXml))
+                        .retryWhen(retryPolicy()).map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
                 } catch (Exception e) {
                     LOG.warn("exception when sendRedpack {}, detail: {}", reqAndBody, ExceptionUtils.exception2detail(e));
                     return Observable.error(e);
