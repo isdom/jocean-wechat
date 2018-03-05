@@ -16,7 +16,7 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.ws.rs.core.MediaType;
 
 import org.jocean.http.BodyBuilder;
-import org.jocean.http.ContentEncoder;
+import org.jocean.http.ContentUtil;
 import org.jocean.http.Feature;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
@@ -142,7 +142,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                     return _finder.find(HttpClient.class).flatMap(client -> MessageUtil.interaction(client)
                             .method(HttpMethod.POST)
                             .reqbean(reqAndBody)
-                            .body(bb.build(reqAndBody, ContentEncoder.Const.TOXML))
+                            .body(bb.build(reqAndBody, ContentUtil.TOXML))
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx)).execution())
                         .compose(MessageUtil.responseAs(SendRedpackResponse.class, MessageUtil::unserializeAsXml))
                         .retryWhen(retryPolicy()).map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
