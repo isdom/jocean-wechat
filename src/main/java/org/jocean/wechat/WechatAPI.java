@@ -2,6 +2,7 @@
 package org.jocean.wechat;
 
 import org.jocean.http.MessageBody;
+import org.jocean.http.client.HttpClient;
 import org.jocean.idiom.Terminable;
 import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.UserInfoResponse;
@@ -22,6 +23,12 @@ public interface WechatAPI {
     public Observable<UserInfoResponse> getSnsapiUserInfo(final String snsapiAccessToken, final String openid);
     
     public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final String code);
+    
+    public Observable<UserInfoResponse> getUserInfo(final HttpClient client, final String openid);
+
+    public Observable<UserInfoResponse> getSnsapiUserInfo(final HttpClient client, final String snsapiAccessToken, final String openid);
+    
+    public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final HttpClient client, final String code);
     
     //  input mediaId (see : https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1444738726&token=&lang=zh_CN)
     //  output Blob : media download
