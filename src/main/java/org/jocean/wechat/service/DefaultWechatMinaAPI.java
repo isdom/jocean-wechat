@@ -3,13 +3,10 @@
  */
 package org.jocean.wechat.service;
 
-import javax.inject.Inject;
-
 import org.jocean.http.Feature;
+import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
-import org.jocean.http.client.HttpClient;
-import org.jocean.idiom.BeanFinder;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
@@ -60,15 +57,13 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
     }
 
     @Override
-    public Observable<Code2SessionResponse> code2session(final String code) {
+    public Observable<Code2SessionResponse> code2session(final Interact interact, final String code) {
         try {
-            return this._finder.find(HttpClient.class)
-                .flatMap(client -> MessageUtil.interaction(client)
-                        .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                        .uri("https://api.weixin.qq.com").path("/sns/jscode2session")
-                        .paramAsQuery("appid", this._appid).paramAsQuery("secret", this._secret)
-                        .paramAsQuery("js_code", code).paramAsQuery("grant_type", "authorization_code")
-                        .execution())
+            return interact.feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                .uri("https://api.weixin.qq.com").path("/sns/jscode2session")
+                .paramAsQuery("appid", this._appid).paramAsQuery("secret", this._secret)
+                .paramAsQuery("js_code", code).paramAsQuery("grant_type", "authorization_code")
+                .execution()
                 .compose(MessageUtil.responseAs(Code2SessionResponse.class, MessageUtil::unserializeAsJson))
                 .retryWhen(retryPolicy())
                 .doOnNext(resp -> {
@@ -92,9 +87,6 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
             }});
     }
 
-    @Inject
-    private BeanFinder _finder;
-    
     @Value("${mina.name}")
     String _name;
     
