@@ -3,8 +3,12 @@
  */
 package org.jocean.wechat.service;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import javax.inject.Inject;
 
+import org.jocean.http.ContentUtil;
 import org.jocean.http.Feature;
 import org.jocean.http.Interact;
 import org.jocean.http.MessageBody;
@@ -18,6 +22,8 @@ import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.wechat.WechatAPI;
+import org.jocean.wechat.spi.CreateQrcodeRequest;
+import org.jocean.wechat.spi.CreateQrcodeResponse;
 import org.jocean.wechat.spi.DownloadMediaRequest;
 import org.jocean.wechat.spi.OAuthAccessTokenRequest;
 import org.jocean.wechat.spi.OAuthAccessTokenResponse;
@@ -183,7 +189,35 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     
     @Override
     public Observable<String> createVolatileQrcode(final Interact interact, final int expireSeconds, final String scenestr) {
-        return Observable.error(new RuntimeException("NOT IMPL"));
+        final CreateQrcodeRequest reqAndBody = new CreateQrcodeRequest();
+        
+        reqAndBody.setAccessToken(this._accessToken);
+        reqAndBody.setActionName("QR_STR_SCENE");
+        reqAndBody.setExpireSeconds(expireSeconds);
+        reqAndBody.setScenestr(scenestr);
+
+        try {
+            return interact.reqbean(reqAndBody)
+                .body(reqAndBody, ContentUtil.TOJSON)
+                .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
+                .compose(MessageUtil.responseAs(CreateQrcodeResponse.class, MessageUtil::unserializeAsJson))
+                .doOnNext(resp->{
+                    if (null!=resp.getErrcode()) {
+                        throw new RuntimeException(resp.toString());
+                    }
+                })
+                .map(resp-> "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + urlencodeAsUtf8(resp.getTicket()));
+        } catch (Exception e) {
+            return Observable.error(e);
+        }
+    }
+
+    private static String urlencodeAsUtf8(final String ticket) {
+        try {
+            return URLEncoder.encode(ticket, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     @Override
