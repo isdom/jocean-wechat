@@ -182,6 +182,11 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     }
     
     @Override
+    public Observable<String> createVolatileQrcode(final Interact interact, final int expireSeconds, final String scenestr) {
+        return Observable.error(new RuntimeException("NOT IMPL"));
+    }
+    
+    @Override
     public Observable<MessageBody> downloadMedia(final Terminable terminable, final String mediaId) {
         final DownloadMediaRequest reqbean = new DownloadMediaRequest();
         reqbean.setAccessToken(this._accessToken);
