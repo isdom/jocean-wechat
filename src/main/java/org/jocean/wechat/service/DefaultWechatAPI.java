@@ -6,6 +6,7 @@ package org.jocean.wechat.service;
 import javax.inject.Inject;
 
 import org.jocean.http.Feature;
+import org.jocean.http.Interact;
 import org.jocean.http.MessageBody;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
@@ -139,23 +140,22 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         }
     }
 
-    public Observable<UserInfoResponse> getUserInfo(final HttpClient client, final String openid) {
+    public Observable<UserInfoResponse> getUserInfo(final Interact interact, final String openid) {
         try {
             final UserInfoRequest reqbean = new UserInfoRequest();
             reqbean.setAccessToken(this._accessToken);
             reqbean.setOpenid(openid);
 
-            return MessageUtil.interaction(client).reqbean(reqbean).feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
+            return interact.reqbean(reqbean).feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
                 .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson));
         } catch (Exception e) {
             return Observable.error(e);
         }
     }
 
-    public Observable<UserInfoResponse> getSnsapiUserInfo(final HttpClient client, final String snsapiToken, final String openid) {
+    public Observable<UserInfoResponse> getSnsapiUserInfo(final Interact interact, final String snsapiToken, final String openid) {
         try {
-            return MessageUtil.interaction(client)
-                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+            return interact.feature(Feature.ENABLE_LOGGING_OVER_SSL)
                 .uri("https://api.weixin.qq.com").path("/sns/userinfo")
                 .paramAsQuery("access_token", snsapiToken).paramAsQuery("openid", openid)
                 .paramAsQuery("lang", "zh_CN")
@@ -166,14 +166,14 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         }
     }
     
-    public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final HttpClient client, final String code) {
+    public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final Interact interact, final String code) {
         final OAuthAccessTokenRequest reqbean = new OAuthAccessTokenRequest();
         reqbean.setCode(code);
         reqbean.setAppid(this._appid);
         reqbean.setSecret(this._secret);
 
         try {
-            return MessageUtil.interaction(client).reqbean(reqbean)
+            return interact.reqbean(reqbean)
                 .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
                 .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson));
         } catch (Exception e) {
