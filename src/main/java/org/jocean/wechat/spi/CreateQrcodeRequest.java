@@ -34,7 +34,7 @@ public class CreateQrcodeRequest {
         this._accessToken = token;
     }
 
-    @JSONField(name = "expire_seconds")
+    @JSONField(name = "expire_seconds", ordinal=1)
     public int getExpireSeconds() {
         return _expireSeconds;
     }
@@ -43,7 +43,7 @@ public class CreateQrcodeRequest {
         this._expireSeconds = expireSeconds;
     }
 
-    @JSONField(name = "action_name")
+    @JSONField(name = "action_name", ordinal=2)
     public String getActionName() {
         return _actionName;
     }
@@ -52,7 +52,7 @@ public class CreateQrcodeRequest {
         this._actionName = actionName;
     }
 
-    @JSONField(name = "action_info")
+    @JSONField(name = "action_info", ordinal=3)
     public ActionInfo getActionInfo() {
         return _actionInfo;
     }
