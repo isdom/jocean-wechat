@@ -7,17 +7,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-
 import org.jocean.http.ContentUtil;
 import org.jocean.http.Feature;
 import org.jocean.http.Interact;
 import org.jocean.http.MessageBody;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
-import org.jocean.http.client.HttpClient;
-import org.jocean.idiom.BeanFinder;
-import org.jocean.idiom.Terminable;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
@@ -100,54 +95,6 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     }
     
     @Override
-    public Observable<UserInfoResponse> getUserInfo(final String openid) {
-        try {
-            final UserInfoRequest reqbean = new UserInfoRequest();
-            reqbean.setAccessToken(this._accessToken);
-            reqbean.setOpenid(openid);
-
-            return this._finder.find(HttpClient.class)
-                    .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
-                    .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson));
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
-    }
-    
-    @Override
-    public Observable<UserInfoResponse> getSnsapiUserInfo(final String snsapiToken, final String openid) {
-        try {
-            return this._finder.find(HttpClient.class)
-                    .flatMap(client -> MessageUtil.interaction(client)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                            .uri("https://api.weixin.qq.com").path("/sns/userinfo")
-                            .paramAsQuery("access_token", snsapiToken).paramAsQuery("openid", openid)
-                            .paramAsQuery("lang", "zh_CN")
-                            .execution())
-                    .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson));
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
-    }
-    
-    @Override
-    public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final String code) {
-        final OAuthAccessTokenRequest reqbean = new OAuthAccessTokenRequest();
-        reqbean.setCode(code);
-        reqbean.setAppid(this._appid);
-        reqbean.setSecret(this._secret);
-
-        try {
-            return this._finder.find(HttpClient.class)
-                    .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
-                    .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson));
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
-    }
-
     public Observable<UserInfoResponse> getUserInfo(final Interact interact, final String openid) {
         try {
             final UserInfoRequest reqbean = new UserInfoRequest();
@@ -161,6 +108,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         }
     }
 
+    @Override
     public Observable<UserInfoResponse> getSnsapiUserInfo(final Interact interact, final String snsapiToken, final String openid) {
         try {
             return interact.feature(Feature.ENABLE_LOGGING_OVER_SSL)
@@ -174,6 +122,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         }
     }
     
+    @Override
     public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final Interact interact, final String code) {
         final OAuthAccessTokenRequest reqbean = new OAuthAccessTokenRequest();
         reqbean.setCode(code);
@@ -225,19 +174,16 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     }
     
     @Override
-    public Observable<MessageBody> downloadMedia(final Terminable terminable, final String mediaId) {
+    public Observable<MessageBody> downloadMedia(final Interact interact, final String mediaId) {
         final DownloadMediaRequest reqbean = new DownloadMediaRequest();
         reqbean.setAccessToken(this._accessToken);
         reqbean.setMediaId(mediaId);
 
         try {
-            return this._finder.find(HttpClient.class)
-                    .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL).feature(Feature.ENABLE_COMPRESSOR).execution())
-                    .flatMap(interaction -> {
-                        terminable.doOnTerminate(interaction.initiator().closer());
-                        return interaction.execute();
-                    }).retryWhen(retryPolicy()).compose(MessageUtil.asBody());
+            return interact.reqbean(reqbean)
+                .feature(Feature.ENABLE_LOGGING_OVER_SSL).feature(Feature.ENABLE_COMPRESSOR).execution()
+                .flatMap(interaction->interaction.execute())
+                .retryWhen(retryPolicy()).compose(MessageUtil.asBody());
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -254,9 +200,6 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             }});
     }
 
-    @Inject
-    private BeanFinder _finder;
-    
     @Value("${wechat.wpa}")
     String _name;
     
