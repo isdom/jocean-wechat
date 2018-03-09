@@ -1,7 +1,7 @@
 
 package org.jocean.wechat;
 
-import org.jocean.http.BodyBuilder;
+import org.jocean.http.Interact;
 
 import rx.Observable;
 
@@ -65,5 +65,5 @@ public interface WechatPayAPI {
     
     public SendRedpackContext sendRedpack();
     
-    public SendRedpackContext sendRedpack(final BodyBuilder bb);
+    public SendRedpackContext sendRedpack(final Interact interact);
 }

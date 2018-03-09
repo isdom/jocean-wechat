@@ -15,9 +15,9 @@ import javax.inject.Inject;
 import javax.net.ssl.KeyManagerFactory;
 import javax.ws.rs.core.MediaType;
 
-import org.jocean.http.BodyBuilder;
 import org.jocean.http.ContentUtil;
 import org.jocean.http.Feature;
+import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
 import org.jocean.http.client.HttpClient;
@@ -120,7 +120,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
     }
     
     @Override
-    public SendRedpackContext sendRedpack(final BodyBuilder bb) {
+    public SendRedpackContext sendRedpack(final Interact interact) {
         final SendRedpackRequest reqAndBody = new SendRedpackRequest();
         final Func0<Observable<SendRedpackResult>> action = new Func0<Observable<SendRedpackResult>>() {
             @Override
@@ -139,11 +139,10 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                     
                     final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
                     
-                    return _finder.find(HttpClient.class).flatMap(client -> MessageUtil.interaction(client)
-                            .method(HttpMethod.POST)
-                            .reqbean(reqAndBody)
-                            .body(bb.build(reqAndBody, ContentUtil.TOXML))
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx)).execution())
+                    return interact.method(HttpMethod.POST)
+                        .reqbean(reqAndBody)
+                        .body(reqAndBody, ContentUtil.TOXML)
+                        .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx)).execution()
                         .compose(MessageUtil.responseAs(SendRedpackResponse.class, MessageUtil::unserializeAsXml))
                         .retryWhen(retryPolicy()).map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
                 } catch (Exception e) {
