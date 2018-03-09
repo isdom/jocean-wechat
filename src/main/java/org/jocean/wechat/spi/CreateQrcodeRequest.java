@@ -25,6 +25,7 @@ public class CreateQrcodeRequest {
         return builder.toString();
     }
 
+    @JSONField(serialize = false)
     public String getAccessToken() {
         return _accessToken;
     }

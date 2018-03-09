@@ -5,6 +5,7 @@ package org.jocean.wechat.service;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -33,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import io.netty.handler.codec.http.HttpMethod;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -197,10 +199,12 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         reqAndBody.setScenestr(scenestr);
 
         try {
-            return interact.reqbean(reqAndBody)
+            return interact.method(HttpMethod.POST).reqbean(reqAndBody)
                 .body(reqAndBody, ContentUtil.TOJSON)
                 .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
                 .compose(MessageUtil.responseAs(CreateQrcodeResponse.class, MessageUtil::unserializeAsJson))
+                .timeout(this._timeoutInMS, TimeUnit.MILLISECONDS)
+                .retryWhen(retryPolicy())
                 .doOnNext(resp->{
                     if (null!=resp.getErrcode()) {
                         throw new RuntimeException(resp.toString());
@@ -276,4 +280,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     
     @Value("${wechat.retryinterval}")
     private int _retryIntervalBase = 100; // 100 ms
+    
+    @Value("${api.timeoutInMs}")
+    private int _timeoutInMS = 3000;
 }
