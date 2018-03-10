@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import io.netty.handler.codec.http.HttpMethod;
 import rx.Observable;
+import rx.Observable.Transformer;
 import rx.functions.Func1;
 
 
@@ -102,7 +103,8 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             reqbean.setOpenid(openid);
 
             return interact.reqbean(reqbean).feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
-                .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson));
+                .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson))
+                .compose(timeoutAndRetry());
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -116,7 +118,8 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                 .paramAsQuery("access_token", snsapiToken).paramAsQuery("openid", openid)
                 .paramAsQuery("lang", "zh_CN")
                 .execution()
-                .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson));
+                .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson))
+                .compose(timeoutAndRetry());
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -132,7 +135,8 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
         try {
             return interact.reqbean(reqbean)
                 .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
-                .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson));
+                .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
+                .compose(timeoutAndRetry());
         } catch (Exception e) {
             return Observable.error(e);
         }
@@ -152,8 +156,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                 .body(reqAndBody, ContentUtil.TOJSON)
                 .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
                 .compose(MessageUtil.responseAs(CreateQrcodeResponse.class, MessageUtil::unserializeAsJson))
-                .timeout(this._timeoutInMS, TimeUnit.MILLISECONDS)
-                .retryWhen(retryPolicy())
+                .compose(timeoutAndRetry())
                 .doOnNext(resp->{
                     if (null!=resp.getErrcode()) {
                         throw new RuntimeException(resp.toString());
@@ -199,6 +202,10 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                         ;
             }});
     }
+    
+    private <T> Transformer<T, T> timeoutAndRetry() {
+        return org -> org.timeout(this._timeoutInMS, TimeUnit.MILLISECONDS).retryWhen(retryPolicy());
+    }
 
     @Value("${wechat.wpa}")
     String _name;
@@ -225,5 +232,5 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     private int _retryIntervalBase = 100; // 100 ms
     
     @Value("${api.timeoutInMs}")
-    private int _timeoutInMS = 3000;
+    private int _timeoutInMS = 10000;
 }
