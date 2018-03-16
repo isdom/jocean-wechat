@@ -21,7 +21,7 @@ public class WXComponentAPIs {
             final String componentAppid, 
             final String componentAccessToken,
             final String code) {
-        return MessageUtil.interaction(client)
+        return MessageUtil.interact(client)
             .uri("https://api.weixin.qq.com")
             .path("/sns/oauth2/component/access_token")
             .paramAsQuery("appid", appid)
@@ -37,7 +37,7 @@ public class WXComponentAPIs {
             final HttpClient client,
             final String snsapiToken, 
             final String openid) {
-        return MessageUtil.interaction(client)
+        return MessageUtil.interact(client)
             .feature(Feature.ENABLE_LOGGING_OVER_SSL)
             .uri("https://api.weixin.qq.com").path("/sns/userinfo")
             .paramAsQuery("access_token", snsapiToken).paramAsQuery("openid", openid)

@@ -184,7 +184,7 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
         reqbean.setSecret(this._secret);
         try {
             return this._finder.find(HttpClient.class)
-                    .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
+                    .flatMap(client -> MessageUtil.interact(client).reqbean(reqbean)
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
                     .compose(MessageUtil.responseAs(FetchAccessTokenResponse.class, MessageUtil::unserializeAsJson))
                     .timeout(10, TimeUnit.SECONDS);
@@ -200,7 +200,7 @@ public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
         reqbean.setType("jsapi");
         try {
             return this._finder.find(HttpClient.class)
-                    .flatMap(client -> MessageUtil.interaction(client).reqbean(reqbean)
+                    .flatMap(client -> MessageUtil.interact(client).reqbean(reqbean)
                                 .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
                     .compose(MessageUtil.responseAs(FetchTicketResponse.class, MessageUtil::unserializeAsJson))
                     .timeout(10, TimeUnit.SECONDS);

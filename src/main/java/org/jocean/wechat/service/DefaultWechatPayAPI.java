@@ -104,7 +104,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                     
                     final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
                     
-                    return _finder.find(HttpClient.class).flatMap(client -> MessageUtil.interaction(client)
+                    return _finder.find(HttpClient.class).flatMap(client -> MessageUtil.interact(client)
                             .method(HttpMethod.POST)
                             .reqbean(reqAndBody)
                             .body(MessageUtil.toBody(reqAndBody, MediaType.APPLICATION_XML, MessageUtil::serializeToXml))
