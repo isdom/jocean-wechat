@@ -7,6 +7,7 @@ import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.UserInfoResponse;
 
 import rx.Observable;
+import rx.functions.Func1;
 
 public interface WechatAPI {
     
@@ -17,11 +18,11 @@ public interface WechatAPI {
     
     public String getAccessToken();
     
-    public Observable<UserInfoResponse> getUserInfo(final Interact interact, final String openid);
+    public Func1<Interact, Observable<UserInfoResponse>> getUserInfo(final String openid);
 
-    public Observable<UserInfoResponse> getSnsapiUserInfo(final Interact interact, final String snsapiAccessToken, final String openid);
+    public Func1<Interact, Observable<UserInfoResponse>> getSnsapiUserInfo(final String snsapiAccessToken, final String openid);
     
-    public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final Interact interact, final String code);
+    public Func1<Interact, Observable<OAuthAccessTokenResponse>> getOAuthAccessToken(final String code);
     
     /**
      * @param interact
@@ -29,9 +30,9 @@ public interface WechatAPI {
      * @param scenestr 场景值ID（字符串形式的ID），字符串类型，长度限制为1到64
      * @return url for download qrcode image
      */
-    public Observable<String> createVolatileQrcode(final Interact interact, final int expireSeconds, final String scenestr);
+    public Func1<Interact, Observable<String>> createVolatileQrcode(final int expireSeconds, final String scenestr);
     
     //  input mediaId (see : https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1444738726&token=&lang=zh_CN)
     //  output Blob : media download
-    public Observable<MessageBody> downloadMedia(final Interact interact, final String mediaId);
+    public Func1<Interact, Observable<MessageBody>> downloadMedia(final String mediaId);
 }

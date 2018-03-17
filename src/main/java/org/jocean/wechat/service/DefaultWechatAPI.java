@@ -96,76 +96,84 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     }
     
     @Override
-    public Observable<UserInfoResponse> getUserInfo(final Interact interact, final String openid) {
-        try {
-            final UserInfoRequest reqbean = new UserInfoRequest();
-            reqbean.setAccessToken(this._accessToken);
-            reqbean.setOpenid(openid);
-
-            return interact.reqbean(reqbean).feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
-                .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson))
-                .compose(timeoutAndRetry());
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
+    public Func1<Interact, Observable<UserInfoResponse>> getUserInfo(final String openid) {
+        return interact-> {
+            try {
+                final UserInfoRequest reqbean = new UserInfoRequest();
+                reqbean.setAccessToken(this._accessToken);
+                reqbean.setOpenid(openid);
+    
+                return interact.reqbean(reqbean).feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
+                    .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson))
+                    .compose(timeoutAndRetry());
+            } catch (Exception e) {
+                return Observable.error(e);
+            }
+        };
     }
 
     @Override
-    public Observable<UserInfoResponse> getSnsapiUserInfo(final Interact interact, final String snsapiToken, final String openid) {
-        try {
-            return interact.feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                .uri("https://api.weixin.qq.com").path("/sns/userinfo")
-                .paramAsQuery("access_token", snsapiToken).paramAsQuery("openid", openid)
-                .paramAsQuery("lang", "zh_CN")
-                .execution()
-                .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson))
-                .compose(timeoutAndRetry());
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
+    public Func1<Interact, Observable<UserInfoResponse>> getSnsapiUserInfo(final String snsapiToken, final String openid) {
+        return interact-> {
+            try {
+                return interact.feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                    .uri("https://api.weixin.qq.com").path("/sns/userinfo")
+                    .paramAsQuery("access_token", snsapiToken).paramAsQuery("openid", openid)
+                    .paramAsQuery("lang", "zh_CN")
+                    .execution()
+                    .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson))
+                    .compose(timeoutAndRetry());
+            } catch (Exception e) {
+                return Observable.error(e);
+            }
+        };
     }
     
     @Override
-    public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final Interact interact, final String code) {
-        final OAuthAccessTokenRequest reqbean = new OAuthAccessTokenRequest();
-        reqbean.setCode(code);
-        reqbean.setAppid(this._appid);
-        reqbean.setSecret(this._secret);
-
-        try {
-            return interact.reqbean(reqbean)
-                .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
-                .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
-                .compose(timeoutAndRetry());
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
+    public Func1<Interact, Observable<OAuthAccessTokenResponse>> getOAuthAccessToken(final String code) {
+        return interact-> {
+            final OAuthAccessTokenRequest reqbean = new OAuthAccessTokenRequest();
+            reqbean.setCode(code);
+            reqbean.setAppid(this._appid);
+            reqbean.setSecret(this._secret);
+    
+            try {
+                return interact.reqbean(reqbean)
+                    .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
+                    .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
+                    .compose(timeoutAndRetry());
+            } catch (Exception e) {
+                return Observable.error(e);
+            }
+        };
     }
     
     @Override
-    public Observable<String> createVolatileQrcode(final Interact interact, final int expireSeconds, final String scenestr) {
-        final CreateQrcodeRequest reqAndBody = new CreateQrcodeRequest();
-        
-        reqAndBody.setAccessToken(this._accessToken);
-        reqAndBody.setActionName("QR_STR_SCENE");
-        reqAndBody.setExpireSeconds(expireSeconds);
-        reqAndBody.setScenestr(scenestr);
-
-        try {
-            return interact.method(HttpMethod.POST).reqbean(reqAndBody)
-                .body(reqAndBody, ContentUtil.TOJSON)
-                .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
-                .compose(MessageUtil.responseAs(CreateQrcodeResponse.class, MessageUtil::unserializeAsJson))
-                .compose(timeoutAndRetry())
-                .doOnNext(resp->{
-                    if (null!=resp.getErrcode()) {
-                        throw new RuntimeException(resp.toString());
-                    }
-                })
-                .map(resp-> "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + urlencodeAsUtf8(resp.getTicket()));
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
+    public Func1<Interact, Observable<String>> createVolatileQrcode(final int expireSeconds, final String scenestr) {
+        return interact-> {
+            final CreateQrcodeRequest reqAndBody = new CreateQrcodeRequest();
+            
+            reqAndBody.setAccessToken(this._accessToken);
+            reqAndBody.setActionName("QR_STR_SCENE");
+            reqAndBody.setExpireSeconds(expireSeconds);
+            reqAndBody.setScenestr(scenestr);
+    
+            try {
+                return interact.method(HttpMethod.POST).reqbean(reqAndBody)
+                    .body(reqAndBody, ContentUtil.TOJSON)
+                    .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
+                    .compose(MessageUtil.responseAs(CreateQrcodeResponse.class, MessageUtil::unserializeAsJson))
+                    .compose(timeoutAndRetry())
+                    .doOnNext(resp->{
+                        if (null!=resp.getErrcode()) {
+                            throw new RuntimeException(resp.toString());
+                        }
+                    })
+                    .map(resp-> "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + urlencodeAsUtf8(resp.getTicket()));
+            } catch (Exception e) {
+                return Observable.error(e);
+            }
+        };
     }
 
     private static String urlencodeAsUtf8(final String ticket) {
@@ -177,19 +185,21 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     }
     
     @Override
-    public Observable<MessageBody> downloadMedia(final Interact interact, final String mediaId) {
-        final DownloadMediaRequest reqbean = new DownloadMediaRequest();
-        reqbean.setAccessToken(this._accessToken);
-        reqbean.setMediaId(mediaId);
-
-        try {
-            return interact.reqbean(reqbean)
-                .feature(Feature.ENABLE_LOGGING_OVER_SSL).feature(Feature.ENABLE_COMPRESSOR).execution()
-                .flatMap(interaction->interaction.execute())
-                .retryWhen(retryPolicy()).compose(MessageUtil.asBody());
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
+    public Func1<Interact, Observable<MessageBody>> downloadMedia(final String mediaId) {
+        return interact-> {
+            final DownloadMediaRequest reqbean = new DownloadMediaRequest();
+            reqbean.setAccessToken(this._accessToken);
+            reqbean.setMediaId(mediaId);
+    
+            try {
+                return interact.reqbean(reqbean)
+                    .feature(Feature.ENABLE_LOGGING_OVER_SSL).feature(Feature.ENABLE_COMPRESSOR).execution()
+                    .flatMap(interaction->interaction.execute())
+                    .retryWhen(retryPolicy()).compose(MessageUtil.asBody());
+            } catch (Exception e) {
+                return Observable.error(e);
+            }
+        };
     }
     
     private Func1<? super Observable<? extends Throwable>, ? extends Observable<?>> retryPolicy() {
