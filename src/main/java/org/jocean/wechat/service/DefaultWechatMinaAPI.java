@@ -57,23 +57,25 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
     }
 
     @Override
-    public Observable<Code2SessionResponse> code2session(final Interact interact, final String code) {
-        try {
-            return interact.feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                .uri("https://api.weixin.qq.com").path("/sns/jscode2session")
-                .paramAsQuery("appid", this._appid).paramAsQuery("secret", this._secret)
-                .paramAsQuery("js_code", code).paramAsQuery("grant_type", "authorization_code")
-                .execution()
-                .compose(MessageUtil.responseAs(Code2SessionResponse.class, MessageUtil::unserializeAsJson))
-                .retryWhen(retryPolicy())
-                .doOnNext(resp -> {
-                    if (null != resp.getErrcode()) {
-                        throw new RuntimeException(resp.toString());
-                    }
-                });
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
+    public Func1<Interact, Observable<Code2SessionResponse>> code2session(final String code) {
+        return interact-> {
+            try {
+                return interact.feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                    .uri("https://api.weixin.qq.com").path("/sns/jscode2session")
+                    .paramAsQuery("appid", this._appid).paramAsQuery("secret", this._secret)
+                    .paramAsQuery("js_code", code).paramAsQuery("grant_type", "authorization_code")
+                    .execution()
+                    .compose(MessageUtil.responseAs(Code2SessionResponse.class, MessageUtil::unserializeAsJson))
+                    .retryWhen(retryPolicy())
+                    .doOnNext(resp -> {
+                        if (null != resp.getErrcode()) {
+                            throw new RuntimeException(resp.toString());
+                        }
+                    });
+            } catch (Exception e) {
+                return Observable.error(e);
+            }
+        };
     }
     
     private Func1<? super Observable<? extends Throwable>, ? extends Observable<?>> retryPolicy() {
