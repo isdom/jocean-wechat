@@ -4,6 +4,7 @@ package org.jocean.wechat;
 import org.jocean.http.Interact;
 
 import rx.Observable;
+import rx.functions.Func1;
 
 public interface WechatPayAPI {
 
@@ -35,7 +36,7 @@ public interface WechatPayAPI {
         
         public SendRedpackContext setRiskInfo(final String risk_info);
         
-        public Observable<SendRedpackResult> call();
+        public Func1<Interact, Observable<SendRedpackResult>> call();
     }
     
     public interface SendRedpackResult {
@@ -64,6 +65,4 @@ public interface WechatPayAPI {
     }
     
     public SendRedpackContext sendRedpack();
-    
-    public SendRedpackContext sendRedpack(final Interact interact);
 }

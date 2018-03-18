@@ -11,17 +11,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
 import javax.net.ssl.KeyManagerFactory;
-import javax.ws.rs.core.MediaType;
 
 import org.jocean.http.ContentUtil;
 import org.jocean.http.Feature;
 import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
-import org.jocean.http.client.HttpClient;
-import org.jocean.idiom.BeanFinder;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.Md5;
 import org.jocean.idiom.Proxys;
@@ -84,75 +80,42 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
         }
     }
     
+    private Func0<Func1<Interact, Observable<SendRedpackResult>>> buildAction(final SendRedpackRequest reqAndBody) {
+        return () -> interact-> {
+                    reqAndBody.setMchId(_mch_id);
+                    reqAndBody.setWxappid(_appid);
+                    sign(reqAndBody);
+                    
+                    try {
+                        final KeyStore ks = KeyStore.getInstance("PKCS12");
+                        ks.load(new ByteArrayInputStream(BaseEncoding.base64().decode(_certAsBase64)), 
+                                _password.toCharArray());
+                        
+                        final KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+                        kmf.init(ks, _password.toCharArray());
+                        
+                        final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
+                        
+                        return interact.method(HttpMethod.POST)
+                                .reqbean(reqAndBody)
+                                .body(reqAndBody, ContentUtil.TOXML)
+                                .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx)).execution()
+                                .compose(MessageUtil.responseAs(SendRedpackResponse.class, MessageUtil::unserializeAsXml))
+                                .retryWhen(retryPolicy()).map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
+                    } catch (Exception e) {
+                        LOG.warn("exception when sendRedpack {}, detail: {}", reqAndBody, ExceptionUtils.exception2detail(e));
+                        return Observable.error(e);
+                    }
+            };
+    }
+    
     @Override
     public SendRedpackContext sendRedpack() {
         final SendRedpackRequest reqAndBody = new SendRedpackRequest();
-        final Func0<Observable<SendRedpackResult>> action = new Func0<Observable<SendRedpackResult>>() {
-            @Override
-            public Observable<SendRedpackResult> call() {
-                reqAndBody.setMchId(_mch_id);
-                reqAndBody.setWxappid(_appid);
-                sign(reqAndBody);
-                
-                try {
-                    final KeyStore ks = KeyStore.getInstance("PKCS12");
-                    ks.load(new ByteArrayInputStream(BaseEncoding.base64().decode(_certAsBase64)), 
-                            _password.toCharArray());
-                    
-                    final KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-                    kmf.init(ks, _password.toCharArray());
-                    
-                    final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
-                    
-                    return _finder.find(HttpClient.class).flatMap(client -> MessageUtil.interact(client)
-                            .method(HttpMethod.POST)
-                            .reqbean(reqAndBody)
-                            .body(MessageUtil.toBody(reqAndBody, MediaType.APPLICATION_XML, MessageUtil::serializeToXml))
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx)).execution())
-                        .compose(MessageUtil.responseAs(SendRedpackResponse.class, MessageUtil::unserializeAsXml))
-                        .retryWhen(retryPolicy()).map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
-                } catch (Exception e) {
-                    LOG.warn("exception when sendRedpack {}, detail: {}", reqAndBody, ExceptionUtils.exception2detail(e));
-                    return Observable.error(e);
-                }
-            }};
+        final Func0<Func1<Interact, Observable<SendRedpackResult>>> action = buildAction(reqAndBody);
         return Proxys.delegate(SendRedpackContext.class, new Object[]{reqAndBody, action}, new RET[]{RET.SELF, RET.PASSTHROUGH});
     }
-    
-    @Override
-    public SendRedpackContext sendRedpack(final Interact interact) {
-        final SendRedpackRequest reqAndBody = new SendRedpackRequest();
-        final Func0<Observable<SendRedpackResult>> action = new Func0<Observable<SendRedpackResult>>() {
-            @Override
-            public Observable<SendRedpackResult> call() {
-                reqAndBody.setMchId(_mch_id);
-                reqAndBody.setWxappid(_appid);
-                sign(reqAndBody);
-                
-                try {
-                    final KeyStore ks = KeyStore.getInstance("PKCS12");
-                    ks.load(new ByteArrayInputStream(BaseEncoding.base64().decode(_certAsBase64)), 
-                            _password.toCharArray());
-                    
-                    final KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-                    kmf.init(ks, _password.toCharArray());
-                    
-                    final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
-                    
-                    return interact.method(HttpMethod.POST)
-                        .reqbean(reqAndBody)
-                        .body(reqAndBody, ContentUtil.TOXML)
-                        .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx)).execution()
-                        .compose(MessageUtil.responseAs(SendRedpackResponse.class, MessageUtil::unserializeAsXml))
-                        .retryWhen(retryPolicy()).map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
-                } catch (Exception e) {
-                    LOG.warn("exception when sendRedpack {}, detail: {}", reqAndBody, ExceptionUtils.exception2detail(e));
-                    return Observable.error(e);
-                }
-            }};
-        return Proxys.delegate(SendRedpackContext.class, new Object[]{reqAndBody, action}, new RET[]{RET.SELF, RET.PASSTHROUGH});
-    }
-    
+
     @Override
     public String getName() {
         return this._name;
@@ -169,9 +132,6 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
             }});
     }
 
-    @Inject
-    private BeanFinder _finder;
-    
     @Value("${wechat.wpa}")
     String _name;
     
