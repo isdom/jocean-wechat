@@ -44,15 +44,15 @@ import rx.functions.Func0;
 import rx.functions.Func1;
 
 public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
-	
-    private static final Logger LOG = 
+
+    private static final Logger LOG =
             LoggerFactory.getLogger(DefaultWechatPayAPI.class);
 
     @Override
     public void setMBeanRegister(final MBeanRegister register) {
-        
+
     }
-    
+
     private void sign(final SendRedpackRequest req) {
         final Field fields[] = req.getClass().getDeclaredFields();//cHis 是实体类名称
         final List<String> list = new ArrayList<String>();
@@ -65,7 +65,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
             }
             Collections.sort(list);
             final StringBuilder sb = new StringBuilder();
-            for (String string : list) {
+            for (final String string : list) {
                 sb.append(string+"&");
             }
             sb.append("key=");
@@ -75,40 +75,53 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
             final byte[] signatureBytes = md.digest();
             final String signature = Md5.bytesToHexString(signatureBytes).toUpperCase();
             req.setSign(signature);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.warn("exception when sign req {}, detail: {}", req, ExceptionUtils.exception2detail(e));
         }
     }
-    
-    private Func0<Func1<Interact, Observable<SendRedpackResult>>> buildAction(final SendRedpackRequest reqAndBody) {
-        return () -> interact-> {
-                    reqAndBody.setMchId(_mch_id);
-                    reqAndBody.setWxappid(_appid);
-                    sign(reqAndBody);
-                    
-                    try {
-                        final KeyStore ks = KeyStore.getInstance("PKCS12");
-                        ks.load(new ByteArrayInputStream(BaseEncoding.base64().decode(_certAsBase64)), 
-                                _password.toCharArray());
-                        
-                        final KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-                        kmf.init(ks, _password.toCharArray());
-                        
-                        final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
-                        
-                        return interact.method(HttpMethod.POST)
-                                .reqbean(reqAndBody)
-                                .body(reqAndBody, ContentUtil.TOXML)
-                                .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx)).execution()
-                                .compose(MessageUtil.responseAs(SendRedpackResponse.class, MessageUtil::unserializeAsXml))
-                                .retryWhen(retryPolicy()).map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
-                    } catch (Exception e) {
-                        LOG.warn("exception when sendRedpack {}, detail: {}", reqAndBody, ExceptionUtils.exception2detail(e));
-                        return Observable.error(e);
-                    }
-            };
+
+    private final class SendingRedpack implements Func0<Func1<Interact, Observable<SendRedpackResult>>> {
+        private final SendRedpackRequest reqAndBody;
+
+        private SendingRedpack(final SendRedpackRequest reqAndBody) {
+            this.reqAndBody = reqAndBody;
+        }
+
+        @Override
+        public Func1<Interact, Observable<SendRedpackResult>> call() {
+            return interact-> {
+                reqAndBody.setMchId(_mch_id);
+                reqAndBody.setWxappid(_appid);
+                sign(reqAndBody);
+
+                try {
+                    final KeyStore ks = KeyStore.getInstance("PKCS12");
+                    ks.load(new ByteArrayInputStream(BaseEncoding.base64().decode(_certAsBase64)),
+                            _password.toCharArray());
+
+                    final KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+                    kmf.init(ks, _password.toCharArray());
+
+                    final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
+
+                    return interact.method(HttpMethod.POST)
+                            .reqbean(reqAndBody)
+                            .body(reqAndBody, ContentUtil.TOXML)
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL, new Feature.ENABLE_SSL(sslctx)).execution()
+                            .compose(MessageUtil.responseAs(SendRedpackResponse.class, MessageUtil::unserializeAsXml))
+                            .retryWhen(retryPolicy()).map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
+                } catch (final Exception e) {
+                    LOG.warn("exception when sendRedpack {}, detail: {}", reqAndBody, ExceptionUtils.exception2detail(e));
+                    return Observable.error(e);
+                }
+        };
+        }
     }
-    
+
+    private Func0<Func1<Interact, Observable<SendRedpackResult>>> buildAction(final SendRedpackRequest reqAndBody) {
+        return new SendingRedpack(reqAndBody);
+    }
+
     @Override
     public SendRedpackContext sendRedpack() {
         final SendRedpackRequest reqAndBody = new SendRedpackRequest();
@@ -134,25 +147,25 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
 
     @Value("${wechat.wpa}")
     String _name;
-    
+
     @Value("${wechat.appid}")
     String _appid;
-    
+
     @Value("${wechat.mch_id}")
     String _mch_id;
 
     @Value("${wechat.key}")
     String _key;
-    
+
     @Value("${cert.base64}")
     private String _certAsBase64;
-    
+
     @Value("${cert.password}")
     private String _password;
-    
+
     @Value("${wechat.retrytimes}")
-    private int _maxRetryTimes = 3;
-    
+    private final int _maxRetryTimes = 3;
+
     @Value("${wechat.retryinterval}")
-    private int _retryIntervalBase = 100; // 100 ms
+    private final int _retryIntervalBase = 100; // 100 ms
 }
