@@ -3,7 +3,7 @@ package org.jocean.wechat.service;
 
 import org.jocean.wechat.WechatPayAPI;
 
-public interface WechatPayUtil {
+public class WechatPayUtil {
 
     public static WechatPayAPI buildPayAPI(
             final String appid,   //微信分配的公众账号ID
