@@ -97,10 +97,10 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                 try {
                     final KeyStore ks = KeyStore.getInstance("PKCS12");
                     ks.load(new ByteArrayInputStream(BaseEncoding.base64().decode(_certAsBase64)),
-                            _password.toCharArray());
+                            _certPassword.toCharArray());
 
                     final KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-                    kmf.init(ks, _password.toCharArray());
+                    kmf.init(ks, _certPassword.toCharArray());
 
                     final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
 
@@ -158,10 +158,10 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
     String _key;
 
     @Value("${cert.base64}")
-    private String _certAsBase64;
+    String _certAsBase64;
 
     @Value("${cert.password}")
-    private String _password;
+    String _certPassword;
 
     @Value("${wechat.retrytimes}")
     private final int _maxRetryTimes = 3;
