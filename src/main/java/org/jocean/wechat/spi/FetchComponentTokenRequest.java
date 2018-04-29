@@ -13,7 +13,7 @@ import com.alibaba.fastjson.annotation.JSONField;
  *
  */
 @Path("https://api.weixin.qq.com/cgi-bin/component/api_component_token")
-public class FetchComponentAccessTokenRequest {
+public class FetchComponentTokenRequest {
 
     public String getComponentAppid() {
         return _component_appid;

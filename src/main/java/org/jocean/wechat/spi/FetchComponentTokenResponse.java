@@ -10,7 +10,7 @@ import com.alibaba.fastjson.annotation.JSONField;
  * @author isdom
  *
  */
-public class FetchComponentAccessTokenResponse extends WechatResponse {
+public class FetchComponentTokenResponse extends WechatResponse {
 
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -25,12 +25,12 @@ public class FetchComponentAccessTokenResponse extends WechatResponse {
     }
 
     @JSONField(name="component_access_token")
-    public String getComponentAccessToken() {
+    public String getComponentToken() {
         return _accessToken;
     }
 
     @JSONField(name="component_access_token")
-    public void setComponentAccessToken(final String accessToken) {
+    public void setComponentToken(final String accessToken) {
         this._accessToken = accessToken;
     }
 
