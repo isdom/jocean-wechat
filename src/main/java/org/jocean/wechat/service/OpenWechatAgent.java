@@ -53,12 +53,12 @@ import rx.subscriptions.Subscriptions;
 @Controller
 @Scope("singleton")
 @Path("/wxcomponent/")
-public class DefaultComponentTokenSource implements MBeanRegisterAware {
+public class OpenWechatAgent implements MBeanRegisterAware {
 
     private static final String MBEAN_SUFFIX = "info=wechat";
 
     private static final Logger LOG =
-            LoggerFactory.getLogger(DefaultComponentTokenSource.class);
+            LoggerFactory.getLogger(OpenWechatAgent.class);
 
     @Path("authevent")
     @POST
@@ -346,9 +346,6 @@ public class DefaultComponentTokenSource implements MBeanRegisterAware {
         return _secret;
     }
 
-    @Value("${verify.token}")
-    String _verifyToken;
-
     private String _componentToken;
 
     private long _componentTokenExpireInMs = 0;
@@ -365,14 +362,17 @@ public class DefaultComponentTokenSource implements MBeanRegisterAware {
 
     private volatile Subscription _timer;
 
-    @Value("${component.wpa}")
-    String _wpa;
+    @Value("${openwx.name}")
+    String _name;
 
-    @Value("${component.appid}")
+    @Value("${openwx.appid}")
     String _appid;
 
-    @Value("${component.secret}")
+    @Value("${openwx.secret}")
     String _secret;
+
+    @Value("${openwx.verify.token}")
+    String _verifyToken;
 
     private volatile String _componentVerifyTicket;
 
