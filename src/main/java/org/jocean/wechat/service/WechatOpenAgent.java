@@ -52,10 +52,10 @@ import rx.subscriptions.Subscriptions;
  */
 @Controller
 @Scope("singleton")
-@Path("/wxcomponent/")
+@Path("/wxopen/")
 public class WechatOpenAgent implements MBeanRegisterAware {
 
-    private static final String MBEAN_SUFFIX = "info=wechat";
+    private static final String MBEAN_SUFFIX = "info=wxopen";
 
     private static final Logger LOG =
             LoggerFactory.getLogger(WechatOpenAgent.class);
@@ -214,18 +214,12 @@ public class WechatOpenAgent implements MBeanRegisterAware {
             final String expireTimeAsString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                     .format(new Date(this._componentTokenExpireInMs));
 
-            /* TBD
             this._register.unregisterMBean(MBEAN_SUFFIX);
-            this._register.registerMBean(MBEAN_SUFFIX, new WechatInfoMXBean() {
+            this._register.registerMBean(MBEAN_SUFFIX, new WechatOpenMXBean() {
 
                 @Override
                 public String getName() {
-                    return _wpa;
-                }
-
-                @Override
-                public String getAccessToken() {
-                    return _componentToken;
+                    return _name;
                 }
 
                 @Override
@@ -239,15 +233,14 @@ public class WechatOpenAgent implements MBeanRegisterAware {
                 }
 
                 @Override
-                public String getExpireTime() {
-                    return expireTimeAsString;
+                public String getComponentToken() {
+                    return _componentToken;
                 }
 
                 @Override
-                public String getTicket() {
-                    return compnentToken;
+                public String getExpireTime() {
+                    return expireTimeAsString;
                 }});
-                */
         }
     }
 
