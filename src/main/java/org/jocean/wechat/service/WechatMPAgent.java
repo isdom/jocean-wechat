@@ -40,12 +40,12 @@ import rx.subscriptions.Subscriptions;
  * @author isdom
  *
  */
-public class DefaultWXTokenSource implements WXTokenSource, MBeanRegisterAware {
+public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
 
     private static final String MBEAN_SUFFIX = "info=wechat";
 
     private static final Logger LOG = 
-            LoggerFactory.getLogger(DefaultWXTokenSource.class);
+            LoggerFactory.getLogger(WechatMPAgent.class);
     
     public void start() throws Exception {
         startToUpdateToken();

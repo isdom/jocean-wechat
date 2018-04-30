@@ -53,12 +53,12 @@ import rx.subscriptions.Subscriptions;
 @Controller
 @Scope("singleton")
 @Path("/wxcomponent/")
-public class OpenWechatAgent implements MBeanRegisterAware {
+public class WechatOpenAgent implements MBeanRegisterAware {
 
     private static final String MBEAN_SUFFIX = "info=wechat";
 
     private static final Logger LOG =
-            LoggerFactory.getLogger(OpenWechatAgent.class);
+            LoggerFactory.getLogger(WechatOpenAgent.class);
 
     @Path("authevent")
     @POST

@@ -4,12 +4,13 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
     <!-- args:
-    ${wechat.wpa}
-    ${wechat.appid}
-    ${wechat.secret}
+    ${openwx.name}
+    ${openwx.appid}
+    ${openwx.secret}
+    ${openwx.verify.token}
     -->
     
-    <bean class="org.jocean.wechat.service.DefaultWXTokenSource"
+    <bean class="org.jocean.wechat.service.WechatOpenAgent"
         init-method="start"
         destroy-method="stop"/>
 </beans>
