@@ -159,6 +159,13 @@ public class WechatOpenAgent implements MBeanRegisterAware {
     private final Func1<Subscriber<? super String>, Boolean> PUSH_TOKEN_NOW = subscriber->pushCurrentToken(subscriber);
 
     private void startToUpdateComponentToken() throws Exception {
+        if (null == this._componentVerifyTicket) {
+            //  NOT recv component_verify_ticket
+            // TBD, init _getTokenPolicy
+            scheduleUpdateToken(60, TimeUnit.SECONDS);
+            return;
+        }
+
         this._subscribers4ComponentToken = Lists.newCopyOnWriteArrayList();
         this._getTokenPolicy = WAIT_FOR_UPDATE;
 
@@ -355,19 +362,19 @@ public class WechatOpenAgent implements MBeanRegisterAware {
 
     private volatile Subscription _timer;
 
-    @Value("${openwx.name}")
+    @Value("${wxopen.name}")
     String _name;
 
-    @Value("${openwx.appid}")
+    @Value("${wxopen.appid}")
     String _appid;
 
-    @Value("${openwx.secret}")
+    @Value("${wxopen.secret}")
     String _secret;
 
-    @Value("${openwx.verify.token}")
+    @Value("${wxopen.verify.token}")
     String _verifyToken;
 
-    private volatile String _componentVerifyTicket;
+    private volatile String _componentVerifyTicket = null;
 
     private MBeanRegister _register;
 }

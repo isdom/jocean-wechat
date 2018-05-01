@@ -7,7 +7,7 @@
     ${wxopen.name}
     ${wxopen.appid}
     ${wxopen.secret}
-    ${wxopen.componentToken}
+    ${wxopen.component.token}
     ${token.expire}
     ${api.retrytimes}
     ${api.retryinterval}

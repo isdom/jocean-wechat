@@ -4,10 +4,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
     <!-- args:
-    ${openwx.name}
-    ${openwx.appid}
-    ${openwx.secret}
-    ${openwx.verify.token}
+    ${wxopen.name}
+    ${wxopen.appid}
+    ${wxopen.secret}
+    ${wxopen.verify.token}
     -->
     
     <bean class="org.jocean.wechat.service.WechatOpenAgent"

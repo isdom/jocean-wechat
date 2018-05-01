@@ -137,7 +137,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
     @Value("${wxopen.secret}")
     String _secret;
 
-    @Value("${wxopen.componentToken}")
+    @Value("${wxopen.component.token}")
     String _componentToken;
 
     @Value("${token.expire}")
