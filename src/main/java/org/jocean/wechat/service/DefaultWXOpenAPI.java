@@ -5,6 +5,10 @@ package org.jocean.wechat.service;
 
 import java.util.concurrent.TimeUnit;
 
+import org.jocean.http.ContentUtil;
+import org.jocean.http.Feature;
+import org.jocean.http.Interact;
+import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
@@ -15,6 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
+import io.netty.handler.codec.http.HttpMethod;
 import rx.Observable;
 import rx.Observable.Transformer;
 import rx.functions.Func1;
@@ -70,6 +77,46 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
         return this._componentToken;
     }
 
+    public static class PreAuthCodeReq {
+        @JSONField(name = "component_appid")
+        public String getComponentAppid() {
+            return this._componentAppid;
+        }
+
+        @JSONField(name = "component_appid")
+        public void setComponentAppid(final String appid) {
+            this._componentAppid = appid;
+        }
+
+        private String _componentAppid;
+    }
+
+    @Override
+    public Func1<Interact, Observable<PreAuthCodeResponse>> getPreAuthCode() {
+        return interact-> {
+            try {
+                final PreAuthCodeReq req = new PreAuthCodeReq();
+                req.setComponentAppid(this._appid);
+
+                return interact.method(HttpMethod.POST)
+                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                    .uri("https://api.weixin.qq.com")
+                    .path("/cgi-bin/component/api_create_preauthcode")
+                    .paramAsQuery("component_access_token", this._componentToken)
+                    .body(req, ContentUtil.TOJSON)
+                    .execution()
+                    .compose(MessageUtil.responseAs(PreAuthCodeResponse.class, MessageUtil::unserializeAsJson))
+                    .compose(timeoutAndRetry());
+            } catch (final Exception e) {
+                return Observable.error(e);
+            }
+        };
+    }
+
+    private <T> Transformer<T, T> timeoutAndRetry() {
+        return org -> org.timeout(this._timeoutInMS, TimeUnit.MILLISECONDS).retryWhen(retryPolicy());
+    }
+
     private Func1<? super Observable<? extends Throwable>, ? extends Observable<?>> retryPolicy() {
         return RxObservables.retryWith(new RetryPolicy<Integer>() {
             @Override
@@ -79,10 +126,6 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                         .compose(RxObservables.retryDelayTo(_retryIntervalBase))
                         ;
             }});
-    }
-
-    private <T> Transformer<T, T> timeoutAndRetry() {
-        return org -> org.timeout(this._timeoutInMS, TimeUnit.MILLISECONDS).retryWhen(retryPolicy());
     }
 
     @Value("${wxopen.name}")
