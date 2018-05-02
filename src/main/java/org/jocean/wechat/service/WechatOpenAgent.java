@@ -26,6 +26,7 @@ import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.Md5;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
+import org.jocean.svr.ResponseUtil;
 import org.jocean.wechat.spi.ComponentAuthMessage;
 import org.jocean.wechat.spi.FetchComponentTokenRequest;
 import org.jocean.wechat.spi.FetchComponentTokenResponse;
@@ -69,7 +70,7 @@ public class WechatOpenAgent implements MBeanRegisterAware {
         if (verifySignature(verifyreq.getSignature(), _verifyToken, verifyreq.getTimestamp(), verifyreq.getNonce())) {
             return omb.flatMap(body->MessageUtil.<ComponentAuthMessage>decodeXmlAs(body, ComponentAuthMessage.class))
                     .doOnNext(processAuthEvent())
-                    .map(authmsg->"success");
+                    .map(authmsg->ResponseUtil.responseAsText(200, "success"));
         } else {
             return "success";
         }
@@ -111,13 +112,16 @@ public class WechatOpenAgent implements MBeanRegisterAware {
 
     private Action1<ComponentAuthMessage> processAuthEvent() {
         return authmsg-> {
+            LOG.info("authmsg:{}", authmsg.getInfoType());
             if ("component_verify_ticket".equals(authmsg.getInfoType())) {
+                LOG.info("authmsg infotype is component_verify_ticket");
                 updateTicket(authmsg.getComponentVerifyTicket());
             }
         };
     }
 
     private void updateTicket(final String componentVerifyTicket) {
+        LOG.info("update component_verify_ticket: {}", componentVerifyTicket);
         this._componentVerifyTicket = componentVerifyTicket;
     }
 
