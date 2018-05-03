@@ -7,7 +7,8 @@
     ${wxopen.name}
     ${wxopen.appid}
     ${wxopen.secret}
-    ${wxopen.verify.token}
+    ${verify.token}
+    ${encoding.aes.key}
     -->
     
     <bean class="org.jocean.wechat.service.WechatOpenAgent"

@@ -3,6 +3,7 @@
  */
 package org.jocean.wechat.service;
 
+import java.io.ByteArrayInputStream;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -12,6 +13,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Inject;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.POST;
@@ -28,6 +32,7 @@ import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.svr.ResponseUtil;
 import org.jocean.wechat.spi.ComponentAuthMessage;
+import org.jocean.wechat.spi.EncryptedMessage;
 import org.jocean.wechat.spi.FetchComponentTokenRequest;
 import org.jocean.wechat.spi.FetchComponentTokenResponse;
 import org.jocean.wechat.spi.WXVerifyRequest;
@@ -39,6 +44,7 @@ import org.springframework.stereotype.Controller;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import com.google.common.io.BaseEncoding;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -68,13 +74,101 @@ public class WechatOpenAgent implements MBeanRegisterAware {
             return "success";
         }
         if (verifySignature(verifyreq.getSignature(), _verifyToken, verifyreq.getTimestamp(), verifyreq.getNonce())) {
-            return omb.flatMap(body->MessageUtil.<ComponentAuthMessage>decodeXmlAs(body, ComponentAuthMessage.class))
+            return omb.flatMap(body->MessageUtil.<EncryptedMessage>decodeXmlAs(body, EncryptedMessage.class))
+                    .map(decrypt2auth())
                     .doOnNext(processAuthEvent())
                     .map(authmsg->ResponseUtil.responseAsText(200, "success"));
         } else {
             return "success";
         }
+    }
 
+    private Func1<EncryptedMessage, ComponentAuthMessage> decrypt2auth() {
+        return encryptmsg -> {
+            try {
+                return MessageUtil.unserializeAsXml(
+                        new ByteArrayInputStream(
+                                decrypt(encryptmsg.getEncrypt(), encryptmsg.getAppId()).getBytes(Charsets.UTF_8)),
+                        ComponentAuthMessage.class);
+            } catch (final Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    /**
+     * 对密文进行解密.
+     *
+     * @param text 需要解密的密文
+     * @return 解密得到的明文
+     * @throws AesException aes解密失败
+     */
+    String decrypt(final String text, final String appid) throws AesException {
+        final byte[] aesKey = BaseEncoding.base64().decode(this._encodingAesKey + "=");
+        byte[] original;
+        try {
+            // 设置解密模式为AES的CBC模式
+            final Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
+            final SecretKeySpec key_spec = new SecretKeySpec(aesKey, "AES");
+            final IvParameterSpec iv = new IvParameterSpec(Arrays.copyOfRange(aesKey, 0, 16));
+            cipher.init(Cipher.DECRYPT_MODE, key_spec, iv);
+
+            // 使用BASE64对密文进行解码
+            final byte[] encrypted = BaseEncoding.base64().decode(text);
+
+            // 解密
+            original = cipher.doFinal(encrypted);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            throw new AesException(AesException.DecryptAESError);
+        }
+
+        String xmlContent, from_appid;
+        try {
+            // 去除补位字符
+            final byte[] bytes = decode(original);
+
+            // 分离16位随机字符串,网络字节序和AppId
+            final byte[] networkOrder = Arrays.copyOfRange(bytes, 16, 20);
+
+            final int xmlLength = recoverNetworkBytesOrder(networkOrder);
+
+            xmlContent = new String(Arrays.copyOfRange(bytes, 20, 20 + xmlLength), Charsets.UTF_8);
+            from_appid = new String(Arrays.copyOfRange(bytes, 20 + xmlLength, bytes.length), Charsets.UTF_8);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            throw new AesException(AesException.IllegalBuffer);
+        }
+
+        // appid不相同的情况
+        if (!from_appid.equals(appid)) {
+            throw new AesException(AesException.ValidateAppidError);
+        }
+        return xmlContent;
+    }
+
+    /**
+     * 删除解密后明文的补位字符
+     *
+     * @param decrypted 解密后的明文
+     * @return 删除补位字符后的明文
+     */
+    static byte[] decode(final byte[] decrypted) {
+        int pad = (int) decrypted[decrypted.length - 1];
+        if (pad < 1 || pad > 32) {
+            pad = 0;
+        }
+        return Arrays.copyOfRange(decrypted, 0, decrypted.length - pad);
+    }
+
+    // 还原4个字节的网络字节序
+    int recoverNetworkBytesOrder(final byte[] orderBytes) {
+        int sourceNumber = 0;
+        for (int i = 0; i < 4; i++) {
+            sourceNumber <<= 8;
+            sourceNumber |= orderBytes[i] & 0xff;
+        }
+        return sourceNumber;
     }
 
     /**
@@ -112,7 +206,7 @@ public class WechatOpenAgent implements MBeanRegisterAware {
 
     private Action1<ComponentAuthMessage> processAuthEvent() {
         return authmsg-> {
-            LOG.info("authmsg:{}", authmsg.getInfoType());
+            LOG.info("authmsg:{}", authmsg);
             if ("component_verify_ticket".equals(authmsg.getInfoType())) {
                 LOG.info("authmsg infotype is component_verify_ticket");
                 updateTicket(authmsg.getComponentVerifyTicket());
@@ -375,8 +469,11 @@ public class WechatOpenAgent implements MBeanRegisterAware {
     @Value("${wxopen.secret}")
     String _secret;
 
-    @Value("${wxopen.verify.token}")
+    @Value("${verify.token}")
     String _verifyToken;
+
+    @Value("${encoding.aes.key}")
+    String _encodingAesKey;
 
     private volatile String _componentVerifyTicket = null;
 
