@@ -39,7 +39,6 @@ public class EncryptedMessage {
         this._encrypt = encrypt;
     }
 
-
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();

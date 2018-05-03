@@ -86,6 +86,7 @@ public class WechatOpenAgent implements MBeanRegisterAware {
     private Func1<EncryptedMessage, ComponentAuthMessage> decrypt2auth() {
         return encryptmsg -> {
             try {
+                LOG.info("encryptmsg:{}", encryptmsg);
                 return MessageUtil.unserializeAsXml(
                         new ByteArrayInputStream(
                                 decrypt(encryptmsg.getEncrypt(), encryptmsg.getAppId()).getBytes(Charsets.UTF_8)),
@@ -119,7 +120,7 @@ public class WechatOpenAgent implements MBeanRegisterAware {
             // 解密
             original = cipher.doFinal(encrypted);
         } catch (final Exception e) {
-            e.printStackTrace();
+            LOG.warn("exception when decrypt, detail:{}", ExceptionUtils.exception2detail(e));
             throw new AesException(AesException.DecryptAESError);
         }
 
@@ -136,7 +137,7 @@ public class WechatOpenAgent implements MBeanRegisterAware {
             xmlContent = new String(Arrays.copyOfRange(bytes, 20, 20 + xmlLength), Charsets.UTF_8);
             from_appid = new String(Arrays.copyOfRange(bytes, 20 + xmlLength, bytes.length), Charsets.UTF_8);
         } catch (final Exception e) {
-            e.printStackTrace();
+            LOG.warn("exception when decrypt, detail:{}", ExceptionUtils.exception2detail(e));
             throw new AesException(AesException.IllegalBuffer);
         }
 
