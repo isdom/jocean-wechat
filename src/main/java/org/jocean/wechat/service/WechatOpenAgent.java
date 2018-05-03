@@ -5,6 +5,7 @@ package org.jocean.wechat.service;
 
 import java.io.ByteArrayInputStream;
 import java.security.MessageDigest;
+import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -21,6 +22,7 @@ import javax.ws.rs.BeanParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
+import org.jocean.http.ContentUtil;
 import org.jocean.http.Feature;
 import org.jocean.http.MessageBody;
 import org.jocean.http.MessageUtil;
@@ -46,6 +48,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.BaseEncoding;
 
+import io.netty.handler.codec.http.HttpMethod;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
@@ -97,6 +100,9 @@ public class WechatOpenAgent implements MBeanRegisterAware {
         };
     }
 
+    static {
+        Security.setProperty("crypto.policy", null);
+    }
     /**
      * 对密文进行解密.
      *
@@ -359,7 +365,8 @@ public class WechatOpenAgent implements MBeanRegisterAware {
 
         try {
             return this._finder.find(HttpClient.class)
-                    .flatMap(client -> MessageUtil.interact(client).reqbean(reqbean)
+                    .flatMap(client -> MessageUtil.interact(client).method(HttpMethod.POST).reqbean(reqbean)
+                            .body(reqbean, ContentUtil.TOJSON)
                             .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
                     .compose(MessageUtil.responseAs(FetchComponentTokenResponse.class, MessageUtil::unserializeAsJson))
                     .timeout(10, TimeUnit.SECONDS);
