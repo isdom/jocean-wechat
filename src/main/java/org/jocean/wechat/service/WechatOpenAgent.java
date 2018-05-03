@@ -5,7 +5,6 @@ package org.jocean.wechat.service;
 
 import java.io.ByteArrayInputStream;
 import java.security.MessageDigest;
-import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -100,9 +99,6 @@ public class WechatOpenAgent implements MBeanRegisterAware {
         };
     }
 
-    static {
-        Security.setProperty("crypto.policy", null);
-    }
     /**
      * 对密文进行解密.
      *
