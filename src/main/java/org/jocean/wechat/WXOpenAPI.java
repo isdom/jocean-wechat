@@ -64,19 +64,19 @@ public interface WXOpenAPI {
         public String getAuthorizerAppid();
 
         @JSONField(name = "authorizer_appid")
-        public String setAuthorizerAppid(final String appid);
+        public void setAuthorizerAppid(final String appid);
 
         @JSONField(name = "authorizer_access_token")
         public String getAuthorizerAccessToken();
 
         @JSONField(name = "authorizer_access_token")
-        public String setAuthorizerAccessToken(final String token);
+        public void setAuthorizerAccessToken(final String token);
 
         @JSONField(name = "authorizer_refresh_token")
         public String getAuthorizerRefreshToken();
 
         @JSONField(name = "authorizer_refresh_token")
-        public String setAuthorizerRefreshToken(final String refreshToken);
+        public void setAuthorizerRefreshToken(final String refreshToken);
 
         @JSONField(name = "expires_in")
         public int getExpires();
