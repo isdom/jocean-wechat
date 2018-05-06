@@ -16,7 +16,7 @@ public interface WXOpenAPI {
 
     public String getComponentToken();
 
-    public interface PreAuthCodeResponse {
+    public interface WXOpenResponse {
         @JSONField(name="errcode")
         public String getErrcode();
 
@@ -28,7 +28,9 @@ public interface WXOpenAPI {
 
         @JSONField(name="errmsg")
         public void setErrmsg(final String errmsg);
+    }
 
+    public interface PreAuthCodeResponse extends WXOpenResponse {
         @JSONField(name = "pre_auth_code")
         public String getPreAuthCode();
 
@@ -91,7 +93,7 @@ public interface WXOpenAPI {
         public void setFuncInfos(final FuncInfo[] infos);
     }
 
-    public interface QueryAuthResponse {
+    public interface QueryAuthResponse extends WXOpenResponse {
 
         @JSONField(name = "authorization_info")
         public AuthorizationInfo getAuthorizationInfo();
@@ -101,4 +103,26 @@ public interface WXOpenAPI {
     }
 
     public Func1<Interact, Observable<QueryAuthResponse>> queryAuth(final String authorizationCode);
+
+    public interface AuthorizerTokenResponse extends WXOpenResponse {
+        @JSONField(name = "authorizer_access_token")
+        public String getAuthorizerAccessToken();
+
+        @JSONField(name = "authorizer_access_token")
+        public void setAuthorizerAccessToken(final String token);
+
+        @JSONField(name = "authorizer_refresh_token")
+        public String getAuthorizerRefreshToken();
+
+        @JSONField(name = "authorizer_refresh_token")
+        public void setAuthorizerRefreshToken(final String refreshToken);
+
+        @JSONField(name = "expires_in")
+        public int getExpires();
+
+        @JSONField(name = "expires_in")
+        public void setExpires(final int expires);
+    }
+
+    public Func1<Interact, Observable<AuthorizerTokenResponse>> authorizerToken(final String authorizerAppid, final String refreshToken);
 }

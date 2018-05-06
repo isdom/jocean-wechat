@@ -245,6 +245,105 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
         };
     }
 
+    static class AuthorizerTokenReq {
+        @JSONField(name = "component_appid")
+        public String getComponentAppid() {
+            return this._componentAppid;
+        }
+
+        @JSONField(name = "component_appid")
+        public void setComponentAppid(final String appid) {
+            this._componentAppid = appid;
+        }
+
+        @JSONField(name = "authorizer_appid")
+        public String getAuthorizerAppid() {
+            return this._authorizerAppid;
+        }
+
+        @JSONField(name = "authorizer_appid")
+        public void setAuthorizerAppid(final String appid) {
+            this._authorizerAppid = appid;
+        }
+
+        @JSONField(name = "authorizer_refresh_token")
+        public String getAuthorizerRefreshToken() {
+            return this._authorizerRefreshToken;
+        }
+
+        @JSONField(name = "authorizer_refresh_token")
+        public void setAuthorizerRefreshToken(final String refreshToken) {
+            this._authorizerRefreshToken = refreshToken;
+        }
+
+        private String _componentAppid;
+        private String _authorizerAppid;
+        private String _authorizerRefreshToken;
+    }
+
+    /* (non-Javadoc)
+     * @see org.jocean.wechat.WXOpenAPI#authorizerToken(java.lang.String, java.lang.String)
+     * https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1453779503&token=&lang=zh_CN
+     * 5、获取（刷新）授权公众号或小程序的接口调用凭据（令牌）
+     * 该API用于在授权方令牌（authorizer_access_token）失效时，可用刷新令牌（authorizer_refresh_token）获取新的令牌。
+     * 请注意，此处token是2小时刷新一次，开发者需要自行进行token的缓存，避免token的获取次数达到每日的限定额度。
+     * 缓存方法可以参考：http://mp.weixin.qq.com/wiki/2/88b2bf1265a707c031e51f26ca5e6512.html
+     * 当换取 authorizer_refresh_token后建议保存。
+     * 接口调用请求说明
+     * http请求方式: POST（请使用https协议）
+     * https:// api.weixin.qq.com /cgi-bin/component/api_authorizer_token?component_access_token=xxxxx
+     * POST数据示例:
+
+     * {
+     * "component_appid":"appid_value",
+     * "authorizer_appid":"auth_appid_value",
+     * "authorizer_refresh_token":"refresh_token_value",
+     * }
+     * 请求参数说明
+     * 参数  说明
+     * component_appid             第三方平台appid
+     * authorizer_appid            授权方appid
+     * authorizer_refresh_token    授权方的刷新令牌，刷新令牌主要用于第三方平台获取和刷新已授权用户的access_token，
+     *                             只会在授权时刻提供，请妥善保存。一旦丢失，只能让用户重新授权，才能再次拿到新的刷新令牌
+     * 返回结果示例
+     * {
+     * "authorizer_access_token":
+     *    "aaUl5s6kAByLwgV0BhXNuIFFUqfrR8vTATsoSHukcIGqJgrc4KmMJ-JlKoC_-NKCLBvuU1cWPv4vDcLN8Z0pn5I45mpATruU0b51hzeT1f8",
+     * "expires_in": 7200,
+     * "authorizer_refresh_token":
+     * "BstnRqgTJBXb9N2aJq6L5hzfJwP406tpfahQeLNxX0w"
+     * }
+     * 结果参数说明
+     * 参数  说明
+     * authorizer_access_token     授权方令牌
+     * expires_in                  有效期，为2小时
+     * authorizer_refresh_token    刷新令牌
+     *
+     */
+    @Override
+    public Func1<Interact, Observable<AuthorizerTokenResponse>> authorizerToken(final String authorizerAppid, final String refreshToken) {
+        return interact-> {
+            try {
+                final AuthorizerTokenReq req = new AuthorizerTokenReq();
+                req.setComponentAppid(this._appid);
+                req.setAuthorizerAppid(authorizerAppid);
+                req.setAuthorizerRefreshToken(refreshToken);
+
+                return interact.method(HttpMethod.POST)
+                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                    .uri("https://api.weixin.qq.com")
+                    .path("/cgi-bin/component/api_authorizer_token")
+                    .paramAsQuery("component_access_token", this._componentToken)
+                    .body(req, ContentUtil.TOJSON)
+                    .execution()
+                    .compose(MessageUtil.responseAs(AuthorizerTokenResponse.class, MessageUtil::unserializeAsJson))
+                    .compose(timeoutAndRetry());
+            } catch (final Exception e) {
+                return Observable.error(e);
+            }
+        };
+    }
+
     private <T> Transformer<T, T> timeoutAndRetry() {
         return org -> org.timeout(this._timeoutInMS, TimeUnit.MILLISECONDS).retryWhen(retryPolicy());
     }
