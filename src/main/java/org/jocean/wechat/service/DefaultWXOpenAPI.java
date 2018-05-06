@@ -344,6 +344,143 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
         };
     }
 
+    static class AuthorizerInfoReq {
+        @JSONField(name = "component_appid")
+        public String getComponentAppid() {
+            return this._componentAppid;
+        }
+
+        @JSONField(name = "component_appid")
+        public void setComponentAppid(final String appid) {
+            this._componentAppid = appid;
+        }
+
+        @JSONField(name = "authorizer_appid")
+        public String getAuthorizerAppid() {
+            return this._authorizerAppid;
+        }
+
+        @JSONField(name = "authorizer_appid")
+        public void setAuthorizerAppid(final String appid) {
+            this._authorizerAppid = appid;
+        }
+
+        private String _componentAppid;
+        private String _authorizerAppid;
+    }
+
+    /* (non-Javadoc)
+     * @see org.jocean.wechat.WXOpenAPI#getAuthorizerInfo(java.lang.String)
+     * https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1453779503&token=&lang=zh_CN
+     * 获取授权方的帐号基本信息
+     * 该API用于获取授权方的基本信息，包括头像、昵称、帐号类型、认证类型、微信号、原始ID和二维码图片URL。
+
+     * 需要特别记录授权方的帐号类型，在消息及事件推送时，对于不具备客服接口的公众号，需要在5秒内立即响应；
+     *                而若有客服接口，则可以选择暂时不响应，而选择后续通过客服接口来发送消息触达粉丝。
+     * 1）公众号获取方法如下：
+
+     * 接口调用请求说明
+
+     * http请求方式: POST（请使用https协议）
+     * https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info?component_access_token=xxxx
+     * POST数据示例:
+     * {
+     * "component_appid":"appid_value" ,
+     * "authorizer_appid": "auth_appid_value"
+     * }
+     * 请求参数说明
+     * 参数  说明
+     * component_appid     第三方平台appid
+     * authorizer_appid    授权方appid
+     * 返回结果示例
+     * {
+     * "authorizer_info": {
+     * "nick_name": "微信SDK Demo Special",
+     * "head_img": "http://wx.qlogo.cn/mmopen/GPy",
+     * "service_type_info": { "id": 2 },
+     * "verify_type_info": { "id": 0 },
+     * "user_name":"gh_eb5e3a772040",
+     * "principal_name":"腾讯计算机系统有限公司",
+     * "business_info": {"open_store": 0, "open_scan": 0, "open_pay": 0, "open_card": 0,
+     * "open_shake": 0},
+     * "alias":"paytest01"
+     * "qrcode_url":"URL",
+     * },
+     * "authorization_info": {
+     * "authorization_appid": "wxf8b4f85f3a794e77",
+     * "func_info": [
+     * { "funcscope_category": { "id": 1 } },
+     * { "funcscope_category": { "id": 2 } },
+     * { "funcscope_category": { "id": 3 } }
+     * ]
+     * }
+     * }
+     * 结果参数说明
+     * 参数  说明
+     * nick_name   授权方昵称
+     * head_img    授权方头像
+     * service_type_info   授权方公众号类型，0代表订阅号，1代表由历史老帐号升级后的订阅号，2代表服务号
+     * verify_type_info    授权方认证类型，-1代表未认证，
+     *                                 0代表微信认证，
+     *                                 1代表新浪微博认证，
+     *                                 2代表腾讯微博认证，
+     *                                 3代表已资质认证通过但还未通过名称认证，
+     *                                 4代表已资质认证通过、还未通过名称认证，但通过了新浪微博认证，
+     *                                 5代表已资质认证通过、还未通过名称认证，但通过了腾讯微博认证
+     * user_name       授权方公众号的原始ID
+     * principal_name  公众号的主体名称
+     * alias           授权方公众号所设置的微信号，可能为空
+     * business_info   用以了解以下功能的开通状况（0代表未开通，1代表已开通）：
+     *                         open_store:是否开通微信门店功能
+     *                         open_scan:是否开通微信扫商品功能
+     *                         open_pay:是否开通微信支付功能
+     *                         open_card:是否开通微信卡券功能
+     *                         open_shake:是否开通微信摇一摇功能
+     * qrcode_url      二维码图片的URL，开发者最好自行也进行保存
+     * authorization_info  授权信息
+     * authorization_appid 授权方appid
+     * func_info   公众号授权给开发者的权限集列表，ID为1到15时分别代表：
+     *                         1.消息管理权限
+     *                         2.用户管理权限
+     *                         3.帐号服务权限
+     *                         4.网页服务权限
+     *                         5.微信小店权限
+     *                         6.微信多客服权限
+     *                         7.群发与通知权限
+     *                         8.微信卡券权限
+     *                         9.微信扫一扫权限
+     *                         10.微信连WIFI权限
+     *                         11.素材管理权限
+     *                         12.微信摇周边权限
+     *                         13.微信门店权限
+     *                         14.微信支付权限
+     *                         15.自定义菜单权限
+     *                         请注意： 1）该字段的返回不会考虑公众号是否具备该权限集的权限（因为可能部分具备），
+     *                                 请根据公众号的帐号类型和认证情况，来判断公众号的接口权限。
+     */
+    @Override
+    public Func1<Interact, Observable<AuthorizerInfoResponse>> getAuthorizerInfo(final String authorizerAppid) {
+        return interact-> {
+            try {
+                final AuthorizerInfoReq req = new AuthorizerInfoReq();
+                req.setComponentAppid(this._appid);
+                req.setAuthorizerAppid(authorizerAppid);
+
+                return interact.method(HttpMethod.POST)
+                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                    .uri("https://api.weixin.qq.com")
+                    .path("/cgi-bin/component/api_get_authorizer_info")
+                    .paramAsQuery("component_access_token", this._componentToken)
+                    .body(req, ContentUtil.TOJSON)
+                    .execution()
+                    .compose(MessageUtil.responseAs(AuthorizerInfoResponse.class, MessageUtil::unserializeAsJson))
+                    .compose(timeoutAndRetry());
+            } catch (final Exception e) {
+                return Observable.error(e);
+            }
+        };
+    }
+
     private <T> Transformer<T, T> timeoutAndRetry() {
         return org -> org.timeout(this._timeoutInMS, TimeUnit.MILLISECONDS).retryWhen(retryPolicy());
     }

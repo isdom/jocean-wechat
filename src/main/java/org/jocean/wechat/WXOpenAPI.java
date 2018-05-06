@@ -125,4 +125,131 @@ public interface WXOpenAPI {
     }
 
     public Func1<Interact, Observable<AuthorizerTokenResponse>> authorizerToken(final String authorizerAppid, final String refreshToken);
+
+    interface HasId {
+        @JSONField(name = "id")
+        public int getId();
+
+        @JSONField(name = "id")
+        public void setId(final int id);
+    }
+
+    interface BusinessInfo {
+        @JSONField(name = "open_store")
+        public int getOpenStore();
+
+        @JSONField(name = "open_store")
+        public void setOpenStore(final int valid);
+
+        @JSONField(name = "open_scan")
+        public int getOpenScan();
+
+        @JSONField(name = "open_scan")
+        public void setOpenScan(final int valid);
+
+        @JSONField(name = "open_pay")
+        public int getOpenPay();
+
+        @JSONField(name = "open_pay")
+        public void setOpenPay(final int valid);
+
+        @JSONField(name = "open_card")
+        public int getOpenCard();
+
+        @JSONField(name = "open_card")
+        public void setOpenCard(final int valid);
+
+        @JSONField(name = "open_shake")
+        public int getOpenShake();
+
+        @JSONField(name = "open_shake")
+        public void setOpenShake(final int valid);
+    }
+
+    interface AuthorizerInfo {
+        @JSONField(name = "nick_name")
+        public String getNickName();
+
+        @JSONField(name = "nick_name")
+        public void setNickName(final String nickName);
+
+        @JSONField(name = "head_img")
+        public String getHeadImg();
+
+        @JSONField(name = "head_img")
+        public void setHeadImg(final String img);
+
+        @JSONField(name = "service_type_info")
+        public HasId getServiceTypeInfo();
+
+        @JSONField(name = "service_type_info")
+        public void setServiceTypeInfo(final HasId info);
+
+        @JSONField(name = "verify_type_info")
+        public HasId getVerifyTypeInfo();
+
+        @JSONField(name = "verify_type_info")
+        public void setVerifyTypeInfo(final HasId info);
+
+        @JSONField(name = "user_name")
+        public String getUserName();
+
+        @JSONField(name = "user_name")
+        public void setUserName(final String name);
+
+        @JSONField(name = "principal_name")
+        public String getPrincipalName();
+
+        @JSONField(name = "principal_name")
+        public void setPrincipalName(final String name);
+
+        @JSONField(name = "business_info")
+        public BusinessInfo getBusinessInfo();
+
+        @JSONField(name = "business_info")
+        public void setBusinessInfo(final BusinessInfo info);
+
+        @JSONField(name = "alias")
+        public String getAlias();
+
+        @JSONField(name = "alias")
+        public void setAlias(final String alias);
+
+        @JSONField(name = "qrcode_url")
+        public String getQrcodeUrl();
+
+        @JSONField(name = "qrcode_url")
+        public void setQrcodeUrl(final String url);
+    }
+
+    interface SimpleAuthorizationInfo {
+        @JSONField(name = "authorization_appid")
+        public String getAuthorizationAppid();
+
+        @JSONField(name = "authorization_appid")
+        public void setAuthorizationAppid(final String appid);
+
+        @JSONField(name = "func_info")
+        public FuncInfo[] getFuncInfos();
+
+        @JSONField(name = "func_info")
+        public void setFuncInfos(final FuncInfo[] infos);
+    }
+
+    public interface AuthorizerInfoResponse extends WXOpenResponse {
+        @JSONField(name = "authorizer_info")
+        public AuthorizerInfo getAuthorizerInfo();
+
+        @JSONField(name = "authorizer_info")
+        public void setAuthorizerInfo(final AuthorizerInfo info);
+
+        @JSONField(name = "authorization_info")
+        public SimpleAuthorizationInfo getAuthorizationInfo();
+
+        @JSONField(name = "authorization_info")
+        public void setAuthorizationInfo(final SimpleAuthorizationInfo info);
+    }
+
+    public Func1<Interact, Observable<AuthorizerInfoResponse>> getAuthorizerInfo(final String authorizerAppid);
+
 }
