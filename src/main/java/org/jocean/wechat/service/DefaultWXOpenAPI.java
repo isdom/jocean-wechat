@@ -71,6 +71,10 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
         return this._appid;
     }
 
+    public String getSecret() {
+        return this._secret;
+    }
+
     public String getComponentVerifyTicket() {
         return this._componentVerifyTicket;
     }
@@ -511,14 +515,14 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
     @Value("${wxopen.secret}")
     String _secret;
 
-    @Value("${component.verify.ticket}")
-    String _componentVerifyTicket = null;
-
     @Value("${component.token}")
     String _componentToken = null;
 
-    @Value("${component.token.expireInMs}")
+    @Value("${component.token.expire}")
     long _componentTokenExpireInMs = 0;
+
+    @Value("${component.verify.ticket}")
+    String _componentVerifyTicket = null;
 
     @Value("${api.retrytimes}")
     private final int _maxRetryTimes = 3;
