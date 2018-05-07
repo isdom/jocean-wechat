@@ -35,31 +35,31 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
 
     @Override
     public void setMBeanRegister(final MBeanRegister register) {
-        register.registerMBean("name=wxopen", new WechatOpenMXBean() {
-            @Override
-            public String getName() {
-                return _name;
-            }
-
-            @Override
-            public String getAppid() {
-                return _appid;
-            }
-
-            @Override
-            public String getSecret() {
-                return "***";
-            }
-
-            @Override
-            public String getExpireTime() {
-                return _expire;
-            }
-
-            @Override
-            public String getComponentToken() {
-                return _componentToken;
-            }});
+//        register.registerMBean("name=wxopen", new WechatOpenMXBean() {
+//            @Override
+//            public String getName() {
+//                return _name;
+//            }
+//
+//            @Override
+//            public String getAppid() {
+//                return _appid;
+//            }
+//
+//            @Override
+//            public String getSecret() {
+//                return "***";
+//            }
+//
+//            @Override
+//            public String getExpireTime() {
+//                return _expire;
+//            }
+//
+//            @Override
+//            public String getComponentToken() {
+//                return _componentToken;
+//            }});
     }
 
     @Override
@@ -67,14 +67,20 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
         return this._name;
     }
 
-    @Override
     public String getAppid() {
         return this._appid;
     }
 
-    @Override
+    public String getComponentVerifyTicket() {
+        return this._componentVerifyTicket;
+    }
+
     public String getComponentToken() {
         return this._componentToken;
+    }
+
+    public long getComponentTokenExpireInMs() {
+        return this._componentTokenExpireInMs;
     }
 
     static class PreAuthCodeReq {
@@ -505,11 +511,14 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
     @Value("${wxopen.secret}")
     String _secret;
 
-    @Value("${wxopen.component.token}")
-    String _componentToken;
+    @Value("${component.verify.ticket}")
+    String _componentVerifyTicket = null;
 
-    @Value("${token.expire}")
-    String _expire;
+    @Value("${component.token}")
+    String _componentToken = null;
+
+    @Value("${component.token.expireInMs}")
+    long _componentTokenExpireInMs = 0;
 
     @Value("${api.retrytimes}")
     private final int _maxRetryTimes = 3;

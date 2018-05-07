@@ -12,9 +12,9 @@ public interface WXOpenAPI {
 
     public String getName();
 
-    public String getAppid();
-
-    public String getComponentToken();
+//    public String getAppid();
+//
+//    public String getComponentToken();
 
     public interface WXOpenResponse {
         @JSONField(name="errcode")

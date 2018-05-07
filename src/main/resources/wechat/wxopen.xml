@@ -7,13 +7,14 @@
     ${wxopen.name}
     ${wxopen.appid}
     ${wxopen.secret}
-    ${wxopen.component.token}
-    ${token.expire}
+    ${component.token}
+    ${component.token.expire}
+    ${component.verify.ticket}
     ${api.retrytimes}
     ${api.retryinterval}
     ${api.timeoutInMs}
     -->
     
     <bean id="wxopen" class="org.jocean.wechat.service.DefaultWXOpenAPI"/>
-    <alias name="wxopen" alias="${wxopen.name}"/>
+    <alias name="wxopen" alias="${wxopen.appid}"/>
 </beans>
