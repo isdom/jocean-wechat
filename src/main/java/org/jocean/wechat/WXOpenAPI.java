@@ -10,11 +10,7 @@ import rx.functions.Func1;
 
 public interface WXOpenAPI {
 
-    public String getName();
-
-//    public String getAppid();
-//
-//    public String getComponentToken();
+    public String getAppid();
 
     public interface WXOpenResponse {
         @JSONField(name="errcode")

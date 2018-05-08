@@ -63,10 +63,6 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
     }
 
     @Override
-    public String getName() {
-        return this._name;
-    }
-
     public String getAppid() {
         return this._appid;
     }
@@ -506,9 +502,6 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
             }});
     }
 
-    @Value("${wxopen.name}")
-    String _name;
-
     @Value("${wxopen.appid}")
     String _appid;
 
@@ -524,6 +517,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
     @Value("${component.verify.ticket}")
     String _componentVerifyTicket = null;
 
+    // TBD: 使用 BeanFinder 查找配置信息
     @Value("${api.retrytimes}")
     private final int _maxRetryTimes = 3;
 
