@@ -6,6 +6,11 @@ import org.springframework.beans.factory.annotation.Value;
 public class DefaultAuthorizedMP implements AuthorizedMP {
 
     @Override
+    public String getComponentAppid() {
+        return this._componentAppid;
+    }
+
+    @Override
     public String getAppid() {
         return this._appid;
     }
@@ -24,6 +29,9 @@ public class DefaultAuthorizedMP implements AuthorizedMP {
     public long getAccessTokenExpireInMs() {
         return this._tokenExpireInMs;
     }
+
+    @Value("${wxopen.appid}")
+    String _componentAppid;
 
     @Value("${mp.appid}")
     String _appid;
