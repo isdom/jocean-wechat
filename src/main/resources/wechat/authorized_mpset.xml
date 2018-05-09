@@ -5,4 +5,5 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd">
         
     <bean id="authorized_mps" class="java.util.concurrent.ConcurrentHashMap"/>
+    <alias name="authorized_mps" alias="${wxopen.appid}.mps"/>
 </beans>
