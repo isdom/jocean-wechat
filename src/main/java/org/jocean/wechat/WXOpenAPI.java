@@ -218,20 +218,6 @@ public interface WXOpenAPI {
         public void setQrcodeUrl(final String url);
     }
 
-//    interface SimpleAuthorizationInfo {
-//        @JSONField(name = "authorization_appid")
-//        public String getAuthorizationAppid();
-//
-//        @JSONField(name = "authorization_appid")
-//        public void setAuthorizationAppid(final String appid);
-//
-//        @JSONField(name = "func_info")
-//        public FuncInfo[] getFuncInfos();
-//
-//        @JSONField(name = "func_info")
-//        public void setFuncInfos(final FuncInfo[] infos);
-//    }
-
     public interface AuthorizerInfoResponse extends WXOpenResponse {
         @JSONField(name = "authorizer_info")
         public AuthorizerInfo getAuthorizerInfo();
@@ -248,4 +234,32 @@ public interface WXOpenAPI {
 
     public Func1<Interact, Observable<AuthorizerInfoResponse>> getAuthorizerInfo(final String authorizerAppid);
 
+    public interface OAuthAccessTokenResponse extends WXOpenResponse {
+        @JSONField(name="access_token")
+        public String getAccessToken();
+        @JSONField(name="access_token")
+        public void setAccessToken(final String token);
+
+        @JSONField(name="expires_in")
+        public int getExpiresIn();
+        @JSONField(name="expires_in")
+        public void setExpiresIn(int expiresIn);
+
+        @JSONField(name="refresh_token")
+        public String getRefreshToken();
+        @JSONField(name="refresh_token")
+        public void setRefreshToken(final String refreshToken);
+
+        @JSONField(name="openid")
+        public String getOpenid();
+        @JSONField(name="openid")
+        public void setOpenid(final String openid);
+
+        @JSONField(name="scope")
+        public String getScope();
+        @JSONField(name="scope")
+        public void setScope(final String scope);
+    }
+
+    public Func1<Interact, Observable<OAuthAccessTokenResponse>> getOAuthAccessToken(final String authorizerAppid, final String code);
 }

@@ -487,6 +487,28 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
         };
     }
 
+    @Override
+    public Func1<Interact, Observable<OAuthAccessTokenResponse>> getOAuthAccessToken(final String authorizerAppid, final String code) {
+        return interact-> {
+            try {
+                return interact.method(HttpMethod.GET)
+                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                    .uri("https://api.weixin.qq.com")
+                    .path("/sns/oauth2/component/access_token")
+                    .paramAsQuery("appid", authorizerAppid)
+                    .paramAsQuery("code", code)
+                    .paramAsQuery("grant_type", "authorization_code")
+                    .paramAsQuery("component_appid", this._appid)
+                    .paramAsQuery("component_access_token", this._componentToken)
+                    .execution()
+                    .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
+                    .compose(timeoutAndRetry());
+            } catch (final Exception e) {
+                return Observable.error(e);
+            }
+        };
+    }
+
     private <T> Transformer<T, T> timeoutAndRetry() {
         return org -> org.timeout(this._timeoutInMS, TimeUnit.MILLISECONDS).retryWhen(retryPolicy());
     }
