@@ -218,19 +218,19 @@ public interface WXOpenAPI {
         public void setQrcodeUrl(final String url);
     }
 
-    interface SimpleAuthorizationInfo {
-        @JSONField(name = "authorization_appid")
-        public String getAuthorizationAppid();
-
-        @JSONField(name = "authorization_appid")
-        public void setAuthorizationAppid(final String appid);
-
-        @JSONField(name = "func_info")
-        public FuncInfo[] getFuncInfos();
-
-        @JSONField(name = "func_info")
-        public void setFuncInfos(final FuncInfo[] infos);
-    }
+//    interface SimpleAuthorizationInfo {
+//        @JSONField(name = "authorization_appid")
+//        public String getAuthorizationAppid();
+//
+//        @JSONField(name = "authorization_appid")
+//        public void setAuthorizationAppid(final String appid);
+//
+//        @JSONField(name = "func_info")
+//        public FuncInfo[] getFuncInfos();
+//
+//        @JSONField(name = "func_info")
+//        public void setFuncInfos(final FuncInfo[] infos);
+//    }
 
     public interface AuthorizerInfoResponse extends WXOpenResponse {
         @JSONField(name = "authorizer_info")
@@ -240,10 +240,10 @@ public interface WXOpenAPI {
         public void setAuthorizerInfo(final AuthorizerInfo info);
 
         @JSONField(name = "authorization_info")
-        public SimpleAuthorizationInfo getAuthorizationInfo();
+        public AuthorizationInfo getAuthorizationInfo();
 
         @JSONField(name = "authorization_info")
-        public void setAuthorizationInfo(final SimpleAuthorizationInfo info);
+        public void setAuthorizationInfo(final AuthorizationInfo info);
     }
 
     public Func1<Interact, Observable<AuthorizerInfoResponse>> getAuthorizerInfo(final String authorizerAppid);
