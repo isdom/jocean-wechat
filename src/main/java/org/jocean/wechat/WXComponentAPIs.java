@@ -4,8 +4,8 @@ package org.jocean.wechat;
 import org.jocean.http.Feature;
 import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
+import org.jocean.wechat.WechatAPI.UserInfoResponse;
 import org.jocean.wechat.spi.OAuthAccessTokenResponse;
-import org.jocean.wechat.spi.UserInfoResponse;
 
 import rx.Observable;
 import rx.functions.Func1;
@@ -14,11 +14,11 @@ public class WXComponentAPIs {
     private WXComponentAPIs() {
         throw new IllegalStateException("No instances!");
     }
-    
-    
+
+
     public static Func1<Interact, Observable<OAuthAccessTokenResponse>> getOAuthAccessToken(
-            final String appid, 
-            final String componentAppid, 
+            final String appid,
+            final String componentAppid,
             final String componentAccessToken,
             final String code) {
         return interact->interact
@@ -34,12 +34,13 @@ public class WXComponentAPIs {
     }
 
     public static Func1<Interact, Observable<UserInfoResponse>> getSnsapiUserInfo(
-            final String snsapiToken, 
+            final String snsapiToken,
             final String openid) {
         return interact->interact
                 .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                 .uri("https://api.weixin.qq.com").path("/sns/userinfo")
-                .paramAsQuery("access_token", snsapiToken).paramAsQuery("openid", openid)
+                .paramAsQuery("access_token", snsapiToken)
+                .paramAsQuery("openid", openid)
                 .paramAsQuery("lang", "zh_CN")
                 .execution()
                 .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson));

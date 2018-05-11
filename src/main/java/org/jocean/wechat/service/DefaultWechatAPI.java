@@ -22,9 +22,7 @@ import org.jocean.wechat.spi.CreateQrcodeRequest;
 import org.jocean.wechat.spi.CreateQrcodeResponse;
 import org.jocean.wechat.spi.DownloadMediaRequest;
 import org.jocean.wechat.spi.OAuthAccessTokenRequest;
-import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.UserInfoRequest;
-import org.jocean.wechat.spi.UserInfoResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,9 +34,9 @@ import rx.functions.Func1;
 
 
 public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
-	
+
     @SuppressWarnings("unused")
-    private static final Logger LOG = 
+    private static final Logger LOG =
             LoggerFactory.getLogger(DefaultWechatAPI.class);
 
     @Override
@@ -74,27 +72,27 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                 return _expire;
             }});
     }
-    
+
     @Override
     public String getName() {
         return this._name;
     }
-    
+
     @Override
     public String getAppid() {
         return this._appid;
     }
-    
+
     @Override
     public String getJsapiTicket() {
         return this._ticket;
     }
-    
+
     @Override
     public String getAccessToken() {
         return this._accessToken;
     }
-    
+
     @Override
     public Func1<Interact, Observable<UserInfoResponse>> getUserInfo(final String openid) {
         return interact-> {
@@ -102,11 +100,11 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                 final UserInfoRequest reqbean = new UserInfoRequest();
                 reqbean.setAccessToken(this._accessToken);
                 reqbean.setOpenid(openid);
-    
+
                 return interact.reqbean(reqbean).feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
                     .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson))
                     .compose(timeoutAndRetry());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return Observable.error(e);
             }
         };
@@ -123,12 +121,12 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                     .execution()
                     .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson))
                     .compose(timeoutAndRetry());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return Observable.error(e);
             }
         };
     }
-    
+
     @Override
     public Func1<Interact, Observable<OAuthAccessTokenResponse>> getOAuthAccessToken(final String code) {
         return interact-> {
@@ -136,28 +134,28 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             reqbean.setCode(code);
             reqbean.setAppid(this._appid);
             reqbean.setSecret(this._secret);
-    
+
             try {
                 return interact.reqbean(reqbean)
                     .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
                     .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
                     .compose(timeoutAndRetry());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return Observable.error(e);
             }
         };
     }
-    
+
     @Override
     public Func1<Interact, Observable<String>> createVolatileQrcode(final int expireSeconds, final String scenestr) {
         return interact-> {
             final CreateQrcodeRequest reqAndBody = new CreateQrcodeRequest();
-            
+
             reqAndBody.setAccessToken(this._accessToken);
             reqAndBody.setActionName("QR_STR_SCENE");
             reqAndBody.setExpireSeconds(expireSeconds);
             reqAndBody.setScenestr(scenestr);
-    
+
             try {
                 return interact.method(HttpMethod.POST).reqbean(reqAndBody)
                     .body(reqAndBody, ContentUtil.TOJSON)
@@ -170,7 +168,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                         }
                     })
                     .map(resp-> "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + urlencodeAsUtf8(resp.getTicket()));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return Observable.error(e);
             }
         };
@@ -179,29 +177,29 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     private static String urlencodeAsUtf8(final String ticket) {
         try {
             return URLEncoder.encode(ticket, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
-    
+
     @Override
     public Func1<Interact, Observable<MessageBody>> downloadMedia(final String mediaId) {
         return interact-> {
             final DownloadMediaRequest reqbean = new DownloadMediaRequest();
             reqbean.setAccessToken(this._accessToken);
             reqbean.setMediaId(mediaId);
-    
+
             try {
                 return interact.reqbean(reqbean)
                     .feature(Feature.ENABLE_LOGGING_OVER_SSL).feature(Feature.ENABLE_COMPRESSOR).execution()
                     .flatMap(interaction->interaction.execute())
                     .retryWhen(retryPolicy()).compose(MessageUtil.asBody());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return Observable.error(e);
             }
         };
     }
-    
+
     private Func1<? super Observable<? extends Throwable>, ? extends Observable<?>> retryPolicy() {
         return RxObservables.retryWith(new RetryPolicy<Integer>() {
             @Override
@@ -212,35 +210,35 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                         ;
             }});
     }
-    
+
     private <T> Transformer<T, T> timeoutAndRetry() {
         return org -> org.timeout(this._timeoutInMS, TimeUnit.MILLISECONDS).retryWhen(retryPolicy());
     }
 
     @Value("${wechat.wpa}")
     String _name;
-    
+
     @Value("${wechat.appid}")
     String _appid;
-    
+
     @Value("${wechat.secret}")
     String _secret;
 
     @Value("${wechat.token}")
     String _accessToken;
-    
+
     @Value("${wechat.ticket}")
     String _ticket;
-    
+
     @Value("${token.expire}")
     String _expire;
-            
+
     @Value("${wechat.retrytimes}")
-    private int _maxRetryTimes = 3;
-    
+    private final int _maxRetryTimes = 3;
+
     @Value("${wechat.retryinterval}")
-    private int _retryIntervalBase = 100; // 100 ms
-    
+    private final int _retryIntervalBase = 100; // 100 ms
+
     @Value("${api.timeoutInMs}")
-    private int _timeoutInMS = 10000;
+    private final int _timeoutInMS = 10000;
 }
