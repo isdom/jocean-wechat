@@ -4,7 +4,6 @@ package org.jocean.wechat;
 import org.jocean.http.Interact;
 import org.jocean.http.MessageBody;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
-import org.jocean.wechat.WXProtocol.UserInfoResponse;
 
 import rx.Observable;
 import rx.functions.Func1;
@@ -17,10 +16,6 @@ public interface WechatAPI {
     public String getJsapiTicket();
 
     public String getAccessToken();
-
-    public Func1<Interact, Observable<UserInfoResponse>> getUserInfo(final String openid);
-
-    public Func1<Interact, Observable<UserInfoResponse>> getSnsapiUserInfo(final String snsapiAccessToken, final String openid);
 
     public Func1<Interact, Observable<OAuthAccessTokenResponse>> getOAuthAccessToken(final String code);
 

@@ -18,13 +18,11 @@ import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
-import org.jocean.wechat.WXProtocol.UserInfoResponse;
 import org.jocean.wechat.WechatAPI;
 import org.jocean.wechat.spi.CreateQrcodeRequest;
 import org.jocean.wechat.spi.CreateQrcodeResponse;
 import org.jocean.wechat.spi.DownloadMediaRequest;
 import org.jocean.wechat.spi.OAuthAccessTokenRequest;
-import org.jocean.wechat.spi.UserInfoRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -93,40 +91,6 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     @Override
     public String getAccessToken() {
         return this._accessToken;
-    }
-
-    @Override
-    public Func1<Interact, Observable<UserInfoResponse>> getUserInfo(final String openid) {
-        return interact-> {
-            try {
-                final UserInfoRequest reqbean = new UserInfoRequest();
-                reqbean.setAccessToken(this._accessToken);
-                reqbean.setOpenid(openid);
-
-                return interact.reqbean(reqbean).feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
-                    .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson))
-                    .compose(timeoutAndRetry());
-            } catch (final Exception e) {
-                return Observable.error(e);
-            }
-        };
-    }
-
-    @Override
-    public Func1<Interact, Observable<UserInfoResponse>> getSnsapiUserInfo(final String snsapiToken, final String openid) {
-        return interact-> {
-            try {
-                return interact.feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                    .uri("https://api.weixin.qq.com").path("/sns/userinfo")
-                    .paramAsQuery("access_token", snsapiToken).paramAsQuery("openid", openid)
-                    .paramAsQuery("lang", "zh_CN")
-                    .execution()
-                    .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson))
-                    .compose(timeoutAndRetry());
-            } catch (final Exception e) {
-                return Observable.error(e);
-            }
-        };
     }
 
     @Override
