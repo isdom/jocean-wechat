@@ -17,6 +17,8 @@ import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
+import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
+import org.jocean.wechat.WXProtocol.UserInfoResponse;
 import org.jocean.wechat.WechatAPI;
 import org.jocean.wechat.spi.CreateQrcodeRequest;
 import org.jocean.wechat.spi.CreateQrcodeResponse;

@@ -4,8 +4,8 @@ package org.jocean.wechat;
 import org.jocean.http.Feature;
 import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
-import org.jocean.wechat.WechatAPI.UserInfoResponse;
-import org.jocean.wechat.spi.OAuthAccessTokenResponse;
+import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
+import org.jocean.wechat.WXProtocol.UserInfoResponse;
 
 import rx.Observable;
 import rx.functions.Func1;

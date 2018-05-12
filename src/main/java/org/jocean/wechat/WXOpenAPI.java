@@ -2,6 +2,8 @@
 package org.jocean.wechat;
 
 import org.jocean.http.Interact;
+import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
+import org.jocean.wechat.WXProtocol.WXAPIResponse;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -12,21 +14,7 @@ public interface WXOpenAPI {
 
     public String getAppid();
 
-    public interface WXOpenResponse {
-        @JSONField(name="errcode")
-        public String getErrcode();
-
-        @JSONField(name="errcode")
-        public void setErrcode(final String errcode);
-
-        @JSONField(name="errmsg")
-        public String getErrmsg();
-
-        @JSONField(name="errmsg")
-        public void setErrmsg(final String errmsg);
-    }
-
-    public interface PreAuthCodeResponse extends WXOpenResponse {
+    public interface PreAuthCodeResponse extends WXAPIResponse {
         @JSONField(name = "pre_auth_code")
         public String getPreAuthCode();
 
@@ -89,7 +77,7 @@ public interface WXOpenAPI {
         public void setFuncInfos(final FuncInfo[] infos);
     }
 
-    public interface QueryAuthResponse extends WXOpenResponse {
+    public interface QueryAuthResponse extends WXAPIResponse {
 
         @JSONField(name = "authorization_info")
         public AuthorizationInfo getAuthorizationInfo();
@@ -100,7 +88,7 @@ public interface WXOpenAPI {
 
     public Func1<Interact, Observable<QueryAuthResponse>> queryAuth(final String authorizationCode);
 
-    public interface AuthorizerTokenResponse extends WXOpenResponse {
+    public interface AuthorizerTokenResponse extends WXAPIResponse {
         @JSONField(name = "authorizer_access_token")
         public String getAuthorizerAccessToken();
 
@@ -218,7 +206,7 @@ public interface WXOpenAPI {
         public void setQrcodeUrl(final String url);
     }
 
-    public interface AuthorizerInfoResponse extends WXOpenResponse {
+    public interface AuthorizerInfoResponse extends WXAPIResponse {
         @JSONField(name = "authorizer_info")
         public AuthorizerInfo getAuthorizerInfo();
 
@@ -234,32 +222,6 @@ public interface WXOpenAPI {
 
     public Func1<Interact, Observable<AuthorizerInfoResponse>> getAuthorizerInfo(final String authorizerAppid);
 
-    public interface OAuthAccessTokenResponse extends WXOpenResponse {
-        @JSONField(name="access_token")
-        public String getAccessToken();
-        @JSONField(name="access_token")
-        public void setAccessToken(final String token);
-
-        @JSONField(name="expires_in")
-        public int getExpiresIn();
-        @JSONField(name="expires_in")
-        public void setExpiresIn(int expiresIn);
-
-        @JSONField(name="refresh_token")
-        public String getRefreshToken();
-        @JSONField(name="refresh_token")
-        public void setRefreshToken(final String refreshToken);
-
-        @JSONField(name="openid")
-        public String getOpenid();
-        @JSONField(name="openid")
-        public void setOpenid(final String openid);
-
-        @JSONField(name="scope")
-        public String getScope();
-        @JSONField(name="scope")
-        public void setScope(final String scope);
-    }
 
     public Func1<Interact, Observable<OAuthAccessTokenResponse>> getOAuthAccessToken(final String authorizerAppid, final String code);
 }
