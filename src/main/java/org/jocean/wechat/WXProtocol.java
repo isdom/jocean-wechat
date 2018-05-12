@@ -25,7 +25,7 @@ public class WXProtocol {
         }
     };
 
-    public interface UserInfoResponse extends WXAPIResponse {
+    public interface WXUserInfo {
 
         @JSONField(name="subscribe")
         public int getSubscribe();
@@ -110,6 +110,9 @@ public class WXProtocol {
 
         @JSONField(name="tagid_list")
         public void setTagid_list(final int[] tagid_list);
+    }
+
+    public interface UserInfoResponse extends WXAPIResponse, WXUserInfo {
     }
 
     public interface OAuthAccessTokenResponse extends WXAPIResponse {
