@@ -28,10 +28,10 @@ public class WXProtocol {
     public interface WXUserInfo {
 
         @JSONField(name="subscribe")
-        public int getSubscribe();
+        public Integer getSubscribe();
 
         @JSONField(name="subscribe")
-        public void setSubscribe(final int subscribe);
+        public void setSubscribe(final Integer subscribe);
 
         @JSONField(name="openid")
         public String getOpenid();
@@ -46,10 +46,10 @@ public class WXProtocol {
         public void setNickname(final String nickname);
 
         @JSONField(name="sex")
-        public int getSex();
+        public Integer getSex();
 
         @JSONField(name="sex")
-        public void setSex(final int sex);
+        public void setSex(final Integer sex);
 
         @JSONField(name="city")
         public String getCity();
@@ -82,10 +82,10 @@ public class WXProtocol {
         public void setHeadimgurl(final String headimgurl);
 
         @JSONField(name="subscribe_time")
-        public long getSubscribe_time();
+        public Long getSubscribeTime();
 
         @JSONField(name="subscribe_time")
-        public void setSubscribe_time(final long subscribe_time);
+        public void setSubscribeTime(final Long subscribeTime);
 
         @JSONField(name="unionid")
         public String getUnionid();
@@ -100,10 +100,10 @@ public class WXProtocol {
         public void setRemark(final String remark);
 
         @JSONField(name="groupid")
-        public int getGroupid();
+        public Integer getGroupid();
 
         @JSONField(name="groupid")
-        public void setGroupid(final int groupid);
+        public void setGroupid(final Integer groupid);
 
         @JSONField(name="tagid_list")
         public int[] getTagid_list();
