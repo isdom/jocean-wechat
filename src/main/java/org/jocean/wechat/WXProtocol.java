@@ -2,6 +2,8 @@ package org.jocean.wechat;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
+import rx.functions.Action1;
+
 public class WXProtocol {
     public interface WXAPIResponse {
         @JSONField(name="errcode")
@@ -16,6 +18,12 @@ public class WXProtocol {
         @JSONField(name="errmsg")
         public void setErrmsg(final String errmsg);
     }
+
+    public static final Action1<WXAPIResponse> CHECK_WXRESP = resp-> {
+        if (null != resp.getErrcode()) {
+            throw new RuntimeException(resp.toString());
+        }
+    };
 
     public interface UserInfoResponse extends WXAPIResponse {
 
