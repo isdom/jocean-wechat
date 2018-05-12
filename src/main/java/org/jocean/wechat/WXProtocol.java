@@ -146,4 +146,26 @@ public class WXProtocol {
         @JSONField(name="openid")
         public void setOpenid(final String openid);
     }
+
+    public interface CreateQrcodeResponse extends WXAPIResponse {
+
+        @JSONField(name="ticket")
+        public String getTicket();
+
+        @JSONField(name="ticket")
+        public void setTicket(final String ticket);
+
+        @JSONField(name="expire_seconds")
+        public int getExpireSeconds();
+
+        @JSONField(name="expire_seconds")
+        public void setExpireSeconds(final int expire_seconds);
+
+
+        @JSONField(name="url")
+        public String getUrl();
+
+        @JSONField(name="url")
+        public void setUrl(final String url);
+    }
 }

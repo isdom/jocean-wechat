@@ -17,10 +17,11 @@ import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
+import org.jocean.wechat.WXProtocol;
+import org.jocean.wechat.WXProtocol.CreateQrcodeResponse;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WechatAPI;
 import org.jocean.wechat.spi.CreateQrcodeRequest;
-import org.jocean.wechat.spi.CreateQrcodeResponse;
 import org.jocean.wechat.spi.DownloadMediaRequest;
 import org.jocean.wechat.spi.OAuthAccessTokenRequest;
 import org.slf4j.Logger;
@@ -105,7 +106,8 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                 return interact.reqbean(reqbean)
                     .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
                     .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
-                    .compose(timeoutAndRetry());
+                    .compose(timeoutAndRetry())
+                    .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
@@ -123,16 +125,13 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             reqAndBody.setScenestr(scenestr);
 
             try {
-                return interact.method(HttpMethod.POST).reqbean(reqAndBody)
+                return interact.method(HttpMethod.POST)
+                    .reqbean(reqAndBody)
                     .body(reqAndBody, ContentUtil.TOJSON)
                     .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
                     .compose(MessageUtil.responseAs(CreateQrcodeResponse.class, MessageUtil::unserializeAsJson))
                     .compose(timeoutAndRetry())
-                    .doOnNext(resp->{
-                        if (null!=resp.getErrcode()) {
-                            throw new RuntimeException(resp.toString());
-                        }
-                    })
+                    .doOnNext(WXProtocol.CHECK_WXRESP)
                     .map(resp-> "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + urlencodeAsUtf8(resp.getTicket()));
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -157,7 +156,9 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
 
             try {
                 return interact.reqbean(reqbean)
-                    .feature(Feature.ENABLE_LOGGING_OVER_SSL).feature(Feature.ENABLE_COMPRESSOR).execution()
+                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                    .feature(Feature.ENABLE_COMPRESSOR)
+                    .execution()
                     .flatMap(interaction->interaction.execute())
                     .retryWhen(retryPolicy()).compose(MessageUtil.asBody());
             } catch (final Exception e) {
