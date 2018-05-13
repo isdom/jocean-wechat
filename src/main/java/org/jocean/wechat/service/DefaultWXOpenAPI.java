@@ -15,6 +15,7 @@ import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.wechat.WXOpenAPI;
+import org.jocean.wechat.WXProtocol;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +114,8 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                     .body(req, ContentUtil.TOJSON)
                     .execution()
                     .compose(MessageUtil.responseAs(PreAuthCodeResponse.class, MessageUtil::unserializeAsJson))
-                    .compose(timeoutAndRetry());
+                    .compose(timeoutAndRetry())
+                    .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
@@ -245,7 +247,8 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                     .body(req, ContentUtil.TOJSON)
                     .execution()
                     .compose(MessageUtil.responseAs(QueryAuthResponse.class, MessageUtil::unserializeAsJson))
-                    .compose(timeoutAndRetry());
+                    .compose(timeoutAndRetry())
+                    .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
@@ -344,7 +347,8 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                     .body(req, ContentUtil.TOJSON)
                     .execution()
                     .compose(MessageUtil.responseAs(AuthorizerTokenResponse.class, MessageUtil::unserializeAsJson))
-                    .compose(timeoutAndRetry());
+                    .compose(timeoutAndRetry())
+                    .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
@@ -481,7 +485,8 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                     .body(req, ContentUtil.TOJSON)
                     .execution()
                     .compose(MessageUtil.responseAs(AuthorizerInfoResponse.class, MessageUtil::unserializeAsJson))
-                    .compose(timeoutAndRetry());
+                    .compose(timeoutAndRetry())
+                    .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
@@ -503,7 +508,8 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                     .paramAsQuery("component_access_token", this._componentToken)
                     .execution()
                     .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
-                    .compose(timeoutAndRetry());
+                    .compose(timeoutAndRetry())
+                    .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
