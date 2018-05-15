@@ -29,6 +29,16 @@ public class EncryptedMessage {
         this._appId = appId;
     }
 
+    @JacksonXmlProperty(localName="ToUserName")
+    public String getToUserName() {
+        return this._toUserName;
+    }
+
+    @JacksonXmlProperty(localName="ToUserName")
+    public void setToUserName(final String toUserName) {
+        this._toUserName = toUserName;
+    }
+
     @JacksonXmlProperty(localName="Encrypt")
     public String getEncrypt() {
         return this._encrypt;
@@ -42,12 +52,15 @@ public class EncryptedMessage {
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        builder.append("EncryptedMessage [appId=").append(_appId).append(", encrypt=").append(_encrypt).append("]");
+        builder.append("EncryptedMessage [appId=").append(_appId).append(", toUserName=").append(_toUserName)
+            .append(", encrypt=").append(_encrypt).append("]");
         return builder.toString();
     }
 
     //  第三方平台appid
     private String _appId;
+
+    private String _toUserName;
 
     private String _encrypt;
 }
