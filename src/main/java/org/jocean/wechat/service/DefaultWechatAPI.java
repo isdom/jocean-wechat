@@ -22,7 +22,6 @@ import org.jocean.wechat.WXProtocol.CreateQrcodeResponse;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WechatAPI;
 import org.jocean.wechat.spi.CreateQrcodeRequest;
-import org.jocean.wechat.spi.DownloadMediaRequest;
 import org.jocean.wechat.spi.OAuthAccessTokenRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,17 +149,28 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     @Override
     public Func1<Interact, Observable<MessageBody>> downloadMedia(final String mediaId) {
         return interact-> {
-            final DownloadMediaRequest reqbean = new DownloadMediaRequest();
-            reqbean.setAccessToken(this._accessToken);
-            reqbean.setMediaId(mediaId);
-
             try {
-                return interact.reqbean(reqbean)
+                return interact.method(HttpMethod.GET)
+                    .uri("https://api.weixin.qq.com")
+                    .path("/cgi-bin/media/get")
+                    .paramAsQuery("access_token", this._accessToken)
+                    .paramAsQuery("media_id", mediaId)
                     .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                     .feature(Feature.ENABLE_COMPRESSOR)
                     .execution()
                     .flatMap(interaction->interaction.execute())
-                    .retryWhen(retryPolicy()).compose(MessageUtil.asBody());
+                    .retryWhen(retryPolicy())
+                    .compose(MessageUtil.asBody())
+                    .flatMap(body-> {
+                        if (body.contentType().startsWith("application/json")) {
+                            // error return as json
+                            // TODO
+                            return Observable.error(new RuntimeException());
+                        } else {
+                            return Observable.just(body);
+                        }
+                    })
+                    ;
             } catch (final Exception e) {
                 return Observable.error(e);
             }
