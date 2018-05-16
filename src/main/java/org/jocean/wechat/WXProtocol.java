@@ -20,7 +20,7 @@ public class WXProtocol {
     }
 
     public static final Action1<WXAPIResponse> CHECK_WXRESP = resp-> {
-        if (null != resp.getErrcode()) {
+        if (null != resp.getErrcode() && !resp.getErrcode().equals("0")) {
             throw new RuntimeException(resp.toString());
         }
     };

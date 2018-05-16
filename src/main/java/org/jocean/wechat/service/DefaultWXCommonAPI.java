@@ -2,6 +2,7 @@ package org.jocean.wechat.service;
 
 import java.util.concurrent.TimeUnit;
 
+import org.jocean.http.ContentUtil;
 import org.jocean.http.Feature;
 import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
@@ -11,7 +12,10 @@ import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.wechat.WXCommonAPI;
 import org.jocean.wechat.WXProtocol;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
+import org.jocean.wechat.WXProtocol.WXAPIResponse;
 import org.springframework.beans.factory.annotation.Value;
+
+import com.alibaba.fastjson.annotation.JSONField;
 
 import rx.Observable;
 import rx.Observable.Transformer;
@@ -49,6 +53,80 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
                     .paramAsQuery("lang", "zh_CN")
                     .execution()
                     .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson))
+                    .compose(timeoutAndRetry())
+                    .doOnNext(WXProtocol.CHECK_WXRESP);
+            } catch (final Exception e) {
+                return Observable.error(e);
+            }
+        };
+    }
+
+    static class CustomMessageReq {
+        static class Text {
+            @JSONField(name = "content")
+            public String getCntent() {
+                return this._content;
+            }
+
+            @JSONField(name = "content")
+            public void setcContent(final String content) {
+                this._content = content;
+            }
+
+            private String _content;
+        }
+
+        @JSONField(name = "touser")
+        public String getToUser() {
+            return this._touser;
+        }
+
+        @JSONField(name = "touser")
+        public void setToUser(final String touser) {
+            this._touser = touser;
+        }
+
+        @JSONField(name = "msgtype")
+        public String getMsgType() {
+            return this._msgtype;
+        }
+
+        @JSONField(name = "msgtype")
+        public void setMsgType(final String msgtype) {
+            this._msgtype = msgtype;
+        }
+
+        @JSONField(name = "text")
+        public Text getText() {
+            return this._text;
+        }
+
+        @JSONField(deserialize = false)
+        public void setTextContent(final String content) {
+            this._text = new Text();
+            this._text.setcContent(content);
+        }
+
+        private String _touser;
+        private String _msgtype;
+        private Text _text;
+    }
+
+    @Override
+    public Func1<Interact, Observable<WXAPIResponse>> sendCustomMessageWithText(final String accessToken,
+            final String openid, final String content) {
+        return interact-> {
+            try {
+                final CustomMessageReq req = new CustomMessageReq();
+                req.setToUser(openid);
+                req.setMsgType("text");
+                req.setTextContent(content);
+                return interact.feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                    .uri("https://api.weixin.qq.com").path("/cgi-bin/message/custom/send")
+                    .paramAsQuery("access_token", accessToken)
+                    .body(req, ContentUtil.TOJSON)
+                    .execution()
+                    .compose(MessageUtil.responseAs(WXAPIResponse.class, MessageUtil::unserializeAsJson))
                     .compose(timeoutAndRetry())
                     .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
