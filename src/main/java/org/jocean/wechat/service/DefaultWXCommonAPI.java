@@ -113,7 +113,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
     }
 
     @Override
-    public Func1<Interact, Observable<WXAPIResponse>> sendCustomMessageWithText(final String accessToken,
+    public Func1<Interact, Observable<WXAPIResponse>> sendCustomMessageInText(final String accessToken,
             final String openid, final String content) {
         return interact-> {
             try {
