@@ -1,4 +1,4 @@
-package org.jocean.wechat.service;
+package org.jocean.wechat;
 
 @SuppressWarnings("serial")
 public class AesException extends Exception {
@@ -51,7 +51,7 @@ public class AesException extends Exception {
 		return code;
 	}
 
-	AesException(final int code) {
+	public AesException(final int code) {
 		super(getMessage(code));
 		this.code = code;
 	}

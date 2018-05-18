@@ -11,6 +11,8 @@ package org.jocean.wechat.service;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
+import org.jocean.wechat.AesException;
+
 /**
  * SHA1 class
  *

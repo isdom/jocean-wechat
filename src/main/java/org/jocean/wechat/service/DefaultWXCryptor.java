@@ -8,6 +8,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.jocean.idiom.ExceptionUtils;
+import org.jocean.wechat.AesException;
+import org.jocean.wechat.WXCryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,10 +17,10 @@ import org.springframework.beans.factory.annotation.Value;
 import com.google.common.base.Charsets;
 import com.google.common.io.BaseEncoding;
 
-public class WXCryptor {
+public class DefaultWXCryptor implements WXCryptor {
 
     private static final Logger LOG =
-        LoggerFactory.getLogger(WXCryptor.class);
+        LoggerFactory.getLogger(DefaultWXCryptor.class);
 
     /**
      * 将公众平台回复用户的消息加密打包.
@@ -35,6 +37,7 @@ public class WXCryptor {
      * @return 加密后的可以直接回复用户的密文，包括msg_signature, timestamp, nonce, encrypt的xml格式的字符串
      * @throws AesException 执行失败，请查看该异常的错误码和具体的错误信息
      */
+    @Override
     public String encryptMsg(final String replyMsg, String timeStamp, final String nonce, final String appid) throws AesException {
         // 加密
         final String encrypt = encrypt(getRandomStr(), replyMsg, appid);
@@ -153,6 +156,7 @@ public class WXCryptor {
      * @return 解密得到的明文
      * @throws AesException aes解密失败
      */
+    @Override
     public String[] decrypt(final String text) throws AesException {
         final byte[] aesKey = BaseEncoding.base64().decode(this._encodingAesKey + "=");
         byte[] original;
