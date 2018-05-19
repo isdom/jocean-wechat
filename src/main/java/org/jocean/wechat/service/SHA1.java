@@ -11,7 +11,10 @@ package org.jocean.wechat.service;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
+import org.jocean.idiom.ExceptionUtils;
 import org.jocean.wechat.AesException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SHA1 class
@@ -19,6 +22,8 @@ import org.jocean.wechat.AesException;
  * 计算公众平台的消息签名接口.
  */
 class SHA1 {
+    private static final Logger LOG =
+            LoggerFactory.getLogger(SHA1.class);
 
 	/**
 	 * 用SHA1算法生成安全签名
@@ -56,7 +61,7 @@ class SHA1 {
 			}
 			return hexstr.toString();
 		} catch (final Exception e) {
-			e.printStackTrace();
+		    LOG.warn("exception when getSHA1, detail: {}", ExceptionUtils.exception2detail(e));
 			throw new AesException(AesException.ComputeSignatureError);
 		}
 	}

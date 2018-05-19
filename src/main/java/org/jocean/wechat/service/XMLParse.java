@@ -13,7 +13,10 @@ import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.jocean.idiom.ExceptionUtils;
 import org.jocean.wechat.AesException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -25,6 +28,8 @@ import org.xml.sax.InputSource;
  * 提供提取消息格式中的密文及生成回复消息格式的接口.
  */
 class XMLParse {
+    private static final Logger LOG =
+            LoggerFactory.getLogger(XMLParse.class);
 
 	/**
 	 * 提取出xml数据包中的加密消息
@@ -49,7 +54,7 @@ class XMLParse {
 			result[2] = nodelist2.item(0).getTextContent();
 			return result;
 		} catch (final Exception e) {
-			e.printStackTrace();
+            LOG.warn("exception when XMLParse.extract, detail: {}", ExceptionUtils.exception2detail(e));
 			throw new AesException(AesException.ParseXmlError);
 		}
 	}
