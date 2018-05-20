@@ -2,6 +2,8 @@ package org.jocean.wechat;
 
 public interface WXCryptor {
 
+    public boolean verifySignature(final String signature, final String timestamp, final String nonce);
+
     /**
      * 将公众平台回复用户的消息加密打包.
      * <ol>

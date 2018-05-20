@@ -1,5 +1,6 @@
 package org.jocean.wechat.service;
 
+import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -8,6 +9,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.jocean.idiom.ExceptionUtils;
+import org.jocean.idiom.Md5;
 import org.jocean.wechat.AesException;
 import org.jocean.wechat.WXCryptor;
 import org.slf4j.Logger;
@@ -21,6 +23,40 @@ public class DefaultWXCryptor implements WXCryptor {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(DefaultWXCryptor.class);
+
+    /**
+     * 判断是否加密
+     * @param signature
+     * @param token
+     * @param timestamp
+     * @param nonce
+     *
+     * @return
+     */
+    @Override
+    public boolean verifySignature(final String signature, final String timestamp, final String nonce) {
+        LOG.info("###token:{};signature:{};timestamp:{};nonce:{}", this._verifyToken, signature, timestamp, nonce);
+        if (signature != null && !signature.equals("") && timestamp != null && !timestamp.equals("") && nonce != null
+                && !nonce.equals("")) {
+            try {
+                final String[] ss = new String[] { this._verifyToken, timestamp, nonce };
+                Arrays.sort(ss);
+                final String allstr = ss[0] + ss[1] + ss[2];
+                final MessageDigest md = MessageDigest.getInstance("SHA1");
+                md.update(allstr.getBytes(Charsets.UTF_8));
+                final byte[] signatureBytes = md.digest();
+                final String localSignature = Md5.bytesToHexString(signatureBytes);
+
+                LOG.info("request's signature {}, calced: {}", signature, localSignature);
+                return localSignature.equals(signature);
+            } catch (final Exception e) {
+                LOG.warn("exception when verifySignature, detail: {}", ExceptionUtils.exception2detail(e));
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 
     /**
      * 将公众平台回复用户的消息加密打包.
