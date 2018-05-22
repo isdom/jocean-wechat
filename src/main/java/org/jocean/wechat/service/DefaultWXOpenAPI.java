@@ -6,7 +6,6 @@ package org.jocean.wechat.service;
 import java.util.concurrent.TimeUnit;
 
 import org.jocean.http.ContentUtil;
-import org.jocean.http.Feature;
 import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
@@ -107,7 +106,6 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                 req.setComponentAppid(this._appid);
 
                 return interact.method(HttpMethod.POST)
-                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                     .uri("https://api.weixin.qq.com")
                     .path("/cgi-bin/component/api_create_preauthcode")
                     .paramAsQuery("component_access_token", this._componentToken)
@@ -240,7 +238,6 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                 req.setAuthorizationCode(authorizationCode);
 
                 return interact.method(HttpMethod.POST)
-                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                     .uri("https://api.weixin.qq.com")
                     .path("/cgi-bin/component/api_query_auth")
                     .paramAsQuery("component_access_token", this._componentToken)
@@ -340,7 +337,6 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                 req.setAuthorizerRefreshToken(refreshToken);
 
                 return interact.method(HttpMethod.POST)
-                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                     .uri("https://api.weixin.qq.com")
                     .path("/cgi-bin/component/api_authorizer_token")
                     .paramAsQuery("component_access_token", this._componentToken)
@@ -478,7 +474,6 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                 req.setAuthorizerAppid(authorizerAppid);
 
                 return interact.method(HttpMethod.POST)
-                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                     .uri("https://api.weixin.qq.com")
                     .path("/cgi-bin/component/api_get_authorizer_info")
                     .paramAsQuery("component_access_token", this._componentToken)
@@ -498,7 +493,6 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
         return interact-> {
             try {
                 return interact.method(HttpMethod.GET)
-                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                     .uri("https://api.weixin.qq.com")
                     .path("/sns/oauth2/component/access_token")
                     .paramAsQuery("appid", authorizerAppid)

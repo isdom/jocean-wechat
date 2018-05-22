@@ -8,7 +8,6 @@ import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 
 import org.jocean.http.ContentUtil;
-import org.jocean.http.Feature;
 import org.jocean.http.Interact;
 import org.jocean.http.MessageBody;
 import org.jocean.http.MessageUtil;
@@ -103,7 +102,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
 
             try {
                 return interact.reqbean(reqbean)
-                    .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
+                    .execution()
                     .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
                     .compose(timeoutAndRetry())
                     .doOnNext(WXProtocol.CHECK_WXRESP);
@@ -127,7 +126,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                 return interact.method(HttpMethod.POST)
                     .reqbean(reqAndBody)
                     .body(reqAndBody, ContentUtil.TOJSON)
-                    .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
+                    .execution()
                     .compose(MessageUtil.responseAs(CreateQrcodeResponse.class, MessageUtil::unserializeAsJson))
                     .compose(timeoutAndRetry())
                     .doOnNext(WXProtocol.CHECK_WXRESP)
@@ -155,8 +154,6 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                     .path("/cgi-bin/media/get")
                     .paramAsQuery("access_token", this._accessToken)
                     .paramAsQuery("media_id", mediaId)
-                    .feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                    .feature(Feature.ENABLE_COMPRESSOR)
                     .execution()
                     .flatMap(interaction->interaction.execute())
                     .retryWhen(retryPolicy())

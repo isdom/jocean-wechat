@@ -3,7 +3,6 @@ package org.jocean.wechat.service;
 import java.util.concurrent.TimeUnit;
 
 import org.jocean.http.ContentUtil;
-import org.jocean.http.Feature;
 import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
@@ -27,7 +26,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
     public Func1<Interact, Observable<UserInfoResponse>> getUserInfo(final String accessToken, final String openid) {
         return interact-> {
             try {
-                return interact.feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                return interact
                     .uri("https://api.weixin.qq.com").path("/cgi-bin/user/info")
                     .paramAsQuery("access_token", accessToken)
                     .paramAsQuery("openid", openid)
@@ -46,7 +45,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
     public Func1<Interact, Observable<UserInfoResponse>> getSnsUserInfo(final String oauth2Token, final String openid) {
         return interact-> {
             try {
-                return interact.feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                return interact
                     .uri("https://api.weixin.qq.com").path("/sns/userinfo")
                     .paramAsQuery("access_token", oauth2Token)
                     .paramAsQuery("openid", openid)
@@ -121,7 +120,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
                 req.setToUser(openid);
                 req.setMsgType("text");
                 req.setTextContent(content);
-                return interact.feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                return interact
                     .uri("https://api.weixin.qq.com").path("/cgi-bin/message/custom/send")
                     .paramAsQuery("access_token", accessToken)
                     .body(req, ContentUtil.TOJSON)

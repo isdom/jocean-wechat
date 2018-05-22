@@ -3,7 +3,6 @@
  */
 package org.jocean.wechat.service;
 
-import org.jocean.http.Feature;
 import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.TransportException;
@@ -22,9 +21,9 @@ import rx.functions.Func1;
 
 
 public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
-	
+
     @SuppressWarnings("unused")
-    private static final Logger LOG = 
+    private static final Logger LOG =
             LoggerFactory.getLogger(DefaultWechatMinaAPI.class);
 
     @Override
@@ -45,12 +44,12 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
                 return "***";
             }});
     }
-    
+
     @Override
     public String getName() {
         return this._name;
     }
-    
+
     @Override
     public String getAppid() {
         return this._appid;
@@ -60,8 +59,7 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
     public Func1<Interact, Observable<Code2SessionResponse>> code2session(final String code) {
         return interact-> {
             try {
-                return interact.feature(Feature.ENABLE_LOGGING_OVER_SSL)
-                    .uri("https://api.weixin.qq.com").path("/sns/jscode2session")
+                return interact.uri("https://api.weixin.qq.com").path("/sns/jscode2session")
                     .paramAsQuery("appid", this._appid).paramAsQuery("secret", this._secret)
                     .paramAsQuery("js_code", code).paramAsQuery("grant_type", "authorization_code")
                     .execution()
@@ -72,12 +70,12 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
                             throw new RuntimeException(resp.toString());
                         }
                     });
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return Observable.error(e);
             }
         };
     }
-    
+
     private Func1<? super Observable<? extends Throwable>, ? extends Observable<?>> retryPolicy() {
         return RxObservables.retryWith(new RetryPolicy<Integer>() {
             @Override
@@ -91,16 +89,16 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
 
     @Value("${mina.name}")
     String _name;
-    
+
     @Value("${mina.appid}")
     String _appid;
-    
+
     @Value("${mina.secret}")
     String _secret;
 
     @Value("${mina.retrytimes}")
-    private int _maxRetryTimes = 3;
-    
+    private final int _maxRetryTimes = 3;
+
     @Value("${mina.retryinterval}")
-    private int _retryIntervalBase = 100; // 100 ms
+    private final int _retryIntervalBase = 100; // 100 ms
 }
