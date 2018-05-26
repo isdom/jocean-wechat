@@ -10,8 +10,8 @@ import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
+import org.jocean.wechat.WXProtocol;
 import org.jocean.wechat.WechatMinaAPI;
-import org.jocean.wechat.spi.Code2SessionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,17 +59,17 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
     public Func1<Interact, Observable<Code2SessionResponse>> code2session(final String code) {
         return interact-> {
             try {
-                return interact.uri("https://api.weixin.qq.com").path("/sns/jscode2session")
-                    .paramAsQuery("appid", this._appid).paramAsQuery("secret", this._secret)
-                    .paramAsQuery("js_code", code).paramAsQuery("grant_type", "authorization_code")
+                return interact
+                    .uri("https://api.weixin.qq.com")
+                    .path("/sns/jscode2session")
+                    .paramAsQuery("appid", this._appid)
+                    .paramAsQuery("secret", this._secret)
+                    .paramAsQuery("js_code", code)
+                    .paramAsQuery("grant_type", "authorization_code")
                     .execution()
                     .compose(MessageUtil.responseAs(Code2SessionResponse.class, MessageUtil::unserializeAsJson))
                     .retryWhen(retryPolicy())
-                    .doOnNext(resp -> {
-                        if (null != resp.getErrcode()) {
-                            throw new RuntimeException(resp.toString());
-                        }
-                    });
+                    .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
