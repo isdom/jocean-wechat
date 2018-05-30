@@ -3,16 +3,11 @@
  */
 package org.jocean.wechat.service;
 
-import java.util.concurrent.TimeUnit;
-
 import org.jocean.http.ContentUtil;
 import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
-import org.jocean.http.TransportException;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
-import org.jocean.idiom.rx.RxObservables;
-import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.wechat.WXOpenAPI;
 import org.jocean.wechat.WXProtocol;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
@@ -24,7 +19,6 @@ import com.alibaba.fastjson.annotation.JSONField;
 
 import io.netty.handler.codec.http.HttpMethod;
 import rx.Observable;
-import rx.Observable.Transformer;
 import rx.functions.Func1;
 
 
@@ -112,7 +106,6 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                     .body(req, ContentUtil.TOJSON)
                     .execution()
                     .compose(MessageUtil.responseAs(PreAuthCodeResponse.class, MessageUtil::unserializeAsJson))
-                    .compose(timeoutAndRetry())
                     .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -244,7 +237,6 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                     .body(req, ContentUtil.TOJSON)
                     .execution()
                     .compose(MessageUtil.responseAs(QueryAuthResponse.class, MessageUtil::unserializeAsJson))
-                    .compose(timeoutAndRetry())
                     .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -343,7 +335,6 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                     .body(req, ContentUtil.TOJSON)
                     .execution()
                     .compose(MessageUtil.responseAs(AuthorizerTokenResponse.class, MessageUtil::unserializeAsJson))
-                    .compose(timeoutAndRetry())
                     .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -480,7 +471,6 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                     .body(req, ContentUtil.TOJSON)
                     .execution()
                     .compose(MessageUtil.responseAs(AuthorizerInfoResponse.class, MessageUtil::unserializeAsJson))
-                    .compose(timeoutAndRetry())
                     .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -502,27 +492,11 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                     .paramAsQuery("component_access_token", this._componentToken)
                     .execution()
                     .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
-                    .compose(timeoutAndRetry())
                     .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
         };
-    }
-
-    private <T> Transformer<T, T> timeoutAndRetry() {
-        return org -> org.timeout(this._timeoutInMS, TimeUnit.MILLISECONDS).retryWhen(retryPolicy());
-    }
-
-    private Func1<? super Observable<? extends Throwable>, ? extends Observable<?>> retryPolicy() {
-        return RxObservables.retryWith(new RetryPolicy<Integer>() {
-            @Override
-            public Observable<Integer> call(final Observable<Throwable> errors) {
-                return errors.compose(RxObservables.retryIfMatch(TransportException.class))
-                        .compose(RxObservables.retryMaxTimes(_maxRetryTimes))
-                        .compose(RxObservables.retryDelayTo(_retryIntervalBase))
-                        ;
-            }});
     }
 
     @Value("${wxopen.appid}")
@@ -539,14 +513,4 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
 
     @Value("${component.verify.ticket}")
     String _componentVerifyTicket = null;
-
-    // TBD: 使用 BeanFinder 查找配置信息
-    @Value("${api.retrytimes}")
-    private final int _maxRetryTimes = 3;
-
-    @Value("${api.retryinterval}")
-    private final int _retryIntervalBase = 100; // 100 ms
-
-    @Value("${api.timeoutInMs}")
-    private final int _timeoutInMS = 10000;
 }

@@ -17,15 +17,12 @@ import org.jocean.http.ContentUtil;
 import org.jocean.http.Feature;
 import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
-import org.jocean.http.TransportException;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.Md5;
 import org.jocean.idiom.Proxys;
 import org.jocean.idiom.Proxys.RET;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
-import org.jocean.idiom.rx.RxObservables;
-import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.wechat.WechatPayAPI;
 import org.jocean.wechat.spi.SendRedpackRequest;
 import org.jocean.wechat.spi.SendRedpackResponse;
@@ -109,7 +106,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                             .body(reqAndBody, ContentUtil.TOXML)
                             .feature(new Feature.ENABLE_SSL(sslctx)).execution()
                             .compose(MessageUtil.responseAs(SendRedpackResponse.class, MessageUtil::unserializeAsXml))
-                            .retryWhen(retryPolicy()).map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
+                            .map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
                 } catch (final Exception e) {
                     LOG.warn("exception when sendRedpack {}, detail: {}", reqAndBody, ExceptionUtils.exception2detail(e));
                     return Observable.error(e);
@@ -134,17 +131,6 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
         return this._name;
     }
 
-    private Func1<? super Observable<? extends Throwable>, ? extends Observable<?>> retryPolicy() {
-        return RxObservables.retryWith(new RetryPolicy<Integer>() {
-            @Override
-            public Observable<Integer> call(final Observable<Throwable> errors) {
-                return errors.compose(RxObservables.retryIfMatch(TransportException.class))
-                        .compose(RxObservables.retryMaxTimes(_maxRetryTimes))
-                        .compose(RxObservables.retryDelayTo(_retryIntervalBase))
-                        ;
-            }});
-    }
-
     @Value("${wechat.wpa}")
     String _name;
 
@@ -162,10 +148,4 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
 
     @Value("${cert.password}")
     String _certPassword;
-
-    @Value("${wechat.retrytimes}")
-    private final int _maxRetryTimes = 3;
-
-    @Value("${wechat.retryinterval}")
-    private final int _retryIntervalBase = 100; // 100 ms
 }

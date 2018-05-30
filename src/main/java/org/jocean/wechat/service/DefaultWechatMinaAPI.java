@@ -5,11 +5,8 @@ package org.jocean.wechat.service;
 
 import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
-import org.jocean.http.TransportException;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
-import org.jocean.idiom.rx.RxObservables;
-import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.wechat.WXProtocol;
 import org.jocean.wechat.WechatMinaAPI;
 import org.slf4j.Logger;
@@ -68,23 +65,11 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
                     .paramAsQuery("grant_type", "authorization_code")
                     .execution()
                     .compose(MessageUtil.responseAs(Code2SessionResponse.class, MessageUtil::unserializeAsJson))
-                    .retryWhen(retryPolicy())
                     .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
         };
-    }
-
-    private Func1<? super Observable<? extends Throwable>, ? extends Observable<?>> retryPolicy() {
-        return RxObservables.retryWith(new RetryPolicy<Integer>() {
-            @Override
-            public Observable<Integer> call(final Observable<Throwable> errors) {
-                return errors.compose(RxObservables.retryIfMatch(TransportException.class))
-                        .compose(RxObservables.retryMaxTimes(_maxRetryTimes))
-                        .compose(RxObservables.retryDelayTo(_retryIntervalBase))
-                        ;
-            }});
     }
 
     @Value("${mina.name}")
@@ -95,10 +80,4 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
 
     @Value("${mina.secret}")
     String _secret;
-
-    @Value("${mina.retrytimes}")
-    private final int _maxRetryTimes = 3;
-
-    @Value("${mina.retryinterval}")
-    private final int _retryIntervalBase = 100; // 100 ms
 }
