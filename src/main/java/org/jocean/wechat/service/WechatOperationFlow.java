@@ -30,6 +30,8 @@ import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.j2se.jmx.MBeanUtil;
 import org.jocean.netty.BlobRepo.Blob;
+import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
+import org.jocean.wechat.WXProtocol.UserInfoResponse;
 import org.jocean.wechat.WechatOperation;
 import org.jocean.wechat.spi.DownloadMediaRequest;
 import org.jocean.wechat.spi.DownloadMediaResponse;
@@ -38,11 +40,9 @@ import org.jocean.wechat.spi.FetchAccessTokenResponse;
 import org.jocean.wechat.spi.FetchTicketRequest;
 import org.jocean.wechat.spi.FetchTicketResponse;
 import org.jocean.wechat.spi.OAuthAccessTokenRequest;
-import org.jocean.wechat.spi.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.UploadMediaRequest;
 import org.jocean.wechat.spi.UploadMediaResponse;
 import org.jocean.wechat.spi.UserInfoRequest;
-import org.jocean.wechat.spi.UserInfoResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,16 +64,17 @@ import rx.subscriptions.Subscriptions;
 
 public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
     implements WechatOperation, MBeanRegisterAware {
-	
-    private static final Logger LOG = 
+
+    private static final Logger LOG =
             LoggerFactory.getLogger(WechatOperationFlow.class);
-    
+
+    @Override
     public Observable<UserInfoResponse> getUserInfo(final String accessToken, final String openid) {
         try {
             final UserInfoRequest req = new UserInfoRequest();
             req.setAccessToken(accessToken);
             req.setOpenid(openid);
-            
+
             return _signalClient.interaction().request(req)
                 .feature(Feature.ENABLE_LOGGING_OVER_SSL)
                 .feature(new Feature.ENABLE_SSL(SslContextBuilder.forClient().build()))
@@ -81,17 +82,18 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                 .feature(new SignalClient.UsingPath("/user/info"))
                 .feature(new SignalClient.DecodeResponseBodyAs(UserInfoResponse.class))
                 .<UserInfoResponse>build();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return Observable.error(e);
         }
     }
-    
+
+    @Override
     public Observable<OAuthAccessTokenResponse> getOAuthAccessToken(final String code) {
         final OAuthAccessTokenRequest req = new OAuthAccessTokenRequest();
         req.setCode(code);
         req.setAppid(this._appid);
         req.setSecret(this._appsecret);
-        
+
         try {
             return this._signalClient.interaction().request(req)
                 .feature(Feature.ENABLE_LOGGING_OVER_SSL)
@@ -100,16 +102,17 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                 .feature(new SignalClient.UsingPath("/sns/oauth2/access_token"))
                 .feature(new SignalClient.DecodeResponseBodyAs(OAuthAccessTokenResponse.class))
                 .<OAuthAccessTokenResponse>build();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return Observable.error(e);
         }
     }
-    
+
+    @Override
     public Observable<Blob> downloadMedia(final String accessToken, final String mediaId) {
         final DownloadMediaRequest req = new DownloadMediaRequest();
         req.setAccessToken(accessToken);
         req.setMediaId(mediaId);
-        
+
         return _signalClient.interaction()
             .request(req)
             .feature(Feature.ENABLE_LOGGING_OVER_SSL)
@@ -126,14 +129,14 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                 return Blob.Util.fromByteArray(content, contentType, null, null);
             }});
     }
-    
+
     @Override
     public Observable<Blob> downloadMedia(final String mediaId) {
         return getAccessToken(false).flatMap(accessToken -> downloadMedia(accessToken, mediaId));
     }
-    
+
     final static String CONTENT_DISPOSITION = "Content-Disposition";
-    
+
     @Override
     public Observable<String> uploadMedia(final Blob blob) {
         return getAccessToken(false)
@@ -142,15 +145,15 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                 public Observable<String> call(final String accessToken) {
                     final UploadMediaRequest req = new UploadMediaRequest();
                     req.setAccessToken(accessToken);
-                    
+
                     final String contentType = blob.contentType();
                     final String type = contentType.startsWith("image") ? "image" : "voice";
                     req.setType(type);
                     final String typeSuffix = contentType.substring(contentType.lastIndexOf('/') + 1);
-                    
+
                     final String multipartDataBoundary = Long.toHexString(ThreadLocalRandom.current().nextLong()).toLowerCase();
                     final String name = "media";
-                    
+
                     final String part = "--" + multipartDataBoundary + "\r\n" +
                                     CONTENT_DISPOSITION + ": form-data; name=\""+ name + "\"; filename=\"ossobj." + typeSuffix + "\"" + "\r\n" +
 //                                    CONTENT_LENGTH + ": " + file1.length() + "\r\n" +
@@ -158,22 +161,22 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                                     HttpHeaderNames.CONTENT_TRANSFER_ENCODING + ": binary" + "\r\n" +
                                     "\r\n";
                     final String end = "\r\n--" + multipartDataBoundary + "--\r\n";
-                    
-                    //  TODO, fix by io stream 
+
+                    //  TODO, fix by io stream
                     try(final InputStream is = blob.inputStream()) {
-                        req.setBody( 
-                            Bytes.concat(part.getBytes(CharsetUtil.UTF_8), 
+                        req.setBody(
+                            Bytes.concat(part.getBytes(CharsetUtil.UTF_8),
                                 ByteStreams.toByteArray(is),
                                 end.getBytes(CharsetUtil.UTF_8))
                                 );
-                    } catch (IOException e) {
-                        LOG.warn("exception when ByteStreams.toByteArray, detail: {}", 
+                    } catch (final IOException e) {
+                        LOG.warn("exception when ByteStreams.toByteArray, detail: {}",
                             ExceptionUtils.exception2detail(e));
                     }
-                    
+
                     req.setContentType("multipart/form-data; boundary=" + multipartDataBoundary);
                     req.setContentLength(Integer.toString(req.getBody().length));
-                    
+
                     return _signalClient.interaction()
                         .request(req)
                         .feature(Feature.ENABLE_LOGGING_OVER_SSL)
@@ -196,18 +199,18 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                 }
             });
     }
-    
+
     @Override
     public String getAppid() {
         return this._appid;
     }
-    
+
 
     @Override
     public void setMBeanRegister(final MBeanRegister register) {
         register.registerMBean("name=wcop", MBeanUtil.createAndConfigureMBean(this));
     }
-    
+
     @Override
     public Observable<String> getAccessToken(final boolean forceRefresh) {
         return Observable.unsafeCreate(new OnSubscribe<String>() {
@@ -224,7 +227,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
             .toBlocking()
             .single();
     }
-    
+
     @Override
     public Observable<String> getJsapiTicket() {
         return Observable.unsafeCreate(new OnSubscribe<String>() {
@@ -233,19 +236,19 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                 selfEventReceiver().acceptEvent("onSubscribeTicket", subscriber);
             }});
     }
-    
+
     public BizStep start() {
         return INIT;
     }
-    
+
     public void stop() {
         selfEventReceiver().acceptEvent("stop");
     }
-    
+
     private final BizStep INIT = new BizStep("weixin.init") {
         @OnEvent(event = "onSubscribeAccessToken")
         private BizStep onSubscribeAccessToken(
-                final Subscriber<? super String> subscriber, 
+                final Subscriber<? super String> subscriber,
                 final boolean forceRefresh) throws Exception {
             LOG.info("onSubscribeAccessToken {}", subscriber);
             if (isAccessTokenValid() && !forceRefresh) {
@@ -272,17 +275,17 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
             }
             return BizStep.CURRENT_BIZSTEP;
         }
-        
+
         @OnEvent(event = "onAccessTokenError")
         private BizStep onAccessTokenError(final Throwable e) {
             LOG.error("onAccessTokenError, detail {}",
                     ExceptionUtils.exception2detail(e));
             clearAccessToken();
-            for (Subscriber<? super String> subscriber : _subscribers4accessToken) {
+            for (final Subscriber<? super String> subscriber : _subscribers4accessToken) {
                 if (!subscriber.isUnsubscribed()) {
                     try {
                         subscriber.onError(e);
-                    } catch (Exception e1) {
+                    } catch (final Exception e1) {
                         LOG.warn("exception when invoke {}.onError, detail: {}",
                                 subscriber, ExceptionUtils.exception2detail(e1));
                     }
@@ -291,20 +294,20 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
             _subscribers4accessToken.clear();
             return BizStep.CURRENT_BIZSTEP;
         }
-            
+
         @OnEvent(event = "onAccessTokenResponse")
         private BizStep onAccessTokenResponse(final FetchAccessTokenResponse resp) {
             _accessToken = resp.getAccessToken();
-            _accessTokenExpireInMs = System.currentTimeMillis() 
+            _accessTokenExpireInMs = System.currentTimeMillis()
                     + (Long.parseLong(resp.getExpiresIn()) - 30) * 1000L;
-            LOG.info("on fetch access token response {}, update token {} and expires timestamp in {}", 
+            LOG.info("on fetch access token response {}, update token {} and expires timestamp in {}",
                     resp, _accessToken, new Date(_accessTokenExpireInMs));
-            for (Subscriber<? super String> subscriber : _subscribers4accessToken) {
+            for (final Subscriber<? super String> subscriber : _subscribers4accessToken) {
                 if (!subscriber.isUnsubscribed()) {
                     try {
                         subscriber.onNext(_accessToken);
                         subscriber.onCompleted();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         LOG.warn("exception when invoke {}.onNext, detail: {}",
                                 subscriber, ExceptionUtils.exception2detail(e));
                     }
@@ -313,7 +316,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
             _subscribers4accessToken.clear();
             return BizStep.CURRENT_BIZSTEP;
         }
-        
+
         @OnEvent(event = "onSubscribeTicket")
         private BizStep onSubscribeTicket(final Subscriber<? super String> subscriber) {
             LOG.info("onSubscribeTicket {}", subscriber);
@@ -334,35 +337,35 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
             }
             return BizStep.CURRENT_BIZSTEP;
         }
-        
+
         @OnEvent(event = "onTicketError")
         private BizStep onTicketError(final Throwable e) {
             LOG.error("onTicketError, detail {}",
                     ExceptionUtils.exception2detail(e));
             _jsapiTicket = null;
             _jsapiTicketExpireInMs = 0;
-            for (Subscriber<? super String> subscriber : _subscribers4ticket) {
+            for (final Subscriber<? super String> subscriber : _subscribers4ticket) {
                 subscriber.onError(e);
             }
             _subscribers4ticket.clear();
             return BizStep.CURRENT_BIZSTEP;
         }
-            
+
         @OnEvent(event = "onTicketResponse")
         private BizStep onTicketResponse(final FetchTicketResponse resp) {
             _jsapiTicket = resp.getTicket();
-            _jsapiTicketExpireInMs = System.currentTimeMillis() 
+            _jsapiTicketExpireInMs = System.currentTimeMillis()
                     + (Long.parseLong(resp.getExpiresIn()) - 30) * 1000L;
-            LOG.info("on fetch ticket response {}, update ticket {} and expires timestamp in ms {}", 
+            LOG.info("on fetch ticket response {}, update ticket {} and expires timestamp in ms {}",
                     resp, _jsapiTicket, _jsapiTicketExpireInMs);
-            for (Subscriber<? super String> subscriber : _subscribers4ticket) {
+            for (final Subscriber<? super String> subscriber : _subscribers4ticket) {
                 subscriber.onNext(_jsapiTicket);
                 subscriber.onCompleted();
             }
             _subscribers4ticket.clear();
             return BizStep.CURRENT_BIZSTEP;
         }
-        
+
         @OnEvent(event = "stop")
         private BizStep stop() {
             //  TODO, add unsubcribe
@@ -370,13 +373,13 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
         }
     }
     .freeze();
-    
+
     private void startFetchAccessToken() throws SSLException, URISyntaxException {
-        
+
         this._fetchingAccessToken = true;
         clearAccessToken();
         final FetchAccessTokenRequest fetchAccessTokenReq = new FetchAccessTokenRequest();
-        
+
         fetchAccessTokenReq.setAppid(this._appid);
         fetchAccessTokenReq.setSecret(this._appsecret);
         this._signalClient.interaction().request(fetchAccessTokenReq)
@@ -402,10 +405,10 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
         this._accessToken = null;
         this._accessTokenExpireInMs = 0;
     }
-    
+
     private void startFetchTicket() {
         this._fetchingJsapiTicket = true;
-        
+
         getAccessToken(false).flatMap(new Func1<String, Observable<? extends FetchTicketResponse>>() {
             @Override
             public Observable<? extends FetchTicketResponse> call(final String accessToken) {
@@ -420,7 +423,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                     .feature(new SignalClient.UsingPath("/ticket/getticket"))
                     .feature(new SignalClient.DecodeResponseBodyAs(FetchTicketResponse.class))
                     .<FetchTicketResponse>build();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LOG.warn("exception when fetchTicket, detail: {}", ExceptionUtils.exception2detail(e));
                     return Observable.error(e);
                 }
@@ -435,7 +438,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
             "onTicketResponse",
             "onTicketError"));
     }
-    
+
     private boolean isFetchingAccessToken() {
         return this._fetchingAccessToken;
     }
@@ -475,7 +478,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
     public String getAppsecret() {
         return _appsecret;
     }
-    
+
     public void setMaxRetryTimes(final int maxRetryTimes) {
         this._maxRetryTimes = maxRetryTimes;
     }
@@ -483,7 +486,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
     public void setRetryIntervalBase(final int retryIntervalBase) {
         this._retryIntervalBase = retryIntervalBase;
     }
-    
+
     private void handleFetchAccessTokenSubscriber(
             final Subscriber<? super String> subscriber) {
         if (!subscriber.isUnsubscribed()) {
@@ -510,27 +513,27 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
 
     @Inject
     private SignalClient _signalClient;
-    
+
     private String _appid;
-    
+
     private String _appsecret;
-    
+
     private String _accessToken;
-    
+
     private long _accessTokenExpireInMs = 0;
-    
+
     private final List<Subscriber<? super String>> _subscribers4accessToken = Lists.newCopyOnWriteArrayList();
-    
+
     private boolean _fetchingAccessToken = false;
-    
+
     private String _jsapiTicket;
 
     private long _jsapiTicketExpireInMs = 0;
-    
+
     private final List<Subscriber<? super String>> _subscribers4ticket = Lists.newCopyOnWriteArrayList();
-    
+
     private boolean _fetchingJsapiTicket = false;
-    
+
     private int _maxRetryTimes = 3;
     private int _retryIntervalBase = 100; // 100 ms
 }
@@ -549,7 +552,7 @@ access_token是公众号的全局唯一票据，公众号调用各接口时都�
     新老access_token都可用，这保证了第三方业务的平滑过渡；
 3、access_token的有效时间可能会在未来有调整，所以中控服务器不仅需要内部定时主动刷新，还需要提供被动刷新access_token的接口，
     这样便于业务服务器在API调用获知access_token已超时的情况下，可以触发access_token的刷新流程。
-    
+
 如果第三方不使用中控服务器，而是选择各个业务逻辑点各自去刷新access_token，那么就可能会产生冲突，导致服务不稳定。
 
 公众号可以使用AppID和AppSecret调用本接口来获取access_token。AppID和AppSecret可在微信公众平台官网-开发者中心页中获得
