@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
 import rx.Observable;
 import rx.functions.Func1;
@@ -149,17 +150,19 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                     .paramAsQuery("media_id", mediaId)
                     .execution()
                     .flatMap(interaction->interaction.execute())
-                    .compose(MessageUtil.asBody())
-                    .flatMap(body-> {
-                        if (body.contentType().startsWith("application/json")) {
+                    .flatMap(fullmsg -> {
+                        final String contentType = fullmsg.message().headers().get(HttpHeaderNames.CONTENT_TYPE);
+                        if (contentType.startsWith("application/json")) {
                             // error return as json
-                            // TODO
-                            return Observable.error(new RuntimeException());
+                            return fullmsg.body()
+                                .flatMap(body -> MessageUtil.<WXProtocol.WXAPIResponse>decodeJsonAs(body,
+                                        WXProtocol.WXAPIResponse.class))
+                                .flatMap(resp -> Observable.error(
+                                        new RuntimeException(resp.getErrcode() + "/" + resp.getErrmsg())));
                         } else {
-                            return Observable.just(body);
+                            return fullmsg.body();
                         }
-                    })
-                    ;
+                    });
             } catch (final Exception e) {
                 return Observable.error(e);
             }
