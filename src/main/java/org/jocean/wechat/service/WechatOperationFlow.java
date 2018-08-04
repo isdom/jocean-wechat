@@ -3,8 +3,6 @@
  */
 package org.jocean.wechat.service;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
@@ -13,8 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.net.ssl.SSLException;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 
 import org.jocean.event.api.AbstractFlow;
 import org.jocean.event.api.BizStep;
@@ -29,31 +25,21 @@ import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.idiom.rx.RxObservables;
 import org.jocean.idiom.rx.RxObservables.RetryPolicy;
 import org.jocean.j2se.jmx.MBeanUtil;
-import org.jocean.netty.BlobRepo.Blob;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
 import org.jocean.wechat.WechatOperation;
-import org.jocean.wechat.spi.DownloadMediaRequest;
-import org.jocean.wechat.spi.DownloadMediaResponse;
 import org.jocean.wechat.spi.FetchAccessTokenRequest;
 import org.jocean.wechat.spi.FetchAccessTokenResponse;
 import org.jocean.wechat.spi.FetchTicketRequest;
 import org.jocean.wechat.spi.FetchTicketResponse;
 import org.jocean.wechat.spi.OAuthAccessTokenRequest;
-import org.jocean.wechat.spi.UploadMediaRequest;
-import org.jocean.wechat.spi.UploadMediaResponse;
 import org.jocean.wechat.spi.UserInfoRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
-import com.google.common.io.ByteStreams;
-import com.google.common.primitives.Bytes;
 
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.util.CharsetUtil;
-import io.netty.util.internal.ThreadLocalRandom;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
@@ -107,6 +93,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
         }
     }
 
+    /*
     @Override
     public Observable<Blob> downloadMedia(final String accessToken, final String mediaId) {
         final DownloadMediaRequest req = new DownloadMediaRequest();
@@ -199,6 +186,7 @@ public class WechatOperationFlow extends AbstractFlow<WechatOperationFlow>
                 }
             });
     }
+    */
 
     @Override
     public String getAppid() {

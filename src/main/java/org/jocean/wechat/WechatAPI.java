@@ -28,6 +28,6 @@ public interface WechatAPI {
     public Func1<Interact, Observable<String>> createVolatileQrcode(final int expireSeconds, final String scenestr);
 
     //  input mediaId (see : https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1444738726&token=&lang=zh_CN)
-    //  output Blob : media download
+    //  output MessageBody : media download
     public Func1<Interact, Observable<MessageBody>> downloadMedia(final String mediaId);
 }
