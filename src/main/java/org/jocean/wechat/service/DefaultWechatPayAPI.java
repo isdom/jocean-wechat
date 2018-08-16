@@ -26,6 +26,8 @@ import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.wechat.WechatPayAPI;
 import org.jocean.wechat.spi.SendRedpackRequest;
 import org.jocean.wechat.spi.SendRedpackResponse;
+import org.jocean.wechat.spi.UnifiedOrderRequest;
+import org.jocean.wechat.spi.UnifiedOrderResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,7 +52,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
 
     }
 
-    private void sign(final SendRedpackRequest req) {
+    private String signOf(final Object req) {
         final Field fields[] = req.getClass().getDeclaredFields();//cHis 是实体类名称
         final List<String> list = new ArrayList<String>();
         try {
@@ -70,10 +72,10 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
             final MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(sb.toString().getBytes(Charsets.UTF_8));
             final byte[] signatureBytes = md.digest();
-            final String signature = Md5.bytesToHexString(signatureBytes).toUpperCase();
-            req.setSign(signature);
+            return Md5.bytesToHexString(signatureBytes).toUpperCase();
         } catch (final Exception e) {
             LOG.warn("exception when sign req {}, detail: {}", req, ExceptionUtils.exception2detail(e));
+            throw new RuntimeException(e);
         }
     }
 
@@ -89,7 +91,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
             return interact-> {
                 reqAndBody.setMchId(_mch_id);
                 reqAndBody.setWxappid(_appid);
-                sign(reqAndBody);
+                reqAndBody.setSign( signOf(reqAndBody) );
 
                 try {
                     final KeyStore ks = KeyStore.getInstance("PKCS12");
@@ -124,6 +126,25 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
         final SendRedpackRequest reqAndBody = new SendRedpackRequest();
         final Func0<Func1<Interact, Observable<SendRedpackResult>>> action = buildAction(reqAndBody);
         return Proxys.delegate(SendRedpackContext.class, new Object[]{reqAndBody, action}, new RET[]{RET.SELF, RET.PASSTHROUGH});
+    }
+
+    @Override
+    public Func1<Interact, Observable<UnifiedOrderResponse>> unifiedorder(final UnifiedOrderRequest req) {
+        return interact-> {
+            req.setMchId(_mch_id);
+            req.setAppid(_appid);
+            req.setSign( signOf(req));
+
+            try {
+                return interact.method(HttpMethod.POST)
+                        .reqbean(req)
+                        .body(req, ContentUtil.TOXML).execution()
+                        .compose(MessageUtil.responseAs(UnifiedOrderResponse.class, MessageUtil::unserializeAsXml));
+            } catch (final Exception e) {
+                LOG.warn("exception when unifiedorder {}, detail: {}", req, ExceptionUtils.exception2detail(e));
+                return Observable.error(e);
+            }
+        };
     }
 
     @Override
