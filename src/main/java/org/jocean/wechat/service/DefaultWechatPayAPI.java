@@ -69,8 +69,10 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
             }
             sb.append("key=");
             sb.append(this._key);
+            final String stringSignTemp = sb.toString();
+            LOG.debug("signOf's input: {}", stringSignTemp);
             final MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(sb.toString().getBytes(Charsets.UTF_8));
+            md.update(stringSignTemp.getBytes(Charsets.UTF_8));
             final byte[] signatureBytes = md.digest();
             return Md5.bytesToHexString(signatureBytes).toUpperCase();
         } catch (final Exception e) {
