@@ -2,6 +2,8 @@
 package org.jocean.wechat;
 
 import org.jocean.http.Interact;
+import org.jocean.wechat.spi.OrderQueryRequest;
+import org.jocean.wechat.spi.OrderQueryResponse;
 import org.jocean.wechat.spi.UnifiedOrderRequest;
 import org.jocean.wechat.spi.UnifiedOrderResponse;
 
@@ -70,6 +72,5 @@ public interface WechatPayAPI {
 
     public Func1<Interact, Observable<UnifiedOrderResponse>> unifiedorder(final UnifiedOrderRequest req);
 
-//    orderquery();
-
+    public Func1<Interact, Observable<OrderQueryResponse>> orderquery(final OrderQueryRequest req);
 }

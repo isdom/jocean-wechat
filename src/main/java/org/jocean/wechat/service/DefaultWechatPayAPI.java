@@ -24,6 +24,8 @@ import org.jocean.idiom.Proxys.RET;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.wechat.WechatPayAPI;
+import org.jocean.wechat.spi.OrderQueryRequest;
+import org.jocean.wechat.spi.OrderQueryResponse;
 import org.jocean.wechat.spi.SendRedpackRequest;
 import org.jocean.wechat.spi.SendRedpackResponse;
 import org.jocean.wechat.spi.UnifiedOrderRequest;
@@ -146,6 +148,13 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                 LOG.warn("exception when unifiedorder {}, detail: {}", req, ExceptionUtils.exception2detail(e));
                 return Observable.error(e);
             }
+        };
+    }
+
+    @Override
+    public Func1<Interact, Observable<OrderQueryResponse>> orderquery(final OrderQueryRequest req) {
+        return interact-> {
+            return Observable.just(new OrderQueryResponse());
         };
     }
 
