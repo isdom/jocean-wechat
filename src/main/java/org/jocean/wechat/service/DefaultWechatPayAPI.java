@@ -154,7 +154,19 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
     @Override
     public Func1<Interact, Observable<OrderQueryResponse>> orderquery(final OrderQueryRequest req) {
         return interact-> {
-            return Observable.just(new OrderQueryResponse());
+            req.setMchId(_mch_id);
+            req.setAppid(_appid);
+            req.setSign( signOf(req));
+
+            try {
+                return interact.method(HttpMethod.POST)
+                        .reqbean(req)
+                        .body(req, ContentUtil.TOXML).execution()
+                        .compose(MessageUtil.responseAs(OrderQueryResponse.class, MessageUtil::unserializeAsXml));
+            } catch (final Exception e) {
+                LOG.warn("exception when orderquery {}, detail: {}", req, ExceptionUtils.exception2detail(e));
+                return Observable.error(e);
+            }
         };
     }
 
