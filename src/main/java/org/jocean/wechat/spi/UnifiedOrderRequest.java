@@ -8,6 +8,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * 统一下单API需要提交的数据
+ * https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=9_1
  * https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_sl_api.php?chapter=9_1
  */
 @Consumes({"application/xml","text/xml"})
