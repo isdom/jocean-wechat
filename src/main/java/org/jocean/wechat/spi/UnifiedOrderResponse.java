@@ -22,4 +22,16 @@ public class UnifiedOrderResponse extends PayBaseResponse {
     }
 
     private String prepay_id;
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("UnifiedOrderResponse [prepay_id=").append(prepay_id).append(", return_code=")
+                .append(return_code).append(", return_msg=").append(return_msg).append(", appid=").append(appid)
+                .append(", mch_id=").append(mch_id).append(", nonce_str=").append(nonce_str).append(", sign=")
+                .append(sign).append(", result_code=").append(result_code).append(", err_code=").append(err_code)
+                .append(", err_code_des=").append(err_code_des).append(", device_info=").append(device_info)
+                .append("]");
+        return builder.toString();
+    }
 }
