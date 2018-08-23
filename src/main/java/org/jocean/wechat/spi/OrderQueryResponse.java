@@ -2,6 +2,7 @@ package org.jocean.wechat.spi;
 
 import javax.ws.rs.Consumes;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @Consumes({"application/xml","text/xml"})
@@ -77,138 +78,172 @@ public class OrderQueryResponse extends PayBaseResponse {
     // 交易状态描述   trade_state_desc    是   String(256) 支付失败，请重新下单支付    对当前查询订单状态的描述和下一步操作的指引
     private String  trade_state_desc;
 
+    @JacksonXmlProperty(localName="trade_state")
     public String getTrade_state() {
         return trade_state;
     }
 
+    @JacksonXmlProperty(localName="trade_state")
     public void setTrade_state(final String trade_state) {
         this.trade_state = trade_state;
     }
 
+    @JacksonXmlProperty(localName="bank_type")
     public String getBank_type() {
         return bank_type;
     }
 
+    @JacksonXmlProperty(localName="bank_type")
     public void setBank_type(final String bank_type) {
         this.bank_type = bank_type;
     }
 
+    @JacksonXmlProperty(localName="total_fee")
     public Integer getTotal_fee() {
         return total_fee;
     }
 
+    @JacksonXmlProperty(localName="total_fee")
     public void setTotal_fee(final Integer total_fee) {
         this.total_fee = total_fee;
     }
 
+    @JacksonXmlProperty(localName="settlement_total_fee")
     public Integer getSettlement_total_fee() {
         return settlement_total_fee;
     }
 
+    @JacksonXmlProperty(localName="settlement_total_fee")
     public void setSettlement_total_fee(final Integer settlement_total_fee) {
         this.settlement_total_fee = settlement_total_fee;
     }
 
+    @JacksonXmlProperty(localName="fee_type")
     public String getFee_type() {
         return fee_type;
     }
 
+    @JacksonXmlProperty(localName="fee_type")
     public void setFee_type(final String fee_type) {
         this.fee_type = fee_type;
     }
 
+    @JacksonXmlProperty(localName="cash_fee")
     public Integer getCash_fee() {
         return cash_fee;
     }
 
+    @JacksonXmlProperty(localName="cash_fee")
     public void setCash_fee(final Integer cash_fee) {
         this.cash_fee = cash_fee;
     }
 
+    @JacksonXmlProperty(localName="cash_fee_type")
     public String getCash_fee_type() {
         return cash_fee_type;
     }
 
+    @JacksonXmlProperty(localName="cash_fee_type")
     public void setCash_fee_type(final String cash_fee_type) {
         this.cash_fee_type = cash_fee_type;
     }
 
+    @JacksonXmlProperty(localName="coupon_fee")
     public Integer getCoupon_fee() {
         return coupon_fee;
     }
 
+    @JacksonXmlProperty(localName="coupon_fee")
     public void setCoupon_fee(final Integer coupon_fee) {
         this.coupon_fee = coupon_fee;
     }
 
+    @JacksonXmlProperty(localName="coupon_count")
     public Integer getCoupon_count() {
         return coupon_count;
     }
 
+    @JacksonXmlProperty(localName="coupon_count")
     public void setCoupon_count(final Integer coupon_count) {
         this.coupon_count = coupon_count;
     }
 
+    @JacksonXmlProperty(localName="attach")
     public String getAttach() {
         return attach;
     }
 
+    @JacksonXmlProperty(localName="attach")
     public void setAttach(final String attach) {
         this.attach = attach;
     }
 
+    @JacksonXmlProperty(localName="time_end")
     public String getTime_end() {
         return time_end;
     }
 
+    @JacksonXmlProperty(localName="time_end")
     public void setTime_end(final String time_end) {
         this.time_end = time_end;
     }
 
+    @JacksonXmlProperty(localName="trade_state_desc")
     public String getTrade_state_desc() {
         return trade_state_desc;
     }
 
+    @JacksonXmlProperty(localName="trade_state_desc")
     public void setTrade_state_desc(final String trade_state_desc) {
         this.trade_state_desc = trade_state_desc;
     }
 
+    @JacksonXmlProperty(localName="openid")
     public String getOpenid() {
         return openid;
     }
 
+    @JacksonXmlProperty(localName="openid")
     public void setOpenid(final String openid) {
         this.openid = openid;
     }
 
+    @JacksonXmlProperty(localName="is_subscribe")
     public String getIs_subscribe() {
         return is_subscribe;
     }
 
+    @JacksonXmlProperty(localName="is_subscribe")
     public void setIs_subscribe(final String is_subscribe) {
         this.is_subscribe = is_subscribe;
     }
 
+    @JacksonXmlProperty(localName="trade_type")
     public String getTrade_type() {
         return trade_type;
     }
 
+    @JacksonXmlProperty(localName="trade_type")
     public void setTrade_type(final String trade_type) {
         this.trade_type = trade_type;
     }
 
+    @JacksonXmlProperty(localName="transaction_id")
     public String getTransaction_id() {
         return transaction_id;
     }
 
+    @JacksonXmlProperty(localName="transaction_id")
     public void setTransaction_id(final String transaction_id) {
         this.transaction_id = transaction_id;
     }
 
+    @JacksonXmlProperty(localName="out_trade_no")
     public String getOut_trade_no() {
         return out_trade_no;
     }
 
+    @JacksonXmlProperty(localName="out_trade_no")
     public void setOut_trade_no(final String out_trade_no) {
         this.out_trade_no = out_trade_no;
     }
