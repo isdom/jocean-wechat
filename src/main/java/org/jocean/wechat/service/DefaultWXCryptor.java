@@ -74,7 +74,7 @@ public class DefaultWXCryptor implements WXCryptor {
      * @throws AesException 执行失败，请查看该异常的错误码和具体的错误信息
      */
     @Override
-    public String encryptMsg(final String replyMsg, String timeStamp, final String nonce, final String appid) throws AesException {
+    public ToWXEncryptedMessage encryptMsg(final String replyMsg, String timeStamp, final String nonce, final String appid) throws AesException {
         // 加密
         final String encrypt = encrypt(getRandomStr(), replyMsg, appid);
 
@@ -85,10 +85,16 @@ public class DefaultWXCryptor implements WXCryptor {
 
         final String signature = SHA1.getSHA1(this._verifyToken, timeStamp, nonce, encrypt);
 
-        // System.out.println("发送给平台的签名是: " + signature[1].toString());
         // 生成发送的xml
-        final String result = XMLParse.generate(encrypt, signature, timeStamp, nonce);
-        return result;
+        final ToWXEncryptedMessage msg = new ToWXEncryptedMessage();
+
+        msg.setEncrypt(encrypt);
+        msg.setMsgSignature(signature);
+        msg.setTimeStamp(timeStamp);
+        msg.setNonce(nonce);
+
+//        final String result = XMLParse.generate(encrypt, signature, timeStamp, nonce);
+        return msg;
     }
 
     // 随机生成16位字符串
@@ -146,7 +152,7 @@ public class DefaultWXCryptor implements WXCryptor {
 
             return base64Encrypted;
         } catch (final Exception e) {
-            e.printStackTrace();
+            LOG.warn("exception when encrypt, detail: {}", ExceptionUtils.exception2detail(e));
             throw new AesException(AesException.EncryptAESError);
         }
     }
