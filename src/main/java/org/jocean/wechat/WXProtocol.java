@@ -5,6 +5,21 @@ import com.alibaba.fastjson.annotation.JSONField;
 import rx.functions.Action1;
 
 public class WXProtocol {
+    public static class WXRespException extends RuntimeException {
+        private static final long serialVersionUID = -497658213874624734L;
+
+        public WXRespException(final WXAPIResponse resp, final String message) {
+            super(message);
+            this._wxresp = resp;
+        }
+
+        public WXAPIResponse response() {
+            return this._wxresp;
+        }
+
+        final WXAPIResponse _wxresp;
+    }
+
     public interface WXAPIResponse {
         @JSONField(name="errcode")
         public String getErrcode();
@@ -21,7 +36,7 @@ public class WXProtocol {
 
     public static final Action1<WXAPIResponse> CHECK_WXRESP = resp-> {
         if (null != resp.getErrcode() && !resp.getErrcode().equals("0")) {
-            throw new RuntimeException(resp.toString());
+            throw new WXRespException(resp, resp.toString());
         }
     };
 
