@@ -24,6 +24,8 @@ import org.jocean.idiom.Proxys.RET;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.wechat.WechatPayAPI;
+import org.jocean.wechat.spi.GetHBInfoRequest;
+import org.jocean.wechat.spi.GetHBInfoResponse;
 import org.jocean.wechat.spi.OrderQueryRequest;
 import org.jocean.wechat.spi.OrderQueryResponse;
 import org.jocean.wechat.spi.SendRedpackRequest;
@@ -195,7 +197,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
 
     // https://pay.weixin.qq.com/wiki/doc/api/tools/cash_coupon.php?chapter=13_6&index=5
     @Override
-    public Func1<Interact, Observable<OrderQueryResponse>> gethbinfo(final OrderQueryRequest req) {
+    public Func1<Interact, Observable<GetHBInfoResponse>> gethbinfo(final GetHBInfoRequest req) {
         // TODO Auto-generated method stub
         return null;
     }
