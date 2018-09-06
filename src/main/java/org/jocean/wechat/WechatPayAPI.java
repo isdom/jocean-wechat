@@ -73,4 +73,6 @@ public interface WechatPayAPI {
     public Func1<Interact, Observable<UnifiedOrderResponse>> unifiedorder(final UnifiedOrderRequest req);
 
     public Func1<Interact, Observable<OrderQueryResponse>> orderquery(final OrderQueryRequest req);
+
+    public Func1<Interact, Observable<OrderQueryResponse>> gethbinfo(final OrderQueryRequest req);
 }

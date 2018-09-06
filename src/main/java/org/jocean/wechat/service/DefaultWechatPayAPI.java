@@ -192,4 +192,11 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
 
     @Value("${cert.password}")
     String _certPassword;
+
+    // https://pay.weixin.qq.com/wiki/doc/api/tools/cash_coupon.php?chapter=13_6&index=5
+    @Override
+    public Func1<Interact, Observable<OrderQueryResponse>> gethbinfo(final OrderQueryRequest req) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
