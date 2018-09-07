@@ -2,27 +2,7 @@ package org.jocean.wechat.spi;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-public class PayBaseResponse {
-    @JacksonXmlProperty(localName="return_code")
-    public String getReturnCode() {
-        return return_code;
-    }
-
-    @JacksonXmlProperty(localName="return_code")
-    public void setReturnCode(final String return_code) {
-        this.return_code = return_code;
-    }
-
-    @JacksonXmlProperty(localName="return_msg")
-    public String getReturnMsg() {
-        return return_msg;
-    }
-
-    @JacksonXmlProperty(localName="return_msg")
-    public void setReturnMsg(final String return_msg) {
-        this.return_msg = return_msg;
-    }
-
+public class OrderResponse extends PayResponse {
     @JacksonXmlProperty(localName="appid")
     public String getAppid() {
         return appid;
@@ -73,40 +53,6 @@ public class PayBaseResponse {
         this.sign = sign;
     }
 
-    @JacksonXmlProperty(localName="result_code")
-    public String getResultCode() {
-        return result_code;
-    }
-
-    @JacksonXmlProperty(localName="result_code")
-    public void setResultCode(final String result_code) {
-        this.result_code = result_code;
-    }
-
-    @JacksonXmlProperty(localName="err_code")
-    public String getErrCode() {
-        return err_code;
-    }
-
-    @JacksonXmlProperty(localName="err_code")
-    public void setErrCode(final String err_code) {
-        this.err_code = err_code;
-    }
-
-    @JacksonXmlProperty(localName="err_code_des")
-    public String getErrCodeDes() {
-        return err_code_des;
-    }
-
-    @JacksonXmlProperty(localName="err_code_des")
-    public void setErrCodeDes(final String err_code_des) {
-        this.err_code_des = err_code_des;
-    }
-
-    //协议层
-    protected String return_code; //SUCCESS/FAIL
-    protected String return_msg;
-
     // 协议返回的具体数据（以下字段在return_code 为SUCCESS 的时候有返回）
     //  小程序ID    appid   是   String(32)  wxd678efh567hg6787  微信分配的小程序ID
     protected String appid;
@@ -118,15 +64,6 @@ public class PayBaseResponse {
 
     // 签名   sign    是   String(32)  C380BEC2BFD727A4B6845133519F3AD6    签名，详见签名生成算法
     protected String sign;
-
-    // 业务结果 result_code 是   String(16)  SUCCESS SUCCESS/FAIL
-    protected String result_code;
-
-    // 错误代码 err_code    否   String(32)  SYSTEMERROR 错误码
-    protected String err_code;
-
-    // 错误代码描述   err_code_des    否   String(128) 系统错误    结果信息描述
-    protected String err_code_des;
 
     // 以下字段在return_code 、result_code、trade_state都为SUCCESS时有返回 ，
     // 如trade_state不为 SUCCESS，则只返回out_trade_no（必传）和attach（选传）。

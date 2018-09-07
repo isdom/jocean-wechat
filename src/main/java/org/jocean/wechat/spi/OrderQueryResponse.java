@@ -7,7 +7,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @Consumes({"application/xml","text/xml"})
 @JacksonXmlRootElement(localName="xml")
-public class OrderQueryResponse extends PayBaseResponse {
+public class OrderQueryResponse extends OrderResponse {
     // 用户标识 openid  是   String(128) oUpF8uMuAJO_M2pxb1Q9zNjWeS6o    用户在商户appid下的唯一标识
     private String openid;
 

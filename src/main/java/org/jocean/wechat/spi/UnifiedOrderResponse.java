@@ -7,7 +7,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @Consumes({"application/xml","text/xml"})
 @JacksonXmlRootElement(localName="xml")
-public class UnifiedOrderResponse extends PayBaseResponse {
+public class UnifiedOrderResponse extends OrderResponse {
 
     //  预支付交易会话标识   prepay_id   是   String(64)  wx201410272009395522657a690389285100    微信生成的预支付回话标识，用于后续接口调用中使用，该值有效期为2小时
     @JacksonXmlProperty(localName="prepay_id")

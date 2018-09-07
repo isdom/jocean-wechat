@@ -119,7 +119,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                     LOG.warn("exception when sendRedpack {}, detail: {}", reqAndBody, ExceptionUtils.exception2detail(e));
                     return Observable.error(e);
                 }
-        };
+            };
         }
     }
 
@@ -172,6 +172,36 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
         };
     }
 
+    // https://pay.weixin.qq.com/wiki/doc/api/tools/cash_coupon.php?chapter=13_6&index=5
+    @Override
+    public Func1<Interact, Observable<GetHBInfoResponse>> gethbinfo(final GetHBInfoRequest req) {
+        return interact-> {
+            req.setMchId(_mch_id);
+            req.setAppid(_appid);
+            req.setSign( signOf(req) );
+
+            try {
+                final KeyStore ks = KeyStore.getInstance("PKCS12");
+                ks.load(new ByteArrayInputStream(BaseEncoding.base64().decode(_certAsBase64)),
+                        _certPassword.toCharArray());
+
+                final KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+                kmf.init(ks, _certPassword.toCharArray());
+
+                final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
+
+                return interact.method(HttpMethod.POST)
+                        .reqbean(req)
+                        .body(req, ContentUtil.TOXML)
+                        .feature(new Feature.ENABLE_SSL(sslctx)).execution()
+                        .compose(MessageUtil.responseAs(GetHBInfoResponse.class, MessageUtil::unserializeAsXml));
+            } catch (final Exception e) {
+                LOG.warn("exception when sendRedpack {}, detail: {}", req, ExceptionUtils.exception2detail(e));
+                return Observable.error(e);
+            }
+        };
+    }
+
     @Override
     public String getName() {
         return this._name;
@@ -194,11 +224,4 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
 
     @Value("${cert.password}")
     String _certPassword;
-
-    // https://pay.weixin.qq.com/wiki/doc/api/tools/cash_coupon.php?chapter=13_6&index=5
-    @Override
-    public Func1<Interact, Observable<GetHBInfoResponse>> gethbinfo(final GetHBInfoRequest req) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }
