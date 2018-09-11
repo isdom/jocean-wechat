@@ -6,6 +6,8 @@ import org.jocean.wechat.spi.GetHBInfoRequest;
 import org.jocean.wechat.spi.GetHBInfoResponse;
 import org.jocean.wechat.spi.OrderQueryRequest;
 import org.jocean.wechat.spi.OrderQueryResponse;
+import org.jocean.wechat.spi.PromotionTransfersRequest;
+import org.jocean.wechat.spi.PromotionTransfersResponse;
 import org.jocean.wechat.spi.UnifiedOrderRequest;
 import org.jocean.wechat.spi.UnifiedOrderResponse;
 
@@ -77,4 +79,6 @@ public interface WechatPayAPI {
     public Func1<Interact, Observable<OrderQueryResponse>> orderquery(final OrderQueryRequest req);
 
     public Func1<Interact, Observable<GetHBInfoResponse>> gethbinfo(final GetHBInfoRequest req);
+
+    public Func1<Interact, Observable<PromotionTransfersResponse>> promotiontransfers(final PromotionTransfersRequest req);
 }
