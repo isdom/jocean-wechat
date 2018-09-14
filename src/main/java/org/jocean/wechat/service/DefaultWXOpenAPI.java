@@ -4,8 +4,8 @@
 package org.jocean.wechat.service;
 
 import org.jocean.http.ContentUtil;
-import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
+import org.jocean.http.RpcRunner;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.wechat.WXOpenAPI;
@@ -19,7 +19,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 
 import io.netty.handler.codec.http.HttpMethod;
 import rx.Observable;
-import rx.functions.Func1;
+import rx.Observable.Transformer;
 
 
 public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
@@ -93,24 +93,23 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
     }
 
     @Override
-    public Func1<Interact, Observable<PreAuthCodeResponse>> createPreAuthCode() {
-        return interact-> {
+    public Transformer<RpcRunner, PreAuthCodeResponse> createPreAuthCode() {
+        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
             try {
                 final PreAuthCodeReq req = new PreAuthCodeReq();
                 req.setComponentAppid(this._appid);
 
-                return interact.method(HttpMethod.POST)
-                    .uri("https://api.weixin.qq.com")
-                    .path("/cgi-bin/component/api_create_preauthcode")
-                    .paramAsQuery("component_access_token", this._componentToken)
-                    .body(req, ContentUtil.TOJSON)
-                    .execution()
-                    .compose(MessageUtil.responseAs(PreAuthCodeResponse.class, MessageUtil::unserializeAsJson))
-                    .doOnNext(WXProtocol.CHECK_WXRESP);
+                return interact.method(HttpMethod.POST).uri("https://api.weixin.qq.com")
+                        .path("/cgi-bin/component/api_create_preauthcode")
+                        .paramAsQuery("component_access_token", this._componentToken)
+                        .body(req, ContentUtil.TOJSON)
+                        .execution()
+                        .compose(MessageUtil.responseAs(PreAuthCodeResponse.class, MessageUtil::unserializeAsJson))
+                        .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     static class QueryAuthReq {
@@ -223,25 +222,24 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
      * @see org.jocean.wechat.WXOpenAPI#queryAuth(java.lang.String)
      */
     @Override
-    public Func1<Interact, Observable<QueryAuthResponse>> queryAuth(final String authorizationCode) {
-        return interact-> {
+    public Transformer<RpcRunner, QueryAuthResponse> queryAuth(final String authorizationCode) {
+        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
             try {
                 final QueryAuthReq req = new QueryAuthReq();
                 req.setComponentAppid(this._appid);
                 req.setAuthorizationCode(authorizationCode);
 
-                return interact.method(HttpMethod.POST)
-                    .uri("https://api.weixin.qq.com")
-                    .path("/cgi-bin/component/api_query_auth")
-                    .paramAsQuery("component_access_token", this._componentToken)
-                    .body(req, ContentUtil.TOJSON)
-                    .execution()
-                    .compose(MessageUtil.responseAs(QueryAuthResponse.class, MessageUtil::unserializeAsJson))
-                    .doOnNext(WXProtocol.CHECK_WXRESP);
+                return interact.method(HttpMethod.POST).uri("https://api.weixin.qq.com")
+                        .path("/cgi-bin/component/api_query_auth")
+                        .paramAsQuery("component_access_token", this._componentToken)
+                        .body(req, ContentUtil.TOJSON)
+                        .execution()
+                        .compose(MessageUtil.responseAs(QueryAuthResponse.class, MessageUtil::unserializeAsJson))
+                        .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     static class AuthorizerTokenReq {
@@ -320,26 +318,25 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
      *
      */
     @Override
-    public Func1<Interact, Observable<AuthorizerTokenResponse>> authorizerToken(final String authorizerAppid, final String refreshToken) {
-        return interact-> {
+    public Transformer<RpcRunner, AuthorizerTokenResponse> authorizerToken(final String authorizerAppid, final String refreshToken) {
+        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
             try {
                 final AuthorizerTokenReq req = new AuthorizerTokenReq();
                 req.setComponentAppid(this._appid);
                 req.setAuthorizerAppid(authorizerAppid);
                 req.setAuthorizerRefreshToken(refreshToken);
 
-                return interact.method(HttpMethod.POST)
-                    .uri("https://api.weixin.qq.com")
-                    .path("/cgi-bin/component/api_authorizer_token")
-                    .paramAsQuery("component_access_token", this._componentToken)
-                    .body(req, ContentUtil.TOJSON)
-                    .execution()
-                    .compose(MessageUtil.responseAs(AuthorizerTokenResponse.class, MessageUtil::unserializeAsJson))
-                    .doOnNext(WXProtocol.CHECK_WXRESP);
+                return interact.method(HttpMethod.POST).uri("https://api.weixin.qq.com")
+                        .path("/cgi-bin/component/api_authorizer_token")
+                        .paramAsQuery("component_access_token", this._componentToken)
+                        .body(req, ContentUtil.TOJSON)
+                        .execution()
+                        .compose(MessageUtil.responseAs(AuthorizerTokenResponse.class, MessageUtil::unserializeAsJson))
+                        .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     static class AuthorizerInfoReq {
@@ -457,46 +454,43 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
      *                                 请根据公众号的帐号类型和认证情况，来判断公众号的接口权限。
      */
     @Override
-    public Func1<Interact, Observable<AuthorizerInfoResponse>> getAuthorizerInfo(final String authorizerAppid) {
-        return interact-> {
+    public Transformer<RpcRunner, AuthorizerInfoResponse> getAuthorizerInfo(final String authorizerAppid) {
+        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
             try {
                 final AuthorizerInfoReq req = new AuthorizerInfoReq();
                 req.setComponentAppid(this._appid);
                 req.setAuthorizerAppid(authorizerAppid);
 
-                return interact.method(HttpMethod.POST)
-                    .uri("https://api.weixin.qq.com")
-                    .path("/cgi-bin/component/api_get_authorizer_info")
-                    .paramAsQuery("component_access_token", this._componentToken)
-                    .body(req, ContentUtil.TOJSON)
-                    .execution()
-                    .compose(MessageUtil.responseAs(AuthorizerInfoResponse.class, MessageUtil::unserializeAsJson))
-                    .doOnNext(WXProtocol.CHECK_WXRESP);
+                return interact.method(HttpMethod.POST).uri("https://api.weixin.qq.com")
+                        .path("/cgi-bin/component/api_get_authorizer_info")
+                        .paramAsQuery("component_access_token", this._componentToken)
+                        .body(req, ContentUtil.TOJSON)
+                        .execution()
+                        .compose(MessageUtil.responseAs(AuthorizerInfoResponse.class, MessageUtil::unserializeAsJson))
+                        .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     @Override
-    public Func1<Interact, Observable<OAuthAccessTokenResponse>> getOAuthAccessToken(final String authorizerAppid, final String code) {
-        return interact-> {
+    public Transformer<RpcRunner, OAuthAccessTokenResponse> getOAuthAccessToken(final String authorizerAppid, final String code) {
+        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
             try {
-                return interact.method(HttpMethod.GET)
-                    .uri("https://api.weixin.qq.com")
-                    .path("/sns/oauth2/component/access_token")
-                    .paramAsQuery("appid", authorizerAppid)
-                    .paramAsQuery("code", code)
-                    .paramAsQuery("grant_type", "authorization_code")
-                    .paramAsQuery("component_appid", this._appid)
-                    .paramAsQuery("component_access_token", this._componentToken)
-                    .execution()
-                    .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
-                    .doOnNext(WXProtocol.CHECK_WXRESP);
+                return interact.method(HttpMethod.GET).uri("https://api.weixin.qq.com")
+                        .path("/sns/oauth2/component/access_token")
+                        .paramAsQuery("appid", authorizerAppid)
+                        .paramAsQuery("code", code)
+                        .paramAsQuery("grant_type", "authorization_code")
+                        .paramAsQuery("component_appid", this._appid)
+                        .paramAsQuery("component_access_token", this._componentToken).execution()
+                        .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
+                        .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     @Value("${wxopen.appid}")

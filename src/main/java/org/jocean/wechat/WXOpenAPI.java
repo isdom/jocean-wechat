@@ -1,14 +1,13 @@
 
 package org.jocean.wechat;
 
-import org.jocean.http.Interact;
+import org.jocean.http.RpcRunner;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WXProtocol.WXAPIResponse;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
-import rx.Observable;
-import rx.functions.Func1;
+import rx.Observable.Transformer;
 
 public interface WXOpenAPI {
 
@@ -28,7 +27,7 @@ public interface WXOpenAPI {
         public void setExpires(final int expires);
     }
 
-    public Func1<Interact, Observable<PreAuthCodeResponse>> createPreAuthCode();
+    public Transformer<RpcRunner, PreAuthCodeResponse> createPreAuthCode();
 
     interface FuncscopeCategory {
         @JSONField(name = "id")
@@ -86,7 +85,7 @@ public interface WXOpenAPI {
         public void setAuthorizationInfo(final AuthorizationInfo info);
     }
 
-    public Func1<Interact, Observable<QueryAuthResponse>> queryAuth(final String authorizationCode);
+    public Transformer<RpcRunner, QueryAuthResponse> queryAuth(final String authorizationCode);
 
     public interface AuthorizerTokenResponse extends WXAPIResponse {
         @JSONField(name = "authorizer_access_token")
@@ -108,7 +107,7 @@ public interface WXOpenAPI {
         public void setExpires(final int expires);
     }
 
-    public Func1<Interact, Observable<AuthorizerTokenResponse>> authorizerToken(final String authorizerAppid, final String refreshToken);
+    public Transformer<RpcRunner, AuthorizerTokenResponse> authorizerToken(final String authorizerAppid, final String refreshToken);
 
     interface HasId {
         @JSONField(name = "id")
@@ -220,8 +219,8 @@ public interface WXOpenAPI {
         public void setAuthorizationInfo(final AuthorizationInfo info);
     }
 
-    public Func1<Interact, Observable<AuthorizerInfoResponse>> getAuthorizerInfo(final String authorizerAppid);
+    public Transformer<RpcRunner, AuthorizerInfoResponse> getAuthorizerInfo(final String authorizerAppid);
 
 
-    public Func1<Interact, Observable<OAuthAccessTokenResponse>> getOAuthAccessToken(final String authorizerAppid, final String code);
+    public Transformer<RpcRunner, OAuthAccessTokenResponse> getOAuthAccessToken(final String authorizerAppid, final String code);
 }
