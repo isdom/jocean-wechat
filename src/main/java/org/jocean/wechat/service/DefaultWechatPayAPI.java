@@ -15,8 +15,8 @@ import javax.net.ssl.KeyManagerFactory;
 
 import org.jocean.http.ContentUtil;
 import org.jocean.http.Feature;
-import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
+import org.jocean.http.RpcRunner;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.Md5;
 import org.jocean.idiom.Proxys;
@@ -45,8 +45,8 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import rx.Observable;
+import rx.Observable.Transformer;
 import rx.functions.Func0;
-import rx.functions.Func1;
 
 public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
 
@@ -87,7 +87,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
         }
     }
 
-    private final class SendingRedpack implements Func0<Func1<Interact, Observable<SendRedpackResult>>> {
+    private final class SendingRedpack implements Func0<Transformer<RpcRunner, SendRedpackResult>> {
         private final SendRedpackRequest reqAndBody;
 
         private SendingRedpack(final SendRedpackRequest reqAndBody) {
@@ -95,8 +95,9 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
         }
 
         @Override
-        public Func1<Interact, Observable<SendRedpackResult>> call() {
-            return interact-> {
+        public Transformer<RpcRunner, SendRedpackResult> call() {
+            return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+                interact-> {
                 reqAndBody.setMchId(_mch_id);
                 reqAndBody.setWxappid(_appid);
                 reqAndBody.setSign( signOf(reqAndBody) );
@@ -121,24 +122,25 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                     LOG.warn("exception when sendRedpack {}, detail: {}", reqAndBody, ExceptionUtils.exception2detail(e));
                     return Observable.error(e);
                 }
-            };
+            }));
         }
     }
 
-    private Func0<Func1<Interact, Observable<SendRedpackResult>>> buildAction(final SendRedpackRequest reqAndBody) {
+    private Func0<Transformer<RpcRunner, SendRedpackResult>> buildAction(final SendRedpackRequest reqAndBody) {
         return new SendingRedpack(reqAndBody);
     }
 
     @Override
     public SendRedpackContext sendRedpack() {
         final SendRedpackRequest reqAndBody = new SendRedpackRequest();
-        final Func0<Func1<Interact, Observable<SendRedpackResult>>> action = buildAction(reqAndBody);
+        final Func0<Transformer<RpcRunner, SendRedpackResult>> action = buildAction(reqAndBody);
         return Proxys.delegate(SendRedpackContext.class, new Object[]{reqAndBody, action}, new RET[]{RET.SELF, RET.PASSTHROUGH});
     }
 
     @Override
-    public Func1<Interact, Observable<UnifiedOrderResponse>> unifiedorder(final UnifiedOrderRequest req) {
-        return interact-> {
+    public Transformer<RpcRunner, UnifiedOrderResponse> unifiedorder(final UnifiedOrderRequest req) {
+        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        interact-> {
             req.setMchId(_mch_id);
             req.setAppid(_appid);
             req.setSign( signOf(req));
@@ -152,12 +154,13 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                 LOG.warn("exception when unifiedorder {}, detail: {}", req, ExceptionUtils.exception2detail(e));
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     @Override
-    public Func1<Interact, Observable<OrderQueryResponse>> orderquery(final OrderQueryRequest req) {
-        return interact-> {
+    public Transformer<RpcRunner, OrderQueryResponse> orderquery(final OrderQueryRequest req) {
+        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        interact-> {
             req.setMchId(_mch_id);
             req.setAppid(_appid);
             req.setSign( signOf(req));
@@ -171,13 +174,14 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                 LOG.warn("exception when orderquery {}, detail: {}", req, ExceptionUtils.exception2detail(e));
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     // https://pay.weixin.qq.com/wiki/doc/api/tools/cash_coupon.php?chapter=13_6&index=5
     @Override
-    public Func1<Interact, Observable<GetHBInfoResponse>> gethbinfo(final GetHBInfoRequest req) {
-        return interact-> {
+    public Transformer<RpcRunner, GetHBInfoResponse> gethbinfo(final GetHBInfoRequest req) {
+        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        interact-> {
             req.setMchId(_mch_id);
             req.setAppid(_appid);
             req.setSign( signOf(req) );
@@ -201,13 +205,14 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                 LOG.warn("exception when gethbinfo {}, detail: {}", req, ExceptionUtils.exception2detail(e));
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     //https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_2
     @Override
-    public Func1<Interact, Observable<PromotionTransfersResponse>> promotiontransfers(final PromotionTransfersRequest req) {
-        return interact-> {
+    public Transformer<RpcRunner, PromotionTransfersResponse> promotiontransfers(final PromotionTransfersRequest req) {
+        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        interact-> {
             req.setMchId(_mch_id);
             req.setMchAppid(_appid);
             req.setSign( signOf(req) );
@@ -231,7 +236,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                 LOG.warn("exception when promotiontransfers {}, detail: {}", req, ExceptionUtils.exception2detail(e));
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     @Override

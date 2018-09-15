@@ -1,7 +1,7 @@
 
 package org.jocean.wechat;
 
-import org.jocean.http.Interact;
+import org.jocean.http.RpcRunner;
 import org.jocean.wechat.spi.GetHBInfoRequest;
 import org.jocean.wechat.spi.GetHBInfoResponse;
 import org.jocean.wechat.spi.OrderQueryRequest;
@@ -11,8 +11,7 @@ import org.jocean.wechat.spi.PromotionTransfersResponse;
 import org.jocean.wechat.spi.UnifiedOrderRequest;
 import org.jocean.wechat.spi.UnifiedOrderResponse;
 
-import rx.Observable;
-import rx.functions.Func1;
+import rx.Observable.Transformer;
 
 public interface WechatPayAPI {
 
@@ -44,7 +43,7 @@ public interface WechatPayAPI {
 
         public SendRedpackContext setRiskInfo(final String risk_info);
 
-        public Func1<Interact, Observable<SendRedpackResult>> call();
+        public Transformer<RpcRunner, SendRedpackResult> call();
     }
 
     public interface SendRedpackResult {
@@ -74,11 +73,11 @@ public interface WechatPayAPI {
 
     public SendRedpackContext sendRedpack();
 
-    public Func1<Interact, Observable<UnifiedOrderResponse>> unifiedorder(final UnifiedOrderRequest req);
+    public Transformer<RpcRunner, UnifiedOrderResponse> unifiedorder(final UnifiedOrderRequest req);
 
-    public Func1<Interact, Observable<OrderQueryResponse>> orderquery(final OrderQueryRequest req);
+    public Transformer<RpcRunner, OrderQueryResponse> orderquery(final OrderQueryRequest req);
 
-    public Func1<Interact, Observable<GetHBInfoResponse>> gethbinfo(final GetHBInfoRequest req);
+    public Transformer<RpcRunner, GetHBInfoResponse> gethbinfo(final GetHBInfoRequest req);
 
-    public Func1<Interact, Observable<PromotionTransfersResponse>> promotiontransfers(final PromotionTransfersRequest req);
+    public Transformer<RpcRunner, PromotionTransfersResponse> promotiontransfers(final PromotionTransfersRequest req);
 }
