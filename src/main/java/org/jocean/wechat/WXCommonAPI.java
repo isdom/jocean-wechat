@@ -1,18 +1,17 @@
 
 package org.jocean.wechat;
 
-import org.jocean.http.Interact;
+import org.jocean.http.RpcRunner;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
 import org.jocean.wechat.WXProtocol.WXAPIResponse;
 
-import rx.Observable;
-import rx.functions.Func1;
+import rx.Observable.Transformer;
 
 public interface WXCommonAPI {
-    public Func1<Interact, Observable<UserInfoResponse>> getUserInfo(final String accessToken, final String openid);
+    public Transformer<RpcRunner, UserInfoResponse> getUserInfo(final String accessToken, final String openid);
 
-    public Func1<Interact, Observable<UserInfoResponse>> getSnsUserInfo(final String oauth2Token, final String openid);
+    public Transformer<RpcRunner, UserInfoResponse> getSnsUserInfo(final String oauth2Token, final String openid);
 
-    public Func1<Interact, Observable<WXAPIResponse>> sendCustomMessageInText(final String accessToken,
+    public Transformer<RpcRunner, WXAPIResponse> sendCustomMessageInText(final String accessToken,
             final String openid, final String content);
 }
