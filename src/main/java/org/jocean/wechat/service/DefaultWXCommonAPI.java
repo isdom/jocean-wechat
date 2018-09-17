@@ -1,8 +1,8 @@
 package org.jocean.wechat.service;
 
 import org.jocean.http.ContentUtil;
-import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
+import org.jocean.http.RpcRunner;
 import org.jocean.wechat.WXCommonAPI;
 import org.jocean.wechat.WXProtocol;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
@@ -11,13 +11,14 @@ import org.jocean.wechat.WXProtocol.WXAPIResponse;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import rx.Observable;
-import rx.functions.Func1;
+import rx.Observable.Transformer;
 
 public class DefaultWXCommonAPI implements WXCommonAPI {
 
     @Override
-    public Func1<Interact, Observable<UserInfoResponse>> getUserInfo(final String accessToken, final String openid) {
-        return interact-> {
+    public Transformer<RpcRunner, UserInfoResponse> getUserInfo(final String accessToken, final String openid) {
+        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        interact-> {
             try {
                 return interact
                     .uri("https://api.weixin.qq.com").path("/cgi-bin/user/info")
@@ -30,12 +31,13 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             } catch (final Exception e) {
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     @Override
-    public Func1<Interact, Observable<UserInfoResponse>> getSnsUserInfo(final String oauth2Token, final String openid) {
-        return interact-> {
+    public Transformer<RpcRunner, UserInfoResponse> getSnsUserInfo(final String oauth2Token, final String openid) {
+        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        interact-> {
             try {
                 return interact
                     .uri("https://api.weixin.qq.com").path("/sns/userinfo")
@@ -48,7 +50,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             } catch (final Exception e) {
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     static class CustomMessageReq {
@@ -103,9 +105,10 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
     }
 
     @Override
-    public Func1<Interact, Observable<WXAPIResponse>> sendCustomMessageInText(final String accessToken,
+    public Transformer<RpcRunner, WXAPIResponse> sendCustomMessageInText(final String accessToken,
             final String openid, final String content) {
-        return interact-> {
+        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        interact-> {
             try {
                 final CustomMessageReq req = new CustomMessageReq();
                 req.setToUser(openid);
@@ -121,6 +124,6 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             } catch (final Exception e) {
                 return Observable.error(e);
             }
-        };
+        }));
     }
 }
