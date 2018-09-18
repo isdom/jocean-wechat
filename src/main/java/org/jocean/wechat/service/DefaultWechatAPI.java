@@ -7,9 +7,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import org.jocean.http.ContentUtil;
-import org.jocean.http.Interact;
 import org.jocean.http.MessageBody;
 import org.jocean.http.MessageUtil;
+import org.jocean.http.RpcRunner;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.wechat.WXProtocol;
@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
 import rx.Observable;
-import rx.functions.Func1;
+import rx.Observable.Transformer;
 
 
 public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
@@ -89,8 +89,8 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     }
 
     @Override
-    public Func1<Interact, Observable<OAuthAccessTokenResponse>> getOAuthAccessToken(final String code) {
-        return interact-> {
+    public Transformer<RpcRunner, OAuthAccessTokenResponse> getOAuthAccessToken(final String code) {
+        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
             final OAuthAccessTokenRequest reqbean = new OAuthAccessTokenRequest();
             reqbean.setCode(code);
             reqbean.setAppid(this._appid);
@@ -104,12 +104,12 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             } catch (final Exception e) {
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     @Override
-    public Func1<Interact, Observable<String>> createVolatileQrcode(final int expireSeconds, final String scenestr) {
-        return interact-> {
+    public Transformer<RpcRunner, String> createVolatileQrcode(final int expireSeconds, final String scenestr) {
+        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
             final CreateQrcodeRequest reqAndBody = new CreateQrcodeRequest();
 
             reqAndBody.setAccessToken(this._accessToken);
@@ -128,7 +128,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             } catch (final Exception e) {
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     private static String urlencodeAsUtf8(final String ticket) {
@@ -140,8 +140,8 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
     }
 
     @Override
-    public Func1<Interact, Observable<MessageBody>> downloadMedia(final String mediaId) {
-        return interact-> {
+    public Transformer<RpcRunner, MessageBody> downloadMedia(final String mediaId) {
+        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
             try {
                 return interact.method(HttpMethod.GET)
                     .uri("https://api.weixin.qq.com")
@@ -166,7 +166,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             } catch (final Exception e) {
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     @Value("${wechat.wpa}")
