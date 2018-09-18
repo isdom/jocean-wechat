@@ -3,8 +3,8 @@
  */
 package org.jocean.wechat.service;
 
-import org.jocean.http.Interact;
 import org.jocean.http.MessageUtil;
+import org.jocean.http.RpcRunner;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.wechat.WXProtocol;
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import rx.Observable;
-import rx.functions.Func1;
+import rx.Observable.Transformer;
 
 
 public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
@@ -53,8 +53,9 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
     }
 
     @Override
-    public Func1<Interact, Observable<Code2SessionResponse>> code2session(final String code) {
-        return interact-> {
+    public Transformer<RpcRunner, Code2SessionResponse> code2session(final String code) {
+        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        interact-> {
             try {
                 return interact
                     .uri("https://api.weixin.qq.com")
@@ -69,7 +70,7 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
             } catch (final Exception e) {
                 return Observable.error(e);
             }
-        };
+        }));
     }
 
     @Value("${mina.name}")

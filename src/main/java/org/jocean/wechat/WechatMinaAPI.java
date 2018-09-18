@@ -1,13 +1,12 @@
 
 package org.jocean.wechat;
 
-import org.jocean.http.Interact;
+import org.jocean.http.RpcRunner;
 import org.jocean.wechat.WXProtocol.WXAPIResponse;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
-import rx.Observable;
-import rx.functions.Func1;
+import rx.Observable.Transformer;
 
 public interface WechatMinaAPI {
 
@@ -36,5 +35,5 @@ public interface WechatMinaAPI {
         public void setUnionid(final String unionid);
     }
 
-    public Func1<Interact, Observable<Code2SessionResponse>> code2session(final String code);
+    public Transformer<RpcRunner, Code2SessionResponse> code2session(final String code);
 }
