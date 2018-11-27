@@ -2,12 +2,22 @@ package org.jocean.wechat;
 
 import org.jocean.http.RpcRunner;
 import org.jocean.idiom.BeanFinder;
+import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
 
 import rx.Observable;
 import rx.Observable.Transformer;
 
 public class WXRpc {
+
+    public static Observable<Transformer<RpcRunner, OAuthAccessTokenResponse>> code2tos(
+            final BeanFinder finder,
+            final String appid,
+            final String code) {
+        return finder.find(appid, AuthorizedMP.class).flatMap(mp -> finder.find(mp.getComponentAppid(), WXOpenAPI.class)
+                .map(api -> api.getOAuthAccessToken(mp.getAppid(), code)));
+    }
+
     public static Observable<Transformer<RpcRunner, UserInfoResponse>> tos2userinfo(
             final BeanFinder finder,
             final String scope,
