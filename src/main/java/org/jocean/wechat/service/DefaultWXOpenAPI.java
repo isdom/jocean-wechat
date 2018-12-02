@@ -94,7 +94,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
 
     @Override
     public Transformer<RpcRunner, PreAuthCodeResponse> createPreAuthCode() {
-        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
+        return runners -> runners.flatMap(runner -> runner.name("wxopen.createPreAuthCode").execute(interact -> {
             try {
                 final PreAuthCodeReq req = new PreAuthCodeReq();
                 req.setComponentAppid(this._appid);
@@ -223,7 +223,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
      */
     @Override
     public Transformer<RpcRunner, QueryAuthResponse> queryAuth(final String authorizationCode) {
-        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
+        return runners -> runners.flatMap(runner -> runner.name("wxopen.queryAuth").execute(interact -> {
             try {
                 final QueryAuthReq req = new QueryAuthReq();
                 req.setComponentAppid(this._appid);
@@ -319,7 +319,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
      */
     @Override
     public Transformer<RpcRunner, AuthorizerTokenResponse> authorizerToken(final String authorizerAppid, final String refreshToken) {
-        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
+        return runners -> runners.flatMap(runner -> runner.name("wxopen.authorizerToken").execute(interact -> {
             try {
                 final AuthorizerTokenReq req = new AuthorizerTokenReq();
                 req.setComponentAppid(this._appid);
@@ -455,7 +455,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
      */
     @Override
     public Transformer<RpcRunner, AuthorizerInfoResponse> getAuthorizerInfo(final String authorizerAppid) {
-        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
+        return runners -> runners.flatMap(runner -> runner.name("wxopen.getAuthorizerInfo").execute(interact -> {
             try {
                 final AuthorizerInfoReq req = new AuthorizerInfoReq();
                 req.setComponentAppid(this._appid);
@@ -476,7 +476,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
 
     @Override
     public Transformer<RpcRunner, OAuthAccessTokenResponse> getOAuthAccessToken(final String authorizerAppid, final String code) {
-        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
+        return runners -> runners.flatMap(runner -> runner.name("wxopen.getOAuthAccessToken").execute(interact -> {
             try {
                 return interact.method(HttpMethod.GET).uri("https://api.weixin.qq.com")
                         .path("/sns/oauth2/component/access_token")

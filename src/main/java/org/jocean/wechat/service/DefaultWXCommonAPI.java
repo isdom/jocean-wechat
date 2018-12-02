@@ -17,7 +17,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
 
     @Override
     public Transformer<RpcRunner, UserInfoResponse> getUserInfo(final String accessToken, final String openid) {
-        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        return runners -> runners.flatMap( runner -> runner.name("wxcommon.getUserInfo").execute(
         interact-> {
             try {
                 return interact
@@ -36,7 +36,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
 
     @Override
     public Transformer<RpcRunner, UserInfoResponse> getSnsUserInfo(final String oauth2Token, final String openid) {
-        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        return runners -> runners.flatMap( runner -> runner.name("wxcommon.getSnsUserInfo").execute(
         interact-> {
             try {
                 return interact
@@ -107,7 +107,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
     @Override
     public Transformer<RpcRunner, WXAPIResponse> sendCustomMessageInText(final String accessToken,
             final String openid, final String content) {
-        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        return runners -> runners.flatMap( runner -> runner.name("wxcommon.sendCustomMessageInText").execute(
         interact-> {
             try {
                 final CustomMessageReq req = new CustomMessageReq();
