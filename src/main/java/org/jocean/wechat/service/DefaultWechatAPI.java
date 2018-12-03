@@ -90,7 +90,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
 
     @Override
     public Transformer<RpcRunner, OAuthAccessTokenResponse> getOAuthAccessToken(final String code) {
-        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
+        return runners -> runners.flatMap(runner -> runner.name("wxmp.getOAuthAccessToken").execute(interact -> {
             final OAuthAccessTokenRequest reqbean = new OAuthAccessTokenRequest();
             reqbean.setCode(code);
             reqbean.setAppid(this._appid);
@@ -109,7 +109,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
 
     @Override
     public Transformer<RpcRunner, String> createVolatileQrcode(final int expireSeconds, final String scenestr) {
-        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
+        return runners -> runners.flatMap(runner -> runner.name("wxmp.createVolatileQrcode").execute(interact -> {
             final CreateQrcodeRequest reqAndBody = new CreateQrcodeRequest();
 
             reqAndBody.setAccessToken(this._accessToken);
@@ -141,7 +141,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
 
     @Override
     public Transformer<RpcRunner, MessageBody> downloadMedia(final String mediaId) {
-        return rpcs -> rpcs.flatMap(rpc -> rpc.execute(interact -> {
+        return runners -> runners.flatMap(runner -> runner.name("wxmp.downloadMedia").execute(interact -> {
             try {
                 return interact.method(HttpMethod.GET)
                     .uri("https://api.weixin.qq.com")
