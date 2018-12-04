@@ -96,7 +96,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
 
         @Override
         public Transformer<RpcRunner, SendRedpackResult> call() {
-            return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+            return runners -> runners.flatMap( runner -> runner.name("wxpay.sendRedpack").execute(
                 interact-> {
                 reqAndBody.setMchId(_mch_id);
                 reqAndBody.setWxappid(_appid);
@@ -139,7 +139,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
 
     @Override
     public Transformer<RpcRunner, UnifiedOrderResponse> unifiedorder(final UnifiedOrderRequest req) {
-        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        return runners -> runners.flatMap( runner -> runner.name("wxpay.unifiedorder").execute(
         interact-> {
             req.setMchId(_mch_id);
             req.setAppid(_appid);
@@ -159,7 +159,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
 
     @Override
     public Transformer<RpcRunner, OrderQueryResponse> orderquery(final OrderQueryRequest req) {
-        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        return runners -> runners.flatMap( runner -> runner.name("wxpay.orderquery").execute(
         interact-> {
             req.setMchId(_mch_id);
             req.setAppid(_appid);
@@ -180,7 +180,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
     // https://pay.weixin.qq.com/wiki/doc/api/tools/cash_coupon.php?chapter=13_6&index=5
     @Override
     public Transformer<RpcRunner, GetHBInfoResponse> gethbinfo(final GetHBInfoRequest req) {
-        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        return runners -> runners.flatMap( runner -> runner.name("wxpay.gethbinfo").execute(
         interact-> {
             req.setMchId(_mch_id);
             req.setAppid(_appid);
@@ -211,7 +211,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
     //https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_2
     @Override
     public Transformer<RpcRunner, PromotionTransfersResponse> promotiontransfers(final PromotionTransfersRequest req) {
-        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        return runners -> runners.flatMap( runner -> runner.name("wxpay.promotiontransfers").execute(
         interact-> {
             req.setMchId(_mch_id);
             req.setMchAppid(_appid);

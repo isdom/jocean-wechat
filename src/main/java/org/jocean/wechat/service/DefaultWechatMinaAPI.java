@@ -54,7 +54,7 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
 
     @Override
     public Transformer<RpcRunner, Code2SessionResponse> code2session(final String code) {
-        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        return runners -> runners.flatMap( runner -> runner.name("wxmina.code2session").execute(
         interact-> {
             try {
                 return interact
