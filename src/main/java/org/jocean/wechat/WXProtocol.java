@@ -183,4 +183,27 @@ public class WXProtocol {
         @JSONField(name="url")
         public void setUrl(final String url);
     }
+
+    // refer: https://developers.weixin.qq.com/miniprogram/dev/api/code2Session.html
+    // refer: https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1492585163_FtTNA&token=&lang=zh_CN
+    public interface Code2SessionResponse extends WXAPIResponse {
+        @JSONField(name="openid")
+        public String getOpenid();
+
+        @JSONField(name="openid")
+        public void setOpenid(final String openid);
+
+        @JSONField(name="session_key")
+        public String getSessionkey();
+
+        @JSONField(name="session_key")
+        public void setSessionkey(String session_key);
+
+
+        @JSONField(name="unionid")
+        public String getUnionid();
+
+        @JSONField(name="unionid")
+        public void setUnionid(final String unionid);
+    }
 }

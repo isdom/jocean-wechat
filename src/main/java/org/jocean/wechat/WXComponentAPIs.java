@@ -19,7 +19,7 @@ public class WXComponentAPIs {
             final String componentAppid,
             final String componentAccessToken,
             final String code) {
-        return rpcs -> rpcs.flatMap( rpc -> rpc.execute(
+        return runners -> runners.flatMap( runner -> runner.name("wxcommons.getOAuthAccessToken").execute(
         interact-> interact
                 .uri("https://api.weixin.qq.com")
                 .path("/sns/oauth2/component/access_token")

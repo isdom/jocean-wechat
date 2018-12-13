@@ -7,6 +7,7 @@ import org.jocean.http.RpcRunner;
 import org.jocean.idiom.BeanFinder;
 import org.jocean.svr.ResponseBean;
 import org.jocean.svr.ResponseUtil;
+import org.jocean.wechat.WXProtocol.Code2SessionResponse;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
 
@@ -80,4 +81,11 @@ public class WXUtil {
         return finder.find(WXCommonAPI.class).map(wcapi -> wcapi.getSnsUserInfo(oauth2Token, openid));
     }
 
+    public static Observable<Transformer<RpcRunner, Code2SessionResponse>> component_code2session(
+            final BeanFinder finder,
+            final String minaAppid,
+            final String code) {
+        return finder.find(minaAppid, AuthorizedMP.class).flatMap(mp -> finder.find(mp.getComponentAppid(), WXOpenAPI.class))
+                .map(wxopen -> wxopen.code2session(minaAppid, code));
+    }
 }

@@ -8,6 +8,7 @@ import org.jocean.http.RpcRunner;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.wechat.WXProtocol;
+import org.jocean.wechat.WXProtocol.Code2SessionResponse;
 import org.jocean.wechat.WechatMinaAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

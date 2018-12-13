@@ -10,6 +10,7 @@ import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
 import org.jocean.wechat.WXOpenAPI;
 import org.jocean.wechat.WXProtocol;
+import org.jocean.wechat.WXProtocol.Code2SessionResponse;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -487,6 +488,30 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                         .paramAsQuery("component_access_token", this._componentToken).execution()
                         .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
                         .doOnNext(WXProtocol.CHECK_WXRESP);
+            } catch (final Exception e) {
+                return Observable.error(e);
+            }
+        }));
+    }
+
+    // 小程序: Mina
+    // refer: https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1492585163_FtTNA&token=&lang=zh_CN
+    @Override
+    public Transformer<RpcRunner, Code2SessionResponse> code2session(final String minaAppid, final String code) {
+        return runners -> runners.flatMap( runner -> runner.name("wxopen.code2session").execute(
+        interact-> {
+            try {
+                return interact
+                    .uri("https://api.weixin.qq.com")
+                    .path("/sns/component/jscode2session")
+                    .paramAsQuery("appid", minaAppid)
+                    .paramAsQuery("js_code", code)
+                    .paramAsQuery("grant_type", "authorization_code")
+                    .paramAsQuery("component_appid", this._appid)
+                    .paramAsQuery("component_access_token", this._componentToken)
+                    .execution()
+                    .compose(MessageUtil.responseAs(Code2SessionResponse.class, MessageUtil::unserializeAsJson))
+                    .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
             }
