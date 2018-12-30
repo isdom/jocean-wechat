@@ -1,7 +1,6 @@
 package org.jocean.wechat.service;
 
 import org.jocean.http.ContentUtil;
-import org.jocean.http.MessageUtil;
 import org.jocean.http.RpcRunner;
 import org.jocean.wechat.WXCommonAPI;
 import org.jocean.wechat.WXProtocol;
@@ -21,12 +20,12 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
         interact-> {
             try {
                 return interact
-                    .uri("https://api.weixin.qq.com").path("/cgi-bin/user/info")
+                    .uri("https://api.weixin.qq.com")
+                    .path("/cgi-bin/user/info")
                     .paramAsQuery("access_token", accessToken)
                     .paramAsQuery("openid", openid)
                     .paramAsQuery("lang", "zh_CN")
-                    .execution()
-                    .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson))
+                    .responseAs(ContentUtil.ASJSON, UserInfoResponse.class)
                     .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -40,12 +39,12 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
         interact-> {
             try {
                 return interact
-                    .uri("https://api.weixin.qq.com").path("/sns/userinfo")
+                    .uri("https://api.weixin.qq.com")
+                    .path("/sns/userinfo")
                     .paramAsQuery("access_token", oauth2Token)
                     .paramAsQuery("openid", openid)
                     .paramAsQuery("lang", "zh_CN")
-                    .execution()
-                    .compose(MessageUtil.responseAs(UserInfoResponse.class, MessageUtil::unserializeAsJson))
+                    .responseAs(ContentUtil.ASJSON, UserInfoResponse.class)
                     .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -118,8 +117,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
                     .uri("https://api.weixin.qq.com").path("/cgi-bin/message/custom/send")
                     .paramAsQuery("access_token", accessToken)
                     .body(req, ContentUtil.TOJSON)
-                    .execution()
-                    .compose(MessageUtil.responseAs(WXAPIResponse.class, MessageUtil::unserializeAsJson))
+                    .responseAs(ContentUtil.ASJSON, WXAPIResponse.class)
                     .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);

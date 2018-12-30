@@ -97,9 +97,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             reqbean.setSecret(this._secret);
 
             try {
-                return interact.reqbean(reqbean)
-                    .execution()
-                    .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
+                return interact.reqbean(reqbean).responseAs(ContentUtil.ASJSON, OAuthAccessTokenResponse.class)
                     .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -118,12 +116,8 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
             reqAndBody.setScenestr(scenestr);
 
             try {
-                return interact.method(HttpMethod.POST)
-                    .reqbean(reqAndBody)
-                    .body(reqAndBody, ContentUtil.TOJSON)
-                    .execution()
-                    .compose(MessageUtil.responseAs(CreateQrcodeResponse.class, MessageUtil::unserializeAsJson))
-                    .doOnNext(WXProtocol.CHECK_WXRESP)
+                return interact.method(HttpMethod.POST).reqbean(reqAndBody).body(reqAndBody, ContentUtil.TOJSON)
+                    .responseAs(ContentUtil.ASJSON, CreateQrcodeResponse.class).doOnNext(WXProtocol.CHECK_WXRESP)
                     .map(resp-> "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + urlencodeAsUtf8(resp.getTicket()));
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -154,9 +148,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                         final String contentType = fullmsg.message().headers().get(HttpHeaderNames.CONTENT_TYPE);
                         if (contentType.startsWith("application/json")) {
                             // error return as json
-                            return fullmsg.body()
-                                .flatMap(body -> MessageUtil.<WXProtocol.WXAPIResponse>decodeJsonAs(body,
-                                        WXProtocol.WXAPIResponse.class))
+                            return fullmsg.body().compose(MessageUtil.body2bean(ContentUtil.ASJSON, WXProtocol.WXAPIResponse.class))
                                 .flatMap(resp -> Observable.error(
                                         new RuntimeException(resp.getErrcode() + "/" + resp.getErrmsg())));
                         } else {

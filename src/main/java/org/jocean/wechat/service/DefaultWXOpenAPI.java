@@ -4,7 +4,6 @@
 package org.jocean.wechat.service;
 
 import org.jocean.http.ContentUtil;
-import org.jocean.http.MessageUtil;
 import org.jocean.http.RpcRunner;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
@@ -104,8 +103,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                         .path("/cgi-bin/component/api_create_preauthcode")
                         .paramAsQuery("component_access_token", this._componentToken)
                         .body(req, ContentUtil.TOJSON)
-                        .execution()
-                        .compose(MessageUtil.responseAs(PreAuthCodeResponse.class, MessageUtil::unserializeAsJson))
+                        .responseAs(ContentUtil.ASJSON, PreAuthCodeResponse.class)
                         .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -234,8 +232,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                         .path("/cgi-bin/component/api_query_auth")
                         .paramAsQuery("component_access_token", this._componentToken)
                         .body(req, ContentUtil.TOJSON)
-                        .execution()
-                        .compose(MessageUtil.responseAs(QueryAuthResponse.class, MessageUtil::unserializeAsJson))
+                        .responseAs(ContentUtil.ASJSON, QueryAuthResponse.class)
                         .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -331,8 +328,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                         .path("/cgi-bin/component/api_authorizer_token")
                         .paramAsQuery("component_access_token", this._componentToken)
                         .body(req, ContentUtil.TOJSON)
-                        .execution()
-                        .compose(MessageUtil.responseAs(AuthorizerTokenResponse.class, MessageUtil::unserializeAsJson))
+                        .responseAs(ContentUtil.ASJSON, AuthorizerTokenResponse.class)
                         .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -466,8 +462,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                         .path("/cgi-bin/component/api_get_authorizer_info")
                         .paramAsQuery("component_access_token", this._componentToken)
                         .body(req, ContentUtil.TOJSON)
-                        .execution()
-                        .compose(MessageUtil.responseAs(AuthorizerInfoResponse.class, MessageUtil::unserializeAsJson))
+                        .responseAs(ContentUtil.ASJSON, AuthorizerInfoResponse.class)
                         .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -485,8 +480,8 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                         .paramAsQuery("code", code)
                         .paramAsQuery("grant_type", "authorization_code")
                         .paramAsQuery("component_appid", this._appid)
-                        .paramAsQuery("component_access_token", this._componentToken).execution()
-                        .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
+                        .paramAsQuery("component_access_token", this._componentToken)
+                        .responseAs(ContentUtil.ASJSON, OAuthAccessTokenResponse.class)
                         .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -509,8 +504,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                     .paramAsQuery("grant_type", "authorization_code")
                     .paramAsQuery("component_appid", this._appid)
                     .paramAsQuery("component_access_token", this._componentToken)
-                    .execution()
-                    .compose(MessageUtil.responseAs(Code2SessionResponse.class, MessageUtil::unserializeAsJson))
+                    .responseAs(ContentUtil.ASJSON, Code2SessionResponse.class)
                     .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);

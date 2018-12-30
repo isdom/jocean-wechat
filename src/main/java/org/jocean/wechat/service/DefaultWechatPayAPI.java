@@ -15,7 +15,6 @@ import javax.net.ssl.KeyManagerFactory;
 
 import org.jocean.http.ContentUtil;
 import org.jocean.http.Feature;
-import org.jocean.http.MessageUtil;
 import org.jocean.http.RpcRunner;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.Md5;
@@ -113,10 +112,10 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                     final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
 
                     return interact.method(HttpMethod.POST)
+                            .feature(new Feature.ENABLE_SSL(sslctx))
                             .reqbean(reqAndBody)
                             .body(reqAndBody, ContentUtil.TOXML)
-                            .feature(new Feature.ENABLE_SSL(sslctx)).execution()
-                            .compose(MessageUtil.responseAs(SendRedpackResponse.class, MessageUtil::unserializeAsXml))
+                            .responseAs(ContentUtil.ASXML, SendRedpackResponse.class)
                             .map(resp -> Proxys.delegate(SendRedpackResult.class, resp));
                 } catch (final Exception e) {
                     LOG.warn("exception when sendRedpack {}, detail: {}", reqAndBody, ExceptionUtils.exception2detail(e));
@@ -148,8 +147,8 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
             try {
                 return interact.method(HttpMethod.POST)
                         .reqbean(req)
-                        .body(req, ContentUtil.TOXML).execution()
-                        .compose(MessageUtil.responseAs(UnifiedOrderResponse.class, MessageUtil::unserializeAsXml));
+                        .body(req, ContentUtil.TOXML)
+                        .responseAs(ContentUtil.ASXML, UnifiedOrderResponse.class);
             } catch (final Exception e) {
                 LOG.warn("exception when unifiedorder {}, detail: {}", req, ExceptionUtils.exception2detail(e));
                 return Observable.error(e);
@@ -168,8 +167,8 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
             try {
                 return interact.method(HttpMethod.POST)
                         .reqbean(req)
-                        .body(req, ContentUtil.TOXML).execution()
-                        .compose(MessageUtil.responseAs(OrderQueryResponse.class, MessageUtil::unserializeAsXml));
+                        .body(req, ContentUtil.TOXML)
+                        .responseAs(ContentUtil.ASXML, OrderQueryResponse.class);
             } catch (final Exception e) {
                 LOG.warn("exception when orderquery {}, detail: {}", req, ExceptionUtils.exception2detail(e));
                 return Observable.error(e);
@@ -197,10 +196,10 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                 final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
 
                 return interact.method(HttpMethod.POST)
+                        .feature(new Feature.ENABLE_SSL(sslctx))
                         .reqbean(req)
                         .body(req, ContentUtil.TOXML)
-                        .feature(new Feature.ENABLE_SSL(sslctx)).execution()
-                        .compose(MessageUtil.responseAs(GetHBInfoResponse.class, MessageUtil::unserializeAsXml));
+                        .responseAs(ContentUtil.ASXML, GetHBInfoResponse.class);
             } catch (final Exception e) {
                 LOG.warn("exception when gethbinfo {}, detail: {}", req, ExceptionUtils.exception2detail(e));
                 return Observable.error(e);
@@ -228,10 +227,10 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                 final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
 
                 return interact.method(HttpMethod.POST)
+                        .feature(new Feature.ENABLE_SSL(sslctx))
                         .reqbean(req)
                         .body(req, ContentUtil.TOXML)
-                        .feature(new Feature.ENABLE_SSL(sslctx)).execution()
-                        .compose(MessageUtil.responseAs(PromotionTransfersResponse.class, MessageUtil::unserializeAsXml));
+                        .responseAs(ContentUtil.ASXML, PromotionTransfersResponse.class);
             } catch (final Exception e) {
                 LOG.warn("exception when promotiontransfers {}, detail: {}", req, ExceptionUtils.exception2detail(e));
                 return Observable.error(e);

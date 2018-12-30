@@ -3,7 +3,7 @@
  */
 package org.jocean.wechat.service;
 
-import org.jocean.http.MessageUtil;
+import org.jocean.http.ContentUtil;
 import org.jocean.http.RpcRunner;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
@@ -65,8 +65,7 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
                     .paramAsQuery("secret", this._secret)
                     .paramAsQuery("js_code", code)
                     .paramAsQuery("grant_type", "authorization_code")
-                    .execution()
-                    .compose(MessageUtil.responseAs(Code2SessionResponse.class, MessageUtil::unserializeAsJson))
+                    .responseAs(ContentUtil.ASJSON, Code2SessionResponse.class)
                     .doOnNext(WXProtocol.CHECK_WXRESP);
             } catch (final Exception e) {
                 return Observable.error(e);
