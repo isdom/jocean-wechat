@@ -1,8 +1,8 @@
 
 package org.jocean.wechat;
 
+import org.jocean.http.ContentUtil;
 import org.jocean.http.Feature;
-import org.jocean.http.MessageUtil;
 import org.jocean.http.RpcRunner;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 
@@ -28,8 +28,8 @@ public class WXComponentAPIs {
                 .paramAsQuery("grant_type", "authorization_code")
                 .paramAsQuery("component_appid", componentAppid)
                 .paramAsQuery("component_access_token", componentAccessToken)
-                .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution()
-                .compose(MessageUtil.responseAs(OAuthAccessTokenResponse.class, MessageUtil::unserializeAsJson))
+                .feature(Feature.ENABLE_LOGGING_OVER_SSL)
+                .responseAs(ContentUtil.ASJSON, OAuthAccessTokenResponse.class)
             ));
     }
 }

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.jocean.wechat.service;
 
@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.inject.Inject;
 
+import org.jocean.http.ContentUtil;
 import org.jocean.http.Feature;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.client.HttpClient;
@@ -44,13 +45,13 @@ public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
 
     private static final String MBEAN_SUFFIX = "info=wechat";
 
-    private static final Logger LOG = 
+    private static final Logger LOG =
             LoggerFactory.getLogger(WechatMPAgent.class);
-    
+
     public void start() throws Exception {
         startToUpdateToken();
     }
-    
+
     public void stop() {
         if (this._isActive) {
             this._isActive = false;
@@ -61,7 +62,7 @@ public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
             }
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.jocean.wechat.WXTokenSource#getAppid()
      */
@@ -74,7 +75,7 @@ public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
      * @see org.jocean.wechat.WXTokenSource#getAccessToken(boolean)
      */
     @Override
-    public Observable<String> getAccessToken(boolean forceRefresh) {
+    public Observable<String> getAccessToken(final boolean forceRefresh) {
         return Observable.unsafeCreate(subscriber -> {
             if (!subscriber.isUnsubscribed()) {
                 while (!this._getTokenPolicy.call(subscriber))
@@ -101,7 +102,7 @@ public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
                 scheduleUpdateToken(10, TimeUnit.SECONDS);
             });
     }
-    
+
     private void scheduleUpdateToken(final long delay, final TimeUnit unit) {
         if (this._isActive) {
             this._timer = Observable.timer(delay, unit)
@@ -109,7 +110,7 @@ public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
                     this._timer = null;
                     try {
                         startToUpdateToken();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         LOG.warn("exception when start to update, detail: {}",
                             ExceptionUtils.exception2detail(e));
                     }
@@ -141,10 +142,10 @@ public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
         if (null!=this._register) {
             final String expireTimeAsString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                     .format(new Date(this._accessTokenExpireInMs));
-            
+
             this._register.unregisterMBean(MBEAN_SUFFIX);
             this._register.registerMBean(MBEAN_SUFFIX, new WechatInfoMXBean() {
-                
+
                 @Override
                 public String getName() {
                     return _wpa;
@@ -164,7 +165,7 @@ public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
                 public String getSecret() {
                     return _secret;
                 }
-                
+
                 @Override
                 public String getExpireTime() {
                     return expireTimeAsString;
@@ -185,46 +186,44 @@ public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
         try {
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interact(client).reqbean(reqbean)
-                            .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
-                    .compose(MessageUtil.responseAs(FetchAccessTokenResponse.class, MessageUtil::unserializeAsJson))
+                            .feature(Feature.ENABLE_LOGGING_OVER_SSL).responseAs(ContentUtil.ASJSON, FetchAccessTokenResponse.class))
                     .timeout(10, TimeUnit.SECONDS);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return Observable.error(e);
         }
     }
 
     private Observable<FetchTicketResponse> fetchTicketFromWXOpenAPI() {
         final FetchTicketRequest reqbean = new FetchTicketRequest();
-        
+
         reqbean.setAccessToken(this._accessToken);
         reqbean.setType("jsapi");
         try {
             return this._finder.find(HttpClient.class)
                     .flatMap(client -> MessageUtil.interact(client).reqbean(reqbean)
-                                .feature(Feature.ENABLE_LOGGING_OVER_SSL).execution())
-                    .compose(MessageUtil.responseAs(FetchTicketResponse.class, MessageUtil::unserializeAsJson))
+                                .feature(Feature.ENABLE_LOGGING_OVER_SSL).responseAs(ContentUtil.ASJSON, FetchTicketResponse.class))
                     .timeout(10, TimeUnit.SECONDS);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return Observable.error(e);
         }
     }
-    
+
     private void onAccessTokenResponse(final FetchAccessTokenResponse resp) {
         this._accessToken = resp.getAccessToken();
         this._accessTokenExpireInMs = System.currentTimeMillis() + (Long.parseLong(resp.getExpiresIn()) - 30) * 1000L;
-        LOG.info("on fetch access token response {}, update token {} and expires timestamp in {}", 
+        LOG.info("on fetch access token response {}, update token {} and expires timestamp in {}",
                 resp, _accessToken, new Date(_accessTokenExpireInMs));
-        
+
         this._getTokenPolicy = PUSH_TOKEN_NOW;
-        
+
         final List<Subscriber<? super String>> subscribers = this._subscribers4accessToken;
-        
+
         this._subscribersLock.writeLock().lock();
         this._subscribers4accessToken = null;
         this._subscribersLock.writeLock().unlock();
-        
+
         if (null != subscribers) {
-            for (Subscriber<? super String> subscriber : subscribers) {
+            for (final Subscriber<? super String> subscriber : subscribers) {
                 pushCurrentToken(subscriber);
             }
             subscribers.clear();
@@ -233,15 +232,15 @@ public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
 
     private void onAccessTokenError(final Throwable error) {
         this._getTokenPolicy = PUSH_TOKEN_NOW;
-        
+
         final List<Subscriber<? super String>> subscribers = this._subscribers4accessToken;
-        
+
         this._subscribersLock.writeLock().lock();
         this._subscribers4accessToken = null;
         this._subscribersLock.writeLock().unlock();
-        
+
         if (null != subscribers) {
-            for (Subscriber<? super String> subscriber : subscribers) {
+            for (final Subscriber<? super String> subscriber : subscribers) {
                 pushCurrentTokenWithError(subscriber, error);
             }
             subscribers.clear();
@@ -257,7 +256,7 @@ public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
                 } else {
                     subscriber.onError(new RuntimeException("access token is null"));
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.warn("exception when invoke {}.onNext, detail: {}",
                         subscriber, ExceptionUtils.exception2detail(e));
             }
@@ -265,51 +264,51 @@ public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
         return true;
     }
 
-    private void pushCurrentTokenWithError(final Subscriber<? super String> subscriber, 
+    private void pushCurrentTokenWithError(final Subscriber<? super String> subscriber,
             final Throwable error) {
         if (!subscriber.isUnsubscribed()) {
             try {
                 subscriber.onError(error);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.warn("exception when invoke {}.onError, detail: {}",
                         subscriber, ExceptionUtils.exception2detail(e));
             }
         }
     }
-    
+
     @Override
     public void setMBeanRegister(final MBeanRegister register) {
         this._register = register;
     }
-    
+
     public String getSecret() {
         return _secret;
     }
-    
+
     private String _accessToken;
-    
+
     private long _accessTokenExpireInMs = 0;
-    
+
     private final ReadWriteLock _subscribersLock = new ReentrantReadWriteLock(false);
     private List<Subscriber<? super String>> _subscribers4accessToken;
-    
+
     private volatile Func1<Subscriber<? super String>, Boolean> _getTokenPolicy;
-    
+
     @Inject
     private BeanFinder _finder;
-    
+
     private volatile boolean _isActive = true;
-    
+
     private volatile Subscription _timer;
-    
+
     @Value("${wechat.wpa}")
     String _wpa;
-    
+
     @Value("${wechat.appid}")
     String _appid;
-    
+
     @Value("${wechat.secret}")
     String _secret;
-    
+
     private MBeanRegister _register;
 }
