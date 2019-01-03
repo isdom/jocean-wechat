@@ -9,6 +9,7 @@ import org.jocean.wechat.WXProtocol.WXAPIResponse;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
+import io.netty.handler.codec.http.HttpMethod;
 import rx.Observable;
 import rx.Observable.Transformer;
 
@@ -113,7 +114,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
                 req.setToUser(openid);
                 req.setMsgType("text");
                 req.setTextContent(content);
-                return interact
+                return interact.method(HttpMethod.POST)
                     .uri("https://api.weixin.qq.com").path("/cgi-bin/message/custom/send")
                     .paramAsQuery("access_token", accessToken)
                     .body(req, ContentUtil.TOJSON)
