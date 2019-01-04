@@ -7,6 +7,7 @@ import org.jocean.http.RpcRunner;
 import org.jocean.idiom.BeanFinder;
 import org.jocean.svr.ResponseBean;
 import org.jocean.svr.ResponseUtil;
+import org.jocean.wechat.WXOpenAPI.QueryAuthResponse;
 import org.jocean.wechat.WXProtocol.Code2SessionResponse;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
@@ -88,6 +89,13 @@ public class WXUtil {
             final String code) {
         return finder.find(minaAppid, AuthorizedMP.class).flatMap(mp -> finder.find(mp.getComponentAppid(), WXOpenAPI.class))
                 .map(wxopen -> wxopen.code2session(minaAppid, code));
+    }
+
+    public static Observable<Transformer<RpcRunner, QueryAuthResponse>> component_queryAuth(
+            final BeanFinder finder,
+            final String componentAppid,
+            final String authorizationCode) {
+        return finder.find(componentAppid, WXOpenAPI.class).map(woapi-> woapi.queryAuth(authorizationCode));
     }
 
     public static Observable<Transformer<RpcRunner, WXAPIResponse>> common_sendCustomMessageInText(
