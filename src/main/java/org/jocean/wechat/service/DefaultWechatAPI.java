@@ -142,7 +142,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
                     .path("/cgi-bin/media/get")
                     .paramAsQuery("access_token", this._accessToken)
                     .paramAsQuery("media_id", mediaId)
-                    .response(null)
+                    .response()
                     .flatMap(fullmsg -> {
                         final String contentType = fullmsg.message().headers().get(HttpHeaderNames.CONTENT_TYPE);
                         if (contentType.startsWith("application/json")) {
