@@ -125,4 +125,42 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             }
         }));
     }
+
+    static class ShorturlReq {
+
+        ShorturlReq(final String url) {
+            this.long_url = url;
+        }
+
+        String action = "long2short";
+        String long_url;
+    }
+
+    public interface ShorturlResponse extends WXAPIResponse {
+
+        @JSONField(name = "short_url")
+        public String getShorturl();
+
+        @JSONField(name = "short_url")
+        public void setShortUrl(final String url);
+    }
+
+    @Override
+    public Transformer<RpcRunner, String> getShorturl(final String accessToken, final String url) {
+        return runners -> runners.flatMap( runner -> runner.name("wxcommon.getShorturl").execute(
+        interact-> {
+            try {
+                return interact.method(HttpMethod.POST)
+                    .uri("https://api.weixin.qq.com")
+                    .path("/cgi-bin/shorturl")
+                    .paramAsQuery("access_token", accessToken)
+                    .body(new ShorturlReq(url), ContentUtil.TOJSON)
+                    .responseAs(ContentUtil.ASJSON, ShorturlResponse.class)
+                    .doOnNext(WXProtocol.CHECK_WXRESP)
+                    .map(resp -> resp.getShorturl());
+            } catch (final Exception e) {
+                return Observable.error(e);
+            }
+        }));
+    }
 }

@@ -14,4 +14,6 @@ public interface WXCommonAPI {
 
     public Transformer<RpcRunner, WXAPIResponse> sendCustomMessageInText(final String accessToken,
             final String openid, final String content);
+
+    public Transformer<RpcRunner, String> getShorturl(final String accessToken, final String url);
 }
