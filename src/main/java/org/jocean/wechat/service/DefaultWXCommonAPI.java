@@ -134,6 +134,14 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
 
         String action = "long2short";
         String long_url;
+
+        public String getAction() {
+            return action;
+        }
+
+        public String getLong_url() {
+            return long_url;
+        }
     }
 
     public interface ShorturlResponse extends WXAPIResponse {
