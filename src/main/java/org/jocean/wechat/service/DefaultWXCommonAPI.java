@@ -1,9 +1,14 @@
 package org.jocean.wechat.service;
 
+import java.util.Arrays;
+
+import org.jocean.http.ByteBufSlice;
 import org.jocean.http.ContentUtil;
 import org.jocean.http.MessageBody;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.RpcRunner;
+import org.jocean.idiom.DisposableWrapper;
+import org.jocean.idiom.DisposableWrapperUtil;
 import org.jocean.wechat.WXCommonAPI;
 import org.jocean.wechat.WXProtocol;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
@@ -12,10 +17,16 @@ import org.jocean.wechat.WXProtocol.WXRespError;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpMethod;
+import io.netty.util.CharsetUtil;
+import io.netty.util.internal.PlatformDependent;
 import rx.Observable;
 import rx.Observable.Transformer;
+import rx.functions.Action1;
 
 public class DefaultWXCommonAPI implements WXCommonAPI {
 
@@ -199,4 +210,120 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
         ));
     }
 
+    // https://developers.weixin.qq.com/miniprogram/dev/api-backend/uploadTempMedia.html
+    @Override
+    public Transformer<RpcRunner, UploadTempMediaResponse> uploadTempMedia(final String accessToken,
+            final String filename,
+            final Observable<? extends MessageBody> media) {
+        return runners -> runners.flatMap(runner -> runner.name("wxcommon.uploadTempMedia").execute(interact ->
+        interact.method(HttpMethod.POST)
+            .uri("https://api.weixin.qq.com")
+            .path("/cgi-bin/media/upload")
+            .paramAsQuery("access_token", accessToken)
+            .paramAsQuery("type", "image")
+            .body(media.compose(tomultipart(filename)))
+            .responseAs(ContentUtil.ASJSON, UploadTempMediaResponse.class)
+            .doOnNext(WXProtocol.CHECK_WXRESP)
+    ));
+    }
+
+    private static String getNewMultipartDelimiter() {
+        // construct a generated delimiter
+        return Long.toHexString(PlatformDependent.threadLocalRandom().nextLong());
+    }
+
+    private Transformer<MessageBody, MessageBody> tomultipart(final String filename) {
+        return bodys -> bodys.flatMap(body -> {
+            final String multipartBoundary = getNewMultipartDelimiter();
+            final String contentType = HttpHeaderValues.MULTIPART_FORM_DATA + "; " + HttpHeaderValues.BOUNDARY + '='
+                    + multipartBoundary;
+
+            final Observable<? extends ByteBufSlice> head = headOf(filename, body, multipartBoundary);
+            final Observable<? extends ByteBufSlice> end = endOf(multipartBoundary);
+
+            return Observable.just((MessageBody)new MessageBody() {
+                @Override
+                public String contentType() {
+                    return contentType;
+                }
+                @Override
+                public int contentLength() {
+                    return -1;
+                }
+                @Override
+                public Observable<? extends ByteBufSlice> content() {
+                    return Observable.concat(head, body.content(), end);
+                }});
+        });
+    }
+
+    private Observable<? extends ByteBufSlice> endOf(final String multipartBoundary) {
+        final Iterable<? extends DisposableWrapper<? extends ByteBuf>> elements =
+                Arrays.asList(
+                    DisposableWrapperUtil.wrap(Unpooled.wrappedBuffer(("\r\n--" + multipartBoundary + "--\r\n").getBytes(CharsetUtil.UTF_8)),
+                        (Action1<ByteBuf>)null));
+
+
+        return Observable.just((ByteBufSlice)new ByteBufSlice() {
+            @Override
+            public void step() {
+            }
+
+            @Override
+            public Iterable<? extends DisposableWrapper<? extends ByteBuf>> element() {
+                return elements;
+            }});
+    }
+
+    private Observable<? extends ByteBufSlice> headOf(
+            final String filename,
+            final MessageBody body,
+            final String multipartBoundary) {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append("--");
+        sb.append(multipartBoundary);
+        sb.append("\r\n");
+
+        sb.append(HttpHeaderNames.CONTENT_DISPOSITION);
+        sb.append(": ");
+        sb.append(HttpHeaderValues.FORM_DATA);
+        sb.append("; ");
+        sb.append(HttpHeaderValues.NAME);
+        sb.append("=\"");
+        sb.append(filename);
+        sb.append("\"; ");
+        sb.append(HttpHeaderValues.FILENAME);
+        sb.append("=\"");
+        sb.append(filename);
+        sb.append("\"\r\n");
+
+        if (body.contentLength() > 0) {
+            sb.append(HttpHeaderNames.CONTENT_LENGTH);
+            sb.append(": ");
+            sb.append(body.contentLength());
+            sb.append("\r\n");
+        }
+
+        sb.append(HttpHeaderNames.CONTENT_TYPE);
+        sb.append(": ");
+        sb.append(body.contentType());
+        sb.append("\r\n\r\n");
+
+        final Iterable<? extends DisposableWrapper<? extends ByteBuf>> elements =
+            Arrays.asList(
+                DisposableWrapperUtil.wrap(Unpooled.wrappedBuffer(sb.toString().getBytes(CharsetUtil.UTF_8)),
+                    (Action1<ByteBuf>)null));
+
+
+        return Observable.just((ByteBufSlice)new ByteBufSlice() {
+            @Override
+            public void step() {
+            }
+
+            @Override
+            public Iterable<? extends DisposableWrapper<? extends ByteBuf>> element() {
+                return elements;
+            }});
+    }
 }
