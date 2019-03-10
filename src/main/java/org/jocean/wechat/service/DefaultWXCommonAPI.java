@@ -1,14 +1,18 @@
 package org.jocean.wechat.service;
 
 import org.jocean.http.ContentUtil;
+import org.jocean.http.MessageBody;
+import org.jocean.http.MessageUtil;
 import org.jocean.http.RpcRunner;
 import org.jocean.wechat.WXCommonAPI;
 import org.jocean.wechat.WXProtocol;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
 import org.jocean.wechat.WXProtocol.WXAPIResponse;
+import org.jocean.wechat.WXProtocol.WXRespError;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
 import rx.Observable;
 import rx.Observable.Transformer;
@@ -171,4 +175,28 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             }
         }));
     }
+
+    // https://developers.weixin.qq.com/miniprogram/dev/api-backend/getTempMedia.html
+    @Override
+    public Transformer<RpcRunner, MessageBody> getTempMedia(final String accessToken, final String mediaId) {
+        return runners -> runners.flatMap(runner -> runner.name("wxcommon.getTempMedia").execute(interact ->
+            interact.method(HttpMethod.GET)
+                .uri("https://api.weixin.qq.com")
+                .path("/cgi-bin/media/get")
+                .paramAsQuery("access_token", accessToken)
+                .paramAsQuery("media_id", mediaId)
+                .response()
+                .flatMap(fullmsg -> {
+                    final String contentType = fullmsg.message().headers().get(HttpHeaderNames.CONTENT_TYPE);
+                    if (contentType.startsWith("application/json")) {
+                        // error return as json
+                        return fullmsg.body().compose(MessageUtil.body2bean(ContentUtil.ASJSON, WXProtocol.WXAPIResponse.class))
+                            .flatMap(resp -> Observable.error(new WXRespError(resp, resp.toString())));
+                    } else {
+                        return fullmsg.body();
+                    }
+                })
+        ));
+    }
+
 }
