@@ -238,8 +238,9 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             final String contentType = HttpHeaderValues.MULTIPART_FORM_DATA + "; " + HttpHeaderValues.BOUNDARY + '='
                     + multipartBoundary;
 
-            final Observable<? extends ByteBufSlice> head = headOf(filename, body, multipartBoundary);
-            final Observable<? extends ByteBufSlice> end = endOf(multipartBoundary);
+            final byte[] head = headOf(filename, body, multipartBoundary);
+            final byte[] end = endOf(multipartBoundary);
+            final int contentLength = head.length + end.length + body.contentLength();
 
             return Observable.just((MessageBody)new MessageBody() {
                 @Override
@@ -248,34 +249,20 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
                 }
                 @Override
                 public int contentLength() {
-                    return -1;
+                    return contentLength;
                 }
                 @Override
                 public Observable<? extends ByteBufSlice> content() {
-                    return Observable.concat(head, body.content(), end);
+                    return Observable.concat(bytes2bbs(head), body.content(), bytes2bbs(end));
                 }});
         });
     }
 
-    private Observable<? extends ByteBufSlice> endOf(final String multipartBoundary) {
-        final Iterable<? extends DisposableWrapper<? extends ByteBuf>> elements =
-                Arrays.asList(
-                    DisposableWrapperUtil.wrap(Unpooled.wrappedBuffer(("\r\n--" + multipartBoundary + "--\r\n").getBytes(CharsetUtil.UTF_8)),
-                        (Action1<ByteBuf>)null));
-
-
-        return Observable.just((ByteBufSlice)new ByteBufSlice() {
-            @Override
-            public void step() {
-            }
-
-            @Override
-            public Iterable<? extends DisposableWrapper<? extends ByteBuf>> element() {
-                return elements;
-            }});
+    private byte[] endOf(final String multipartBoundary) {
+        return ("\r\n--" + multipartBoundary + "--\r\n").getBytes(CharsetUtil.UTF_8);
     }
 
-    private Observable<? extends ByteBufSlice> headOf(
+    private byte[] headOf(
             final String filename,
             final MessageBody body,
             final String multipartBoundary) {
@@ -310,13 +297,14 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
         sb.append(body.contentType());
         sb.append("\r\n\r\n");
 
-        final Iterable<? extends DisposableWrapper<? extends ByteBuf>> elements =
-            Arrays.asList(
-                DisposableWrapperUtil.wrap(Unpooled.wrappedBuffer(sb.toString().getBytes(CharsetUtil.UTF_8)),
-                    (Action1<ByteBuf>)null));
+        return sb.toString().getBytes(CharsetUtil.UTF_8);
+    }
 
+    private Observable<? extends ByteBufSlice> bytes2bbs(final byte[] bytes) {
+        final Iterable<? extends DisposableWrapper<? extends ByteBuf>> elements = Arrays
+                .asList(DisposableWrapperUtil.wrap(Unpooled.wrappedBuffer(bytes), (Action1<ByteBuf>) null));
 
-        return Observable.just((ByteBufSlice)new ByteBufSlice() {
+        return Observable.just((ByteBufSlice) new ByteBufSlice() {
             @Override
             public void step() {
             }
@@ -324,6 +312,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             @Override
             public Iterable<? extends DisposableWrapper<? extends ByteBuf>> element() {
                 return elements;
-            }});
+            }
+        });
     }
 }
