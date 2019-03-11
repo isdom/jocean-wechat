@@ -213,6 +213,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
     // https://developers.weixin.qq.com/miniprogram/dev/api-backend/uploadTempMedia.html
     @Override
     public Transformer<RpcRunner, UploadTempMediaResponse> uploadTempMedia(final String accessToken,
+            final String name,
             final String filename,
             final Observable<? extends MessageBody> media) {
         return runners -> runners.flatMap(runner -> runner.name("wxcommon.uploadTempMedia").execute(interact ->
@@ -221,7 +222,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             .path("/cgi-bin/media/upload")
             .paramAsQuery("access_token", accessToken)
             .paramAsQuery("type", "image")
-            .body(media.compose(tomultipart(filename)))
+            .body(media.compose(tomultipart(name, filename)))
             .responseAs(ContentUtil.ASJSON, UploadTempMediaResponse.class)
             .doOnNext(WXProtocol.CHECK_WXRESP)
     ));
@@ -232,13 +233,13 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
         return Long.toHexString(PlatformDependent.threadLocalRandom().nextLong());
     }
 
-    private Transformer<MessageBody, MessageBody> tomultipart(final String filename) {
+    private Transformer<MessageBody, MessageBody> tomultipart(final String name, final String filename) {
         return bodys -> bodys.flatMap(body -> {
             final String multipartBoundary = getNewMultipartDelimiter();
             final String contentType = HttpHeaderValues.MULTIPART_FORM_DATA + "; " + HttpHeaderValues.BOUNDARY + '='
                     + multipartBoundary;
 
-            final byte[] head = headOf(filename, body, multipartBoundary);
+            final byte[] head = headOf(name, filename, body, multipartBoundary);
             final byte[] end = endOf(multipartBoundary);
             final int contentLength = head.length + end.length + body.contentLength();
 
@@ -263,8 +264,8 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
     }
 
     private byte[] headOf(
-            final String filename,
-            final MessageBody body,
+            final String name,
+            final String filename, final MessageBody body,
             final String multipartBoundary) {
         final StringBuilder sb = new StringBuilder();
 
@@ -278,7 +279,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
         sb.append("; ");
         sb.append(HttpHeaderValues.NAME);
         sb.append("=\"");
-        sb.append(filename);
+        sb.append(name);
         sb.append("\"; ");
         sb.append(HttpHeaderValues.FILENAME);
         sb.append("=\"");

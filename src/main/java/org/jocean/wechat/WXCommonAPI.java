@@ -43,5 +43,8 @@ public interface WXCommonAPI {
         public void setCreated(final int time);
     }
 
-    public Transformer<RpcRunner, UploadTempMediaResponse> uploadTempMedia(final String accessToken, final String filename, final Observable<? extends MessageBody> media);
+    public Transformer<RpcRunner, UploadTempMediaResponse> uploadTempMedia(final String accessToken,
+            final String name,
+            final String filename,
+            final Observable<? extends MessageBody> media);
 }
