@@ -71,14 +71,14 @@ public class WXUtil {
         }
     }
 
-    private static Observable<Transformer<RpcRunner, UserInfoResponse>> mpuserinfo(final BeanFinder finder,
+    public static Observable<Transformer<RpcRunner, UserInfoResponse>> mpuserinfo(final BeanFinder finder,
             final String mpappid,
             final String openid) {
         return Observable.zip(finder.find(mpappid, AuthorizedMP.class), finder.find(WXCommonAPI.class),
                 (mp, wcapi) -> wcapi.getUserInfo(mp.getAccessToken(), openid));
     }
 
-    private static Observable<Transformer<RpcRunner, UserInfoResponse>> snsuserinfo(
+    public static Observable<Transformer<RpcRunner, UserInfoResponse>> snsuserinfo(
             final BeanFinder finder,
             final String oauth2Token,
             final String openid) {
