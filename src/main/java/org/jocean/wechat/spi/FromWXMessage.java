@@ -20,7 +20,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  *   假如服务器无法保证在五秒内处理并回复，可以直接回复空串，微信服务器不会对此作任何处理，并且不会发起重试。详情请见“发送消息-被动回复消息”。
  *3、为了保证更高的安全保障，开发者可以在公众平台官网的开发者中心处设置消息加密。
  *   开启加密后，用户发来的消息会被加密，公众号被动回复用户的消息也需要加密（但开发者通过客服接口等API调用形式向用户发送消息，则不受影响）。关于消息加解密的详细说明，请见“消息加解密说明”
- * 
+ *
  * MsgType字符串列表
  * 文本消息 text
  * 图片消息image
@@ -41,11 +41,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @Consumes({"application/xml","text/xml"})
 @JacksonXmlRootElement(localName="xml")
 public class FromWXMessage {
-    
+
     private String _msgId; //消息id，64位整型
-    private String _toUserName; //开发者微信号 
-    private String _fromUserName; //发送方帐号（一个OpenID） 
-    private Integer _createTime; //消息发送时间  the number of seconds since January 1, 1970, 00:00:00 GMT
+    private String _toUserName; //开发者微信号
+    private String _fromUserName; //发送方帐号（一个OpenID）
+    private long   _createTime; //消息发送时间  the number of seconds since January 1, 1970, 00:00:00 GMT
     private String _msgType; //文本消息 text 图片消息image 语音消息voice 视频消息 video 小视频消息 shortvideo 地理位置消息 location  链接消息 link 等等
     private String _content; //文本消息内容
     private String Format; //Format为语音格式，一般为amr
@@ -56,10 +56,10 @@ public class FromWXMessage {
     private String Location_X;// 	地理位置维度
     private String Location_Y;// 	地理位置经度
     private String Scale;// 	地图缩放大小
-    private String Label;// 	地理位置信息 
+    private String Label;// 	地理位置信息
     private String Title;// 	消息标题
     private String Description;// 	消息描述
-    private String Url;// 	消息链接 
+    private String Url;// 	消息链接
     private String Event;// 	事件类型，subscribe(订阅)、unsubscribe(取消订阅)、LOCATION、CLICK、VIEW
     private String EventKey;// 	事件KEY值
     private String Ticket;// 	二维码的ticket，可用来换取二维码图片
@@ -79,7 +79,7 @@ public class FromWXMessage {
         return SkuInfo;
     }
 
-    public void setSkuInfo(String skuInfo) {
+    public void setSkuInfo(final String skuInfo) {
         SkuInfo = skuInfo;
     }
 
@@ -87,7 +87,7 @@ public class FromWXMessage {
         return OrderId;
     }
 
-    public void setOrderId(String orderId) {
+    public void setOrderId(final String orderId) {
         OrderId = orderId;
     }
 
@@ -95,7 +95,7 @@ public class FromWXMessage {
         return OrderStatus;
     }
 
-    public void setOrderStatus(String orderStatus) {
+    public void setOrderStatus(final String orderStatus) {
         OrderStatus = orderStatus;
     }
 
@@ -103,7 +103,7 @@ public class FromWXMessage {
         return ProductId;
     }
 
-    public void setProductId(String productId) {
+    public void setProductId(final String productId) {
         ProductId = productId;
     }
 
@@ -113,7 +113,7 @@ public class FromWXMessage {
     }
 
     @JacksonXmlProperty(localName="MenuId")
-    public void setMenuId(String menuId) {
+    public void setMenuId(final String menuId) {
         MenuId = menuId;
     }
 
@@ -123,7 +123,7 @@ public class FromWXMessage {
 	}
 
     @JacksonXmlProperty(localName="Event")
-	public void setEvent(String event) {
+	public void setEvent(final String event) {
 		Event = event;
 	}
 
@@ -133,7 +133,7 @@ public class FromWXMessage {
 	}
 
     @JacksonXmlProperty(localName="EventKey")
-	public void setEventKey(String eventKey) {
+	public void setEventKey(final String eventKey) {
 		EventKey = eventKey;
 	}
 
@@ -141,7 +141,7 @@ public class FromWXMessage {
 		return Ticket;
 	}
 
-	public void setTicket(String ticket) {
+	public void setTicket(final String ticket) {
 		Ticket = ticket;
 	}
 
@@ -149,7 +149,7 @@ public class FromWXMessage {
 		return Latitude;
 	}
 
-	public void setLatitude(String latitude) {
+	public void setLatitude(final String latitude) {
 		Latitude = latitude;
 	}
 
@@ -157,7 +157,7 @@ public class FromWXMessage {
 		return Longitude;
 	}
 
-	public void setLongitude(String longitude) {
+	public void setLongitude(final String longitude) {
 		Longitude = longitude;
 	}
 
@@ -165,7 +165,7 @@ public class FromWXMessage {
 		return Precision;
 	}
 
-	public void setPrecision(String precision) {
+	public void setPrecision(final String precision) {
 		Precision = precision;
 	}
 
@@ -173,7 +173,7 @@ public class FromWXMessage {
 		return Format;
 	}
 
-	public void setFormat(String format) {
+	public void setFormat(final String format) {
 		Format = format;
 	}
 
@@ -181,7 +181,7 @@ public class FromWXMessage {
 		return Recognition;
 	}
 
-	public void setRecognition(String recognition) {
+	public void setRecognition(final String recognition) {
 		Recognition = recognition;
 	}
 
@@ -189,7 +189,7 @@ public class FromWXMessage {
 		return PicUrl;
 	}
 
-	public void setPicUrl(String picUrl) {
+	public void setPicUrl(final String picUrl) {
 		PicUrl = picUrl;
 	}
 
@@ -197,7 +197,7 @@ public class FromWXMessage {
 		return MediaId;
 	}
 
-	public void setMediaId(String mediaId) {
+	public void setMediaId(final String mediaId) {
 		MediaId = mediaId;
 	}
 
@@ -205,7 +205,7 @@ public class FromWXMessage {
 		return ThumbMediaId;
 	}
 
-	public void setThumbMediaId(String thumbMediaId) {
+	public void setThumbMediaId(final String thumbMediaId) {
 		ThumbMediaId = thumbMediaId;
 	}
 
@@ -213,7 +213,7 @@ public class FromWXMessage {
 		return Location_X;
 	}
 
-	public void setLocation_X(String location_X) {
+	public void setLocation_X(final String location_X) {
 		Location_X = location_X;
 	}
 
@@ -221,7 +221,7 @@ public class FromWXMessage {
 		return Location_Y;
 	}
 
-	public void setLocation_Y(String location_Y) {
+	public void setLocation_Y(final String location_Y) {
 		Location_Y = location_Y;
 	}
 
@@ -229,7 +229,7 @@ public class FromWXMessage {
 		return Scale;
 	}
 
-	public void setScale(String scale) {
+	public void setScale(final String scale) {
 		Scale = scale;
 	}
 
@@ -237,7 +237,7 @@ public class FromWXMessage {
 		return Label;
 	}
 
-	public void setLabel(String label) {
+	public void setLabel(final String label) {
 		Label = label;
 	}
 
@@ -245,7 +245,7 @@ public class FromWXMessage {
 		return Title;
 	}
 
-	public void setTitle(String title) {
+	public void setTitle(final String title) {
 		Title = title;
 	}
 
@@ -253,7 +253,7 @@ public class FromWXMessage {
 		return Description;
 	}
 
-	public void setDescription(String description) {
+	public void setDescription(final String description) {
 		Description = description;
 	}
 
@@ -261,7 +261,7 @@ public class FromWXMessage {
 		return Url;
 	}
 
-	public void setUrl(String url) {
+	public void setUrl(final String url) {
 		Url = url;
 	}
 
@@ -269,7 +269,7 @@ public class FromWXMessage {
         return ArticleCount;
     }
 
-    public void setArticleCount(String articleCount) {
+    public void setArticleCount(final String articleCount) {
         ArticleCount = articleCount;
     }
 
@@ -280,7 +280,7 @@ public class FromWXMessage {
     }
 
     @JacksonXmlProperty(localName="ToUserName")
-    public void setToUserName(String toUserName) {
+    public void setToUserName(final String toUserName) {
         _toUserName = toUserName;
     }
 
@@ -290,17 +290,17 @@ public class FromWXMessage {
     }
 
     @JacksonXmlProperty(localName="FromUserName")
-    public void setFromUserName(String fromUserName) {
+    public void setFromUserName(final String fromUserName) {
         _fromUserName = fromUserName;
     }
 
     @JacksonXmlProperty(localName="CreateTime")
-    public Integer getCreateTime() {
+    public long getCreateTime() {
         return _createTime;
     }
 
     @JacksonXmlProperty(localName="CreateTime")
-    public void setCreateTime(Integer createTime) {
+    public void setCreateTime(final long createTime) {
         _createTime = createTime;
     }
 
@@ -310,7 +310,7 @@ public class FromWXMessage {
     }
 
     @JacksonXmlProperty(localName="MsgType")
-    public void setMsgType(String msgType) {
+    public void setMsgType(final String msgType) {
         _msgType = msgType;
     }
 
@@ -320,7 +320,7 @@ public class FromWXMessage {
     }
 
     @JacksonXmlProperty(localName="Content")
-    public void setContent(String content) {
+    public void setContent(final String content) {
         _content = content;
     }
 
@@ -330,7 +330,7 @@ public class FromWXMessage {
     }
 
     @JacksonXmlProperty(localName="MsgId")
-    public void setMsgId(String msgId) {
+    public void setMsgId(final String msgId) {
         _msgId = msgId;
     }
 
@@ -340,7 +340,7 @@ public class FromWXMessage {
     }
 
     public static void main(final String[] args) throws Exception {
-        final String xmlsrc = 
+        final String xmlsrc =
                 "<xml><ToUserName><![CDATA[gh_7fc2a32d2172]]></ToUserName>"
                 + "<FromUserName><![CDATA[otw1SwCmNhmAdzARWEZlXzrCmv_w]]></FromUserName>"
                 + "<CreateTime>1477579413</CreateTime>"
@@ -349,10 +349,10 @@ public class FromWXMessage {
                 + "<MsgId>6346155256489528442</MsgId>"
                 + "</xml>";
         final ObjectMapper mapper = new XmlMapper();
-        
+
         final FromWXMessage msg = mapper.readValue(xmlsrc, FromWXMessage.class);
         System.out.println("msg:" + msg);
         System.out.println("as Xml:" + mapper.writeValueAsString(msg) );
-        
+
     }
 }
