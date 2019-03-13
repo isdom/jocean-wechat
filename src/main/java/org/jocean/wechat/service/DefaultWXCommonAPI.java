@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.jocean.http.ByteBufSlice;
 import org.jocean.http.ContentUtil;
+import org.jocean.http.Interact;
 import org.jocean.http.MessageBody;
 import org.jocean.http.MessageUtil;
 import org.jocean.http.RpcRunner;
@@ -71,16 +72,30 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
     static class CustomMessageReq {
         static class Text {
             @JSONField(name = "content")
-            public String getCntent() {
+            public String getContent() {
                 return this._content;
             }
 
             @JSONField(name = "content")
-            public void setcContent(final String content) {
+            public void setContent(final String content) {
                 this._content = content;
             }
 
             private String _content;
+        }
+
+        static class Image {
+            @JSONField(name = "media_id")
+            public String getMediaId() {
+                return this._mediaId;
+            }
+
+            @JSONField(name = "media_id")
+            public void setMediaId(final String mediaId) {
+                this._mediaId = mediaId;
+            }
+
+            private String _mediaId;
         }
 
         @JSONField(name = "touser")
@@ -108,15 +123,27 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             return this._text;
         }
 
+        @JSONField(name = "image")
+        public Image getImage() {
+            return this._image;
+        }
+
         @JSONField(deserialize = false)
         public void setTextContent(final String content) {
             this._text = new Text();
-            this._text.setcContent(content);
+            this._text.setContent(content);
+        }
+
+        @JSONField(deserialize = false)
+        public void setImage(final String mediaId) {
+            this._image = new Image();
+            this._image.setMediaId(mediaId);
         }
 
         private String _touser;
         private String _msgtype;
-        private Text _text;
+        private Text   _text;
+        private Image  _image;
     }
 
     @Override
@@ -124,21 +151,35 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             final String openid, final String content) {
         return runners -> runners.flatMap( runner -> runner.name("wxcommon.sendCustomMessageInText").execute(
         interact-> {
-            try {
-                final CustomMessageReq req = new CustomMessageReq();
-                req.setToUser(openid);
-                req.setMsgType("text");
-                req.setTextContent(content);
-                return interact.method(HttpMethod.POST)
-                    .uri("https://api.weixin.qq.com").path("/cgi-bin/message/custom/send")
-                    .paramAsQuery("access_token", accessToken)
-                    .body(req, ContentUtil.TOJSON)
-                    .responseAs(ContentUtil.ASJSON, WXAPIResponse.class)
-                    .doOnNext(WXProtocol.CHECK_WXRESP);
-            } catch (final Exception e) {
-                return Observable.error(e);
-            }
+            final CustomMessageReq req = new CustomMessageReq();
+            req.setToUser(openid);
+            req.setMsgType("text");
+            req.setTextContent(content);
+            return sendCustomMessage(interact, accessToken, req);
         }));
+    }
+
+    @Override
+    public Transformer<RpcRunner, WXAPIResponse> sendCustomMessageInImage(final String accessToken,
+            final String openid, final String mediaId) {
+        return runners -> runners.flatMap( runner -> runner.name("wxcommon.sendCustomMessageInImage").execute(
+        interact-> {
+            final CustomMessageReq req = new CustomMessageReq();
+            req.setToUser(openid);
+            req.setMsgType("image");
+            req.setImage(mediaId);
+            return sendCustomMessage(interact, accessToken, req);
+        }));
+    }
+
+    private Observable<WXAPIResponse> sendCustomMessage(final Interact interact, final String accessToken,
+            final CustomMessageReq req) {
+        return interact.method(HttpMethod.POST)
+            .uri("https://api.weixin.qq.com").path("/cgi-bin/message/custom/send")
+            .paramAsQuery("access_token", accessToken)
+            .body(req, ContentUtil.TOJSON)
+            .responseAs(ContentUtil.ASJSON, WXAPIResponse.class)
+            .doOnNext(WXProtocol.CHECK_WXRESP);
     }
 
     static class ShorturlReq {

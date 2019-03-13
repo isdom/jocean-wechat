@@ -19,6 +19,9 @@ public interface WXCommonAPI {
     public Transformer<RpcRunner, WXAPIResponse> sendCustomMessageInText(final String accessToken,
             final String openid, final String content);
 
+    public Transformer<RpcRunner, WXAPIResponse> sendCustomMessageInImage(final String accessToken,
+            final String openid, final String mediaId);
+
     public Transformer<RpcRunner, String> getShorturl(final String accessToken, final String url);
 
     public Transformer<RpcRunner, MessageBody> getTempMedia(final String accessToken, final String mediaId);
