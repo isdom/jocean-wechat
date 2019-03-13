@@ -130,7 +130,7 @@ public class WXProtocol {
     public interface UserInfoResponse extends WXAPIResponse, WXUserInfo {
     }
 
-    public interface OAuthAccessTokenResponse extends WXAPIResponse {
+    public interface TokenOpenidScope {
         @JSONField(name="expires_in")
         public int getExpiresIn();
 
@@ -160,6 +160,9 @@ public class WXProtocol {
 
         @JSONField(name="openid")
         public void setOpenid(final String openid);
+    }
+
+    public interface OAuthAccessTokenResponse extends WXAPIResponse, TokenOpenidScope {
     }
 
     public interface CreateQrcodeResponse extends WXAPIResponse {
