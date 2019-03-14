@@ -258,15 +258,14 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             final String filename,
             final Observable<? extends MessageBody> media) {
         return runners -> runners.flatMap(runner -> runner.name("wxcommon.uploadTempMedia").execute(interact ->
-        interact.method(HttpMethod.POST)
-            .uri("https://api.weixin.qq.com")
-            .path("/cgi-bin/media/upload")
-            .paramAsQuery("access_token", accessToken)
-            .paramAsQuery("type", "image")
-            .body(media.compose(tomultipart(name, filename)))
-            .responseAs(ContentUtil.ASJSON, UploadTempMediaResponse.class)
-            .doOnNext(WXProtocol.CHECK_WXRESP)
-    ));
+            interact.method(HttpMethod.POST)
+                .uri("https://api.weixin.qq.com")
+                .path("/cgi-bin/media/upload")
+                .paramAsQuery("access_token", accessToken)
+                .paramAsQuery("type", "image")
+                .body(media.compose(tomultipart(name, filename)))
+                .responseAs(ContentUtil.ASJSON, UploadTempMediaResponse.class)
+                .doOnNext(WXProtocol.CHECK_WXRESP)));
     }
 
     private static String getNewMultipartDelimiter() {
