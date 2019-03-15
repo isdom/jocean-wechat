@@ -2,6 +2,8 @@ package org.jocean.wechat.service;
 
 import java.util.Arrays;
 
+import javax.ws.rs.core.MediaType;
+
 import org.jocean.http.ByteBufSlice;
 import org.jocean.http.ContentUtil;
 import org.jocean.http.Interact;
@@ -240,7 +242,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
                 .response()
                 .flatMap(fullmsg -> {
                     final String contentType = fullmsg.message().headers().get(HttpHeaderNames.CONTENT_TYPE);
-                    if (contentType.startsWith("application/json")) {
+                    if (contentType.startsWith(MediaType.APPLICATION_JSON) || contentType.startsWith(MediaType.TEXT_PLAIN)) {
                         // error return as json
                         return fullmsg.body().compose(MessageUtil.body2bean(ContentUtil.ASJSON, WXProtocol.WXAPIResponse.class))
                             .flatMap(resp -> Observable.error(new WXRespError(resp, resp.toString())));
