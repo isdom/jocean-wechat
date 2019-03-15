@@ -185,18 +185,22 @@ public class FromWXMessage {
 		Recognition = recognition;
 	}
 
+    @JacksonXmlProperty(localName="PicUrl")
 	public String getPicUrl() {
 		return PicUrl;
 	}
 
+    @JacksonXmlProperty(localName="PicUrl")
 	public void setPicUrl(final String picUrl) {
 		PicUrl = picUrl;
 	}
 
+    @JacksonXmlProperty(localName="MediaId")
 	public String getMediaId() {
 		return MediaId;
 	}
 
+    @JacksonXmlProperty(localName="MediaId")
 	public void setMediaId(final String mediaId) {
 		MediaId = mediaId;
 	}
