@@ -45,8 +45,7 @@ public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
 
     private static final String MBEAN_SUFFIX = "info=wechat";
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(WechatMPAgent.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WechatMPAgent.class);
 
     public void start() throws Exception {
         startToUpdateToken();
@@ -116,7 +115,7 @@ public class WechatMPAgent implements WXTokenSource, MBeanRegisterAware {
                     }
                 });
         } else {
-            LOG.warn("wxtokensouce unactived, ignore scheduleUpdateToken.");
+            LOG.warn("WechatMPAgent unactived, ignore scheduleUpdateToken.");
         }
     }
 
