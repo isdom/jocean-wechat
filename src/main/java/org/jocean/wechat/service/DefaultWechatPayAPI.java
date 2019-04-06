@@ -49,8 +49,7 @@ import rx.functions.Func0;
 
 public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(DefaultWechatPayAPI.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultWechatPayAPI.class);
 
     @Override
     public void setMBeanRegister(final MBeanRegister register) {
