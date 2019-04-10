@@ -77,6 +77,14 @@ public class RefundQueryResponse extends OrderResponse {
     public void setSettlement_refund_fee_0(final Integer settlement_refund_fee_0) {
         this.settlement_refund_fee_0 = settlement_refund_fee_0;
     }
+    @JacksonXmlProperty(localName = "refund_success_time_0")
+    public String getRefund_success_time_0() {
+        return refund_success_time_0;
+    }
+    @JacksonXmlProperty(localName = "refund_success_time_0")
+    public void setRefund_success_time_0(final String refund_success_time_0) {
+        this.refund_success_time_0 = refund_success_time_0;
+    }
 
     private String transactionId; //微信订单号
 
@@ -91,6 +99,8 @@ public class RefundQueryResponse extends OrderResponse {
     private Integer refund_fee_0;
 
     private Integer settlement_refund_fee_0;
+
+    private String refund_success_time_0;
 
 
 }

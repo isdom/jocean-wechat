@@ -89,11 +89,11 @@ public class RefundRequest{
     }
 
 
-
     @JacksonXmlProperty(localName = "transaction_id")
     public String getTransactionId() {
         return transaction_id;
     }
+
     @JacksonXmlProperty(localName = "transaction_id")
     public void setTransactionId(final String transaction_id) {
         this.transaction_id = transaction_id;
@@ -103,49 +103,68 @@ public class RefundRequest{
     public int getTotalFee() {
         return total_fee;
     }
+
     @JacksonXmlProperty(localName = "total_fee")
     public void setTotalFee(final int total_fee) {
         this.total_fee = total_fee;
     }
+
     @JacksonXmlProperty(localName = "refund_fee")
     public int getRefundFee() {
         return refund_fee;
     }
+
     @JacksonXmlProperty(localName = "refund_fee")
     public void setRefundFee(final int refund_fee) {
         this.refund_fee = refund_fee;
     }
+
     @JacksonXmlProperty(localName = "refund_fee_type")
     public String getRefundFeeType() {
         return refund_fee_type;
     }
+
     @JacksonXmlProperty(localName = "refund_fee_type")
     public void setRefundFeeType(final String refund_fee_type) {
         this.refund_fee_type = refund_fee_type;
     }
+
     @JacksonXmlProperty(localName = "notify_url")
     public String getNotifyUrl() {
         return notify_url;
     }
+
     @JacksonXmlProperty(localName = "notify_url")
     public void setNotifyUrl(final String notify_url) {
         this.notify_url = notify_url;
     }
+
     @JacksonXmlProperty(localName = "refund_desc")
     public String getRefundDesc() {
         return refund_desc;
     }
+
     @JacksonXmlProperty(localName = "refund_desc")
     public void setRefundDesc(final String refund_desc) {
         this.refund_desc = refund_desc;
     }
+
     @JacksonXmlProperty(localName = "refund_account")
     public String getRefundAccount() {
         return refund_account;
     }
+
     @JacksonXmlProperty(localName = "refund_account")
     public void setRefundAccount(final String refund_account) {
         this.refund_account = refund_account;
+    }
+    @JacksonXmlProperty(localName = "out_refund_no")
+    public String getOutRefundNo() {
+        return out_refund_no;
+    }
+    @JacksonXmlProperty(localName = "out_refund_no")
+    public void setOutRefundNo(final String out_refund_no) {
+        this.out_refund_no = out_refund_no;
     }
 
     private String appid;
@@ -160,6 +179,8 @@ public class RefundRequest{
     private String out_trade_no;//商户系统内部的订单号,32个字符内、可包含字母, 其他说明见商户订单号
     private int total_fee;
     private int refund_fee;
+
+    private String out_refund_no; //商户退款单号
 
     private String refund_fee_type = "CNY";
 
