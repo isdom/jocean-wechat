@@ -241,6 +241,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
         }));
     }
 
+    // https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_4
     @Override
     public Transformer<RpcRunner, RefundResponse> refund4jsapi(final RefundRequest req) {
         return runners -> runners.flatMap(runner -> runner.name("wxpay.refund4jsapi").execute(
@@ -271,6 +272,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                 }));
     }
 
+    //  https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_5
     @Override
     public Transformer<RpcRunner, RefundQueryResponse> queryrefund(final RefundQueryRequest req) {
         return runners -> runners.flatMap(runner -> runner.name("wxpay.queryrefund").execute(
