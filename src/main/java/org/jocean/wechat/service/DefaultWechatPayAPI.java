@@ -29,6 +29,10 @@ import org.jocean.wechat.spi.OrderQueryRequest;
 import org.jocean.wechat.spi.OrderQueryResponse;
 import org.jocean.wechat.spi.PromotionTransfersRequest;
 import org.jocean.wechat.spi.PromotionTransfersResponse;
+import org.jocean.wechat.spi.RefundQueryRequest;
+import org.jocean.wechat.spi.RefundQueryResponse;
+import org.jocean.wechat.spi.RefundRequest;
+import org.jocean.wechat.spi.RefundResponse;
 import org.jocean.wechat.spi.SendRedpackRequest;
 import org.jocean.wechat.spi.SendRedpackResponse;
 import org.jocean.wechat.spi.UnifiedOrderRequest;
@@ -235,6 +239,56 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                 return Observable.error(e);
             }
         }));
+    }
+
+    @Override
+    public Transformer<RpcRunner, RefundResponse> refund4jsapi(final RefundRequest req) {
+        return runners -> runners.flatMap(runner -> runner.name("wxpay.refund4jsapi").execute(
+                interact -> {
+                    req.setMchId(_mch_id);
+                    req.setAppid(_appid);
+                    req.setSign(signOf(req));
+
+                    try {
+                        final KeyStore ks = KeyStore.getInstance("PKCS12");
+                        ks.load(new ByteArrayInputStream(BaseEncoding.base64().decode(_certAsBase64)),
+                                _certPassword.toCharArray());
+
+                        final KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+                        kmf.init(ks, _certPassword.toCharArray());
+
+                        final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
+
+                        return interact.method(HttpMethod.POST)
+                                .feature(new Feature.ENABLE_SSL(sslctx))
+                                .reqbean(req)
+                                .body(req, ContentUtil.TOXML)
+                                .responseAs(ContentUtil.ASXML, RefundResponse.class);
+                    } catch (final Exception e) {
+                        LOG.warn("exception when refund4jsapi {}, detail: {}", req, ExceptionUtils.exception2detail(e));
+                        return Observable.error(e);
+                    }
+                }));
+    }
+
+    @Override
+    public Transformer<RpcRunner, RefundQueryResponse> queryrefund(final RefundQueryRequest req) {
+        return runners -> runners.flatMap(runner -> runner.name("wxpay.queryrefund").execute(
+                interact -> {
+                    req.setMchId(_mch_id);
+                    req.setAppid(_appid);
+                    req.setSign(signOf(req));
+
+                    try {
+                        return interact.method(HttpMethod.POST)
+                                .reqbean(req)
+                                .body(req, ContentUtil.TOXML)
+                                .responseAs(ContentUtil.ASXML, RefundQueryResponse.class);
+                    } catch (final Exception e) {
+                        LOG.warn("exception when queryrefund {}, detail: {}", req, ExceptionUtils.exception2detail(e));
+                        return Observable.error(e);
+                    }
+                }));
     }
 
     @Override
