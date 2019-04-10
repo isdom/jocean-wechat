@@ -60,7 +60,7 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
 
     }
 
-    private String signOf(final Object req) {
+    protected String signOf(final Object req) {
         final Field fields[] = req.getClass().getDeclaredFields();//cHis 是实体类名称
         final List<String> list = new ArrayList<String>();
         try {
