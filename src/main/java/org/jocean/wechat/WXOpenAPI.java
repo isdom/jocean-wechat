@@ -45,13 +45,7 @@ public interface WXOpenAPI {
         public void setCategory(final FuncscopeCategory category);
     }
 
-    interface AuthorizationInfo {
-        @JSONField(name = "authorizer_appid")
-        public String getAuthorizerAppid();
-
-        @JSONField(name = "authorizer_appid")
-        public void setAuthorizerAppid(final String appid);
-
+    interface AuthorizerTokenInfo {
         @JSONField(name = "authorizer_access_token")
         public String getAuthorizerAccessToken();
 
@@ -69,6 +63,14 @@ public interface WXOpenAPI {
 
         @JSONField(name = "expires_in")
         public void setExpires(final int expires);
+    }
+
+    interface AuthorizationInfo extends AuthorizerTokenInfo {
+        @JSONField(name = "authorizer_appid")
+        public String getAuthorizerAppid();
+
+        @JSONField(name = "authorizer_appid")
+        public void setAuthorizerAppid(final String appid);
 
         @JSONField(name = "func_info")
         public FuncInfo[] getFuncInfos();
@@ -88,24 +90,7 @@ public interface WXOpenAPI {
 
     public Transformer<RpcRunner, QueryAuthResponse> queryAuth(final String authorizationCode);
 
-    public interface AuthorizerTokenResponse extends WXAPIResponse {
-        @JSONField(name = "authorizer_access_token")
-        public String getAuthorizerAccessToken();
-
-        @JSONField(name = "authorizer_access_token")
-        public void setAuthorizerAccessToken(final String token);
-
-        @JSONField(name = "authorizer_refresh_token")
-        public String getAuthorizerRefreshToken();
-
-        @JSONField(name = "authorizer_refresh_token")
-        public void setAuthorizerRefreshToken(final String refreshToken);
-
-        @JSONField(name = "expires_in")
-        public int getExpires();
-
-        @JSONField(name = "expires_in")
-        public void setExpires(final int expires);
+    public interface AuthorizerTokenResponse extends AuthorizerTokenInfo, WXAPIResponse {
     }
 
     public Transformer<RpcRunner, AuthorizerTokenResponse> authorizerToken(final String authorizerAppid, final String refreshToken);
