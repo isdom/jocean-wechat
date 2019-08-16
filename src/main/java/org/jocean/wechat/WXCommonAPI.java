@@ -5,6 +5,7 @@ import org.jocean.http.MessageBody;
 import org.jocean.http.RpcRunner;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
 import org.jocean.wechat.WXProtocol.WXAPIResponse;
+import org.jocean.wechat.spi.FetchTicketResponse;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -12,6 +13,8 @@ import rx.Observable;
 import rx.Observable.Transformer;
 
 public interface WXCommonAPI {
+    public Transformer<RpcRunner, FetchTicketResponse> getJsapiTicket(final String accessToken);
+
     public Transformer<RpcRunner, UserInfoResponse> getUserInfo(final String accessToken, final String openid);
 
     public Transformer<RpcRunner, UserInfoResponse> getSnsUserInfo(final String oauth2Token, final String openid);

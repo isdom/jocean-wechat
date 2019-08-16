@@ -17,6 +17,7 @@ import org.jocean.wechat.WXProtocol;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
 import org.jocean.wechat.WXProtocol.WXAPIResponse;
 import org.jocean.wechat.WXProtocol.WXRespError;
+import org.jocean.wechat.spi.FetchTicketResponse;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -34,6 +35,18 @@ import rx.Observable.Transformer;
 import rx.functions.Action1;
 
 public class DefaultWXCommonAPI implements WXCommonAPI {
+
+    @Override
+    public Transformer<RpcRunner, FetchTicketResponse> getJsapiTicket(final String accessToken) {
+        return runners -> runners.flatMap( runner -> runner.name("wxcommon.getJsapiTicket").execute(
+            interact-> interact
+                .uri("https://api.weixin.qq.com")
+                .path("/cgi-bin/ticket/getticket")
+                .paramAsQuery("access_token", accessToken)
+                .paramAsQuery("type", "jsapi")
+                .responseAs(ContentUtil.ASJSON, FetchTicketResponse.class)
+        ));
+    }
 
     @Override
     public Transformer<RpcRunner, UserInfoResponse> getUserInfo(final String accessToken, final String openid) {
