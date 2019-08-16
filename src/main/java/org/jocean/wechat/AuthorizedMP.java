@@ -11,4 +11,6 @@ public interface AuthorizedMP {
     public String getRefreshToken();
 
     public long getAccessTokenExpireInMs();
+
+    public String getJsapiTicket();
 }

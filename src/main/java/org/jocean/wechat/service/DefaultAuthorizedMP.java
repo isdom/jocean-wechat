@@ -30,6 +30,11 @@ public class DefaultAuthorizedMP implements AuthorizedMP {
         return this._tokenExpireInMs;
     }
 
+    @Override
+    public String getJsapiTicket() {
+        return this._jsapiTicket;
+    }
+
     @Value("${wxopen.appid}")
     String _componentAppid;
 
@@ -44,4 +49,7 @@ public class DefaultAuthorizedMP implements AuthorizedMP {
 
     @Value("${mp.refreshToken}")
     String _refreshToken;
+
+    @Value("${mp.jsapiTicket}")
+    String _jsapiTicket;
 }
