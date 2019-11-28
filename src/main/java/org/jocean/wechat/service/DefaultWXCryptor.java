@@ -21,8 +21,7 @@ import com.google.common.io.BaseEncoding;
 
 public class DefaultWXCryptor implements WXCryptor {
 
-    private static final Logger LOG =
-        LoggerFactory.getLogger(DefaultWXCryptor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultWXCryptor.class);
 
     /**
      * 判断是否加密

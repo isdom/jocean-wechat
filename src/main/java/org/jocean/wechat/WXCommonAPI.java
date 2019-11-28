@@ -53,4 +53,8 @@ public interface WXCommonAPI {
             final String name,
             final String filename,
             final Observable<? extends MessageBody> media);
+
+    //  input mediaId (see : https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1444738726&token=&lang=zh_CN)
+    //  output MessageBody : media download
+    public Transformer<RpcRunner, MessageBody> downloadMedia(final String accessToken, final String mediaId);
 }

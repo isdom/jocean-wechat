@@ -377,4 +377,31 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             }
         });
     }
+
+    @Override
+    public Transformer<RpcRunner, MessageBody> downloadMedia(final String accessToken, final String mediaId) {
+        return runners -> runners.flatMap(runner -> runner.name("wxcommon.downloadMedia").execute(interact -> {
+            try {
+                return interact.method(HttpMethod.GET)
+                    .uri("https://api.weixin.qq.com")
+                    .path("/cgi-bin/media/get")
+                    .paramAsQuery("access_token", accessToken)
+                    .paramAsQuery("media_id", mediaId)
+                    .response()
+                    .flatMap(fullmsg -> {
+                        final String contentType = fullmsg.message().headers().get(HttpHeaderNames.CONTENT_TYPE);
+                        if (contentType.startsWith("application/json")) {
+                            // error return as json
+                            return fullmsg.body().compose(MessageUtil.body2bean(ContentUtil.ASJSON, WXProtocol.WXAPIResponse.class))
+                                .flatMap(resp -> Observable.error(
+                                        new RuntimeException(resp.getErrcode() + "/" + resp.getErrmsg())));
+                        } else {
+                            return fullmsg.body();
+                        }
+                    });
+            } catch (final Exception e) {
+                return Observable.error(e);
+            }
+        }));
+    }
 }

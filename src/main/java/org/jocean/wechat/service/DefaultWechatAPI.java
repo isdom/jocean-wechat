@@ -31,8 +31,7 @@ import rx.Observable.Transformer;
 public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
 
     @SuppressWarnings("unused")
-    private static final Logger LOG =
-            LoggerFactory.getLogger(DefaultWechatAPI.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultWechatAPI.class);
 
     @Override
     public void setMBeanRegister(final MBeanRegister register) {
