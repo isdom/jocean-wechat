@@ -25,8 +25,7 @@ import rx.Observable.Transformer;
 public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
 
     @SuppressWarnings("unused")
-    private static final Logger LOG =
-            LoggerFactory.getLogger(DefaultWXOpenAPI.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultWXOpenAPI.class);
 
     @Override
     public void setMBeanRegister(final MBeanRegister register) {
