@@ -119,4 +119,12 @@ public class ComponentAuthBase {
 
     //  component_verify_ticket / authorized / unauthorized / updateauthorized
     protected String _infoType;
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("ComponentAuthBase [appId=").append(_appId).append(", createTime=").append(_createTime)
+                .append(", infoType=").append(_infoType).append("]");
+        return builder.toString();
+    }
 }
