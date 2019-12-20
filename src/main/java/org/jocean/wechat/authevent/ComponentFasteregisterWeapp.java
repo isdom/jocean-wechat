@@ -36,7 +36,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @Consumes({"application/xml","text/xml"})
 @JacksonXmlRootElement(localName="xml")
-public class ComponentAuthFasteregisterWeapp extends ComponentAuthBase {
+public class ComponentFasteregisterWeapp extends ComponentAuthBase {
 
     @JacksonXmlProperty(localName="appid")
     public String getAuthorizerAppid() {
@@ -79,7 +79,7 @@ public class ComponentAuthFasteregisterWeapp extends ComponentAuthBase {
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        builder.append("ComponentAuthFasteregisterWeapp [authCode=").append(_authCode).append(", authorizerAppid=")
+        builder.append("ComponentFasteregisterWeapp [authCode=").append(_authCode).append(", authorizerAppid=")
                 .append(_authorizerAppid).append(", status=").append(_status).append(", appId=").append(_appId)
                 .append(", createTime=").append(_createTime).append(", infoType=").append(_infoType).append("]");
         return builder.toString();
