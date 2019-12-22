@@ -3,6 +3,9 @@ package org.jocean.wechat.authevent;
 
 import javax.ws.rs.Consumes;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
@@ -60,5 +63,21 @@ public class ComponentVerifyTicket extends ComponentAuthBase {
                 .append(", appId=").append(_appId).append(", createTime=").append(_createTime).append(", infoType=")
                 .append(_infoType).append("]");
         return builder.toString();
+    }
+
+    public static void main(final String[] args) throws Exception {
+        final String xmlsrc =
+                "<xml>"
+                + "<AppId>123456789</AppId>"
+                + "<CreateTime>1413192605</CreateTime>"
+                + "<InfoType>component_verify_ticket</InfoType>"
+                + "<ComponentVerifyTicket>ticket_demo</ComponentVerifyTicket>"
+                + "</xml>";
+        final ObjectMapper mapper = new XmlMapper();
+
+        final ComponentVerifyTicket msg = mapper.readValue(xmlsrc, ComponentVerifyTicket.class);
+        System.out.println("msg:" + msg);
+        System.out.println("as Xml:\r\n" + mapper.enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(msg) );
+
     }
 }
