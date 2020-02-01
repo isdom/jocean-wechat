@@ -1,5 +1,7 @@
 package org.jocean.wechat.service;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 
 import javax.ws.rs.core.MediaType;
@@ -14,9 +16,11 @@ import org.jocean.idiom.DisposableWrapper;
 import org.jocean.idiom.DisposableWrapperUtil;
 import org.jocean.wechat.WXCommonAPI;
 import org.jocean.wechat.WXProtocol;
+import org.jocean.wechat.WXProtocol.CreateQrcodeResponse;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
 import org.jocean.wechat.WXProtocol.WXAPIResponse;
 import org.jocean.wechat.WXProtocol.WXRespError;
+import org.jocean.wechat.spi.CreateQrcodeRequest;
 import org.jocean.wechat.spi.FetchTicketResponse;
 
 import com.alibaba.fastjson.annotation.JSONField;
@@ -403,5 +407,29 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
                 return Observable.error(e);
             }
         }));
+    }
+
+    @Override
+    public Transformer<RpcRunner, String> createVolatileQrcode(final String accessToken, final int expireSeconds, final String scenestr) {
+        return runners -> runners.flatMap(runner -> runner.name("wxcommon.createVolatileQrcode").execute(interact -> {
+            final CreateQrcodeRequest reqAndBody = new CreateQrcodeRequest();
+
+            reqAndBody.setAccessToken(accessToken);
+            reqAndBody.setActionName("QR_STR_SCENE");
+            reqAndBody.setExpireSeconds(expireSeconds);
+            reqAndBody.setScenestr(scenestr);
+
+            return interact.method(HttpMethod.POST).reqbean(reqAndBody).body(reqAndBody, ContentUtil.TOJSON)
+                .responseAs(ContentUtil.ASJSON, CreateQrcodeResponse.class).doOnNext(WXProtocol.CHECK_WXRESP)
+                .map(resp-> "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + urlencodeAsUtf8(resp.getTicket()));
+        }));
+    }
+
+    private static String urlencodeAsUtf8(final String ticket) {
+        try {
+            return URLEncoder.encode(ticket, "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
