@@ -211,6 +211,7 @@ public interface WXOpenAPI {
     public Transformer<RpcRunner, OAuthAccessTokenResponse> getOAuthAccessToken(final String authorizerAppid, final String code);
 
     // 小程序: Mina
+    // https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/Mini_Programs/WeChat_login.html
     // refer: https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1492585163_FtTNA&token=&lang=zh_CN
     public Transformer<RpcRunner, Code2SessionResponse> code2session(final String minaAppid, final String code);
 }
