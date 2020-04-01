@@ -38,6 +38,29 @@ public class RefundRequest{
         this.mch_id = mch_id;
     }
 
+    // 小程序的APPID  sub_appid  是  String(32)  wx8888888888888888  当前调起支付的小程序APPID
+    @JacksonXmlProperty(localName = "sub_appid")
+    public String getSubAppid() {
+        return sub_appid;
+    }
+
+    // 小程序的APPID  sub_appid  是  String(32)  wx8888888888888888  当前调起支付的小程序APPID
+    @JacksonXmlProperty(localName = "sub_appid")
+    public void setSubAppid(final String sub_appid) {
+        this.sub_appid = sub_appid;
+    }
+
+    // 子商户号  sub_mch_id  是  String(32)  1900000109  微信支付分配的子商户号
+    @JacksonXmlProperty(localName = "sub_mch_id")
+    public String getSubMchId() {
+        return sub_mch_id;
+    }
+
+    // 子商户号  sub_mch_id  是  String(32)  1900000109  微信支付分配的子商户号
+    @JacksonXmlProperty(localName = "sub_mch_id")
+    public void setSubMchId(final String sub_mch_id) {
+        this.sub_mch_id = sub_mch_id;
+    }
 
     //  随机字符串   nonce_str   是   String(32)  5K8264ILTKCH16CQ2502SI8ZNMTM67VS    随机字符串，不长于32位。推荐随机数生成算法
     @JacksonXmlProperty(localName = "nonce_str")
@@ -170,6 +193,9 @@ public class RefundRequest{
     private String appid;
     private String mch_id;
     private String nonce_str;
+
+    private String sub_appid;
+    private String sub_mch_id;
 
     private String sign;//签名，详见签名生成算法
     private String sign_type = "MD5";
