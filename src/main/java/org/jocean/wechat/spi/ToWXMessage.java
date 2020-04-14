@@ -6,7 +6,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 /**
  */
-public abstract class ToWXMessage {
+public class ToWXMessage {
     // 开发人员微信号
     private String ToUserName;
 
