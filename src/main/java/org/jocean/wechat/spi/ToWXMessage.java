@@ -3,9 +3,11 @@ package org.jocean.wechat.spi;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  */
+@JacksonXmlRootElement(localName="xml")
 public class ToWXMessage {
     // 开发人员微信号
     private String ToUserName;
