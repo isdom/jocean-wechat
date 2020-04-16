@@ -12,6 +12,8 @@ import org.jocean.wechat.spi.RefundQueryRequest;
 import org.jocean.wechat.spi.RefundQueryResponse;
 import org.jocean.wechat.spi.RefundRequest;
 import org.jocean.wechat.spi.RefundResponse;
+import org.jocean.wechat.spi.TransfersQueryRequest;
+import org.jocean.wechat.spi.TransfersQueryResponse;
 import org.jocean.wechat.spi.UnifiedOrderRequest;
 import org.jocean.wechat.spi.UnifiedOrderResponse;
 
@@ -84,6 +86,8 @@ public interface WechatPayAPI {
     public Transformer<RpcRunner, GetHBInfoResponse> gethbinfo(final GetHBInfoRequest req);
 
     public Transformer<RpcRunner, PromotionTransfersResponse> promotiontransfers(final PromotionTransfersRequest req);
+
+    public Transformer<RpcRunner, TransfersQueryResponse> gettransferinfo(final TransfersQueryRequest req);
 
     public Transformer<RpcRunner, RefundResponse> refund4jsapi(final RefundRequest req);
 

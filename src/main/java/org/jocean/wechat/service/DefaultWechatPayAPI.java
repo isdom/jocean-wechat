@@ -35,6 +35,8 @@ import org.jocean.wechat.spi.RefundRequest;
 import org.jocean.wechat.spi.RefundResponse;
 import org.jocean.wechat.spi.SendRedpackRequest;
 import org.jocean.wechat.spi.SendRedpackResponse;
+import org.jocean.wechat.spi.TransfersQueryRequest;
+import org.jocean.wechat.spi.TransfersQueryResponse;
 import org.jocean.wechat.spi.UnifiedOrderRequest;
 import org.jocean.wechat.spi.UnifiedOrderResponse;
 import org.slf4j.Logger;
@@ -236,6 +238,37 @@ public class DefaultWechatPayAPI implements WechatPayAPI, MBeanRegisterAware {
                         .responseAs(ContentUtil.ASXML, PromotionTransfersResponse.class);
             } catch (final Exception e) {
                 LOG.warn("exception when promotiontransfers {}, detail: {}", req, ExceptionUtils.exception2detail(e));
+                return Observable.error(e);
+            }
+        }));
+    }
+
+    //https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_3
+    @Override
+    public Transformer<RpcRunner, TransfersQueryResponse> gettransferinfo(final TransfersQueryRequest req) {
+        return runners -> runners.flatMap( runner -> runner.name("wxpay.transfersQuery").execute(
+        interact-> {
+            req.setMchId(_mch_id);
+            req.setMchAppid(_appid);
+            req.setSign( signOf(req) );
+
+            try {
+                final KeyStore ks = KeyStore.getInstance("PKCS12");
+                ks.load(new ByteArrayInputStream(BaseEncoding.base64().decode(_certAsBase64)),
+                        _certPassword.toCharArray());
+
+                final KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+                kmf.init(ks, _certPassword.toCharArray());
+
+                final SslContext sslctx = SslContextBuilder.forClient().keyManager(kmf).build();
+
+                return interact.method(HttpMethod.POST)
+                        .feature(new Feature.ENABLE_SSL(sslctx))
+                        .reqbean(req)
+                        .body(req, ContentUtil.TOXML)
+                        .responseAs(ContentUtil.ASXML, TransfersQueryResponse.class);
+            } catch (final Exception e) {
+                LOG.warn("exception when transfersQuery {}, detail: {}", req, ExceptionUtils.exception2detail(e));
                 return Observable.error(e);
             }
         }));
