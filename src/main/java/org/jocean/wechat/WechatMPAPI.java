@@ -8,13 +8,17 @@ import javax.ws.rs.core.MediaType;
 
 import org.jocean.rpc.annotation.ConstParams;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
+import org.jocean.wechat.spi.FetchTicketResponse;
 
 import rx.Observable;
 
 public interface WechatMPAPI {
-    interface GetUserInfoBuilder {
+    interface NeedAccessToken<BUILDER> {
         @QueryParam("access_token")
-        GetUserInfoBuilder accessToken(final String accessToken);
+        BUILDER accessToken(final String accessToken);
+    }
+
+    interface GetUserInfoBuilder extends NeedAccessToken<GetUserInfoBuilder> {
 
         @QueryParam("openid")
         GetUserInfoBuilder openid(final String openid);
@@ -28,9 +32,7 @@ public interface WechatMPAPI {
 
     public GetUserInfoBuilder getUserInfo();
 
-    interface GetSnsUserInfoBuilder {
-        @QueryParam("access_token")
-        GetSnsUserInfoBuilder accessToken(final String accessToken);
+    interface GetSnsUserInfoBuilder extends NeedAccessToken<GetSnsUserInfoBuilder> {
 
         @QueryParam("openid")
         GetSnsUserInfoBuilder openid(final String openid);
@@ -43,4 +45,15 @@ public interface WechatMPAPI {
     }
 
     public GetSnsUserInfoBuilder getSnsUserInfo();
+
+    interface GetJsapiTicketBuilder extends NeedAccessToken<GetJsapiTicketBuilder> {
+
+        @GET
+        @Path("https://api.weixin.qq.com/cgi-bin/ticket/getticket")
+        @ConstParams({"type", "jsapi"})
+        @Consumes(MediaType.APPLICATION_JSON)
+        Observable<FetchTicketResponse> call();
+    }
+
+    public GetJsapiTicketBuilder getJsapiTicket();
 }
