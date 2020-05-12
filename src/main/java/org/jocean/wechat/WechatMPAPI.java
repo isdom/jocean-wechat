@@ -7,6 +7,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.jocean.rpc.annotation.ConstParams;
+import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
 import org.jocean.wechat.spi.FetchTicketResponse;
 
@@ -56,4 +57,26 @@ public interface WechatMPAPI {
     }
 
     public GetJsapiTicketBuilder getJsapiTicket();
+
+    interface GetOAuthAccessTokenBuilder {
+        @QueryParam("appid")
+        GetOAuthAccessTokenBuilder authorizerAppid(final String authorizerAppid);
+
+        @QueryParam("code")
+        GetOAuthAccessTokenBuilder code(final String code);
+
+        @QueryParam("component_appid")
+        GetOAuthAccessTokenBuilder componentAppid(final String componentAppid);
+
+        @QueryParam("component_access_token")
+        GetOAuthAccessTokenBuilder componentAccesstoken(final String componentAccesstoken);
+
+        @GET
+        @Path("https://api.weixin.qq.com/sns/oauth2/component/access_token")
+        @ConstParams({"grant_type", "authorization_code"})
+        @Consumes(MediaType.APPLICATION_JSON)
+        Observable<OAuthAccessTokenResponse> call();
+    }
+
+    public GetOAuthAccessTokenBuilder getOAuthAccessToken();
 }
