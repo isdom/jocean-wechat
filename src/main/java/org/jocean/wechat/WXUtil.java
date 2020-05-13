@@ -19,6 +19,31 @@ import rx.Observable;
 import rx.Observable.Transformer;
 
 public class WXUtil {
+    public static Observable<ResponseBean> redirect4componentoauth(
+            final AuthorizedMP mp,
+            final String redirect_uri,
+            final String scope,
+            final Observable<String> getstate) {
+        // 代公众号发起网页授权
+        // https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1419318590&token=&lang=zh_CN
+        // redirect to wechat auth2.0
+        // https://open.weixin.qq.com/connect/oauth2/authorize?appid=APPID&redirect_uri=REDIRECT_URI
+        //      &response_type=code&scope=SCOPE&state=STATE&component_appid=component_appid#wechat_redirect
+        return getstate.map(state -> {
+                try {
+                    return ResponseUtil.redirectOnly("https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + mp.getAppid()
+                            + "&redirect_uri=" + URLEncoder.encode(redirect_uri, "UTF-8")
+                            + "&response_type=code"
+                            + "&scope=" + scope
+                            + "&state=" + URLEncoder.encode(state, "UTF-8")
+                            + "&component_appid=" + mp.getComponentAppid()
+                            + "#wechat_redirect");
+                } catch (final UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+    }
+
     public static Observable<ResponseBean> redirect4componentoauth(final BeanFinder finder, final String mpappid,
             final String redirect_uri, final String scope, final Observable<String> getstate) {
         // 代公众号发起网页授权
