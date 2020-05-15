@@ -1,10 +1,15 @@
 package org.jocean.wechat;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.alibaba.fastjson.annotation.JSONField;
 
 import rx.functions.Action1;
 
 public class WXProtocol {
+    private static final Logger LOG = LoggerFactory.getLogger(WXProtocol.class);
+
     public static class WXRespError extends RuntimeException {
         private static final long serialVersionUID = -497658213874624734L;
 
@@ -35,6 +40,7 @@ public class WXProtocol {
     }
 
     public static final Action1<WXAPIResponse> CHECK_WXRESP = resp-> {
+        LOG.debug("in CHECK_WXRESP");
         if (null != resp.getErrcode() && !resp.getErrcode().equals("0")) {
             throw new WXRespError(resp, resp.toString());
         }
