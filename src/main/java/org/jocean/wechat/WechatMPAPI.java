@@ -29,6 +29,7 @@ public interface WechatMPAPI {
         @Path("https://api.weixin.qq.com/cgi-bin/user/info")
         @ConstParams({"lang", "zh_CN"})
         @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
         Observable<UserInfoResponse> call();
     }
 
@@ -43,6 +44,7 @@ public interface WechatMPAPI {
         @Path("https://api.weixin.qq.com/sns/userinfo")
         @ConstParams({"lang", "zh_CN"})
         @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
         Observable<UserInfoResponse> call();
     }
 
