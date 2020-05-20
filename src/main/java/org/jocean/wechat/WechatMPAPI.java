@@ -8,6 +8,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.jocean.rpc.annotation.ConstParams;
 import org.jocean.rpc.annotation.OnResponse;
+import org.jocean.wechat.WXProtocol.Code2SessionResponse;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
 import org.jocean.wechat.spi.FetchTicketResponse;
@@ -83,4 +84,29 @@ public interface WechatMPAPI {
     }
 
     public GetOAuthAccessTokenBuilder getOAuthAccessToken();
+
+    interface Code2SessionBuilder {
+        @QueryParam("appid")
+        Code2SessionBuilder authorizerAppid(final String authorizerAppid);
+
+        @QueryParam("js_code")
+        Code2SessionBuilder code(final String code);
+
+        @QueryParam("component_appid")
+        Code2SessionBuilder componentAppid(final String componentAppid);
+
+        @QueryParam("component_access_token")
+        Code2SessionBuilder componentAccesstoken(final String componentAccesstoken);
+
+        @GET
+        @Path("https://api.weixin.qq.com/sns/component/jscode2session")
+        @ConstParams({"grant_type", "authorization_code"})
+        @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        Observable<Code2SessionResponse> call();
+    }
+
+    // 小程序: Mina
+    // refer: https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1492585163_FtTNA&token=&lang=zh_CN
+    public Code2SessionBuilder code2session();
 }
