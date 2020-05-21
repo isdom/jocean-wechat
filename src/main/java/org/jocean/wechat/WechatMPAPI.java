@@ -6,6 +6,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.jocean.http.FullMessage;
 import org.jocean.rpc.annotation.ConstParams;
 import org.jocean.rpc.annotation.OnResponse;
 import org.jocean.wechat.WXProtocol.Code2SessionResponse;
@@ -13,6 +14,7 @@ import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
 import org.jocean.wechat.spi.FetchTicketResponse;
 
+import io.netty.handler.codec.http.HttpResponse;
 import rx.Observable;
 
 public interface WechatMPAPI {
@@ -109,4 +111,17 @@ public interface WechatMPAPI {
     // 小程序: Mina
     // refer: https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1492585163_FtTNA&token=&lang=zh_CN
     public Code2SessionBuilder code2session();
+
+    interface DownloadMediaBuilder extends NeedAccessToken<GetUserInfoBuilder> {
+        @QueryParam("media_id")
+        DownloadMediaBuilder mediaId(final String mediaId);
+
+        @GET
+        @Path("https://api.weixin.qq.com/cgi-bin/media/get")
+//        @Consumes(MediaType.APPLICATION_JSON)
+//        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        Observable<FullMessage<HttpResponse>> call();
+    }
+
+    public DownloadMediaBuilder downloadMedia();
 }
