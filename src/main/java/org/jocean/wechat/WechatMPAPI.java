@@ -2,7 +2,9 @@ package org.jocean.wechat;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
@@ -12,7 +14,10 @@ import org.jocean.rpc.annotation.OnResponse;
 import org.jocean.wechat.WXProtocol.Code2SessionResponse;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
+import org.jocean.wechat.WXProtocol.WXAPIResponse;
 import org.jocean.wechat.spi.FetchTicketResponse;
+
+import com.alibaba.fastjson.annotation.JSONField;
 
 import io.netty.handler.codec.http.HttpResponse;
 import rx.Observable;
@@ -124,4 +129,48 @@ public interface WechatMPAPI {
     }
 
     public DownloadMediaBuilder downloadMedia();
+
+    interface UploadTempMediaBuilder {
+
+    }
+
+    public class ShorturlReq {
+
+        ShorturlReq(final String url) {
+            this.long_url = url;
+        }
+
+        String action = "long2short";
+        String long_url;
+
+        public String getAction() {
+            return action;
+        }
+
+        public String getLong_url() {
+            return long_url;
+        }
+    }
+
+    public interface ShorturlResponse extends WXAPIResponse {
+
+        @JSONField(name = "short_url")
+        public String getShorturl();
+
+        @JSONField(name = "short_url")
+        public void setShortUrl(final String url);
+    }
+
+    interface GetShorturlBuilder extends NeedAccessToken<GetShorturlBuilder> {
+        @Produces(MediaType.APPLICATION_JSON)
+        GetUserInfoBuilder body(final ShorturlReq req);
+
+        @POST
+        @Path("https://api.weixin.qq.com/cgi-bin/shorturl")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        Observable<ShorturlResponse> call();
+    }
+
+    public GetShorturlBuilder getShorturl();
 }
