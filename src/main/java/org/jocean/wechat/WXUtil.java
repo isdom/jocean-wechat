@@ -19,7 +19,10 @@ import rx.Observable;
 import rx.Observable.Transformer;
 
 public class WXUtil {
-    public static Observable<ResponseBean> redirect4componentoauth(
+    private WXUtil() {
+    }
+
+    public static Observable<ResponseBean> toMPAuthorize(
             final AuthorizedMP mp,
             final String redirect_uri,
             final String scope,
