@@ -23,7 +23,7 @@ dependencies {
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonVersion}"
     compile 'org.apache.commons:commons-lang3:3.8.1'
     compile 'javax.inject:javax.inject:1'
-    compile 'com.google.guava:guava:28.1-jre'
+    compile "com.google.guava:guava:${guavaVersion}"
     compile "org.springframework:spring-context:${springVersion}"
         
     compile 'org.jocean:jocean-idiom:0.1.4-SNAPSHOT'
