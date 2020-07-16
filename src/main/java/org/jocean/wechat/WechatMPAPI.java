@@ -173,4 +173,56 @@ public interface WechatMPAPI {
     }
 
     public GetShorturlBuilder getShorturl();
+
+    public interface KfInfo {
+        @JSONField(name="kf_id")
+        public String getKfid();
+
+        @JSONField(name="kf_id")
+        public void setKfid(final String id);
+
+        @JSONField(name="kf_account")
+        public String getKfaccount();
+
+        @JSONField(name="kf_account")
+        public void setKfaccount(final String account);
+
+        @JSONField(name="kf_headimgurl")
+        public String getKfheadimgurl();
+
+        @JSONField(name="kf_headimgurl")
+        public void setKfheadimgurl(final String headimgurl);
+
+        @JSONField(name="kf_nick")
+        public String getKfnick();
+
+        @JSONField(name="kf_nick")
+        public void setKfnick(final String nick);
+
+        @JSONField(name="kf_wx")
+        public String getKfwx();
+
+        @JSONField(name="kf_wx")
+        public void setKfwx(final String wx);
+    }
+
+    public interface GetKflistResponse extends WXAPIResponse {
+        @JSONField(name="kf_list")
+        public KfInfo[] getKflist();
+
+        @JSONField(name="kf_list")
+        public void setKflist(final KfInfo[] kfs);
+    }
+
+    // https://developers.weixin.qq.com/doc/offiaccount/Customer_Service/Customer_Service_Management.html#0
+    interface GetKflistBuilder extends NeedAccessToken<GetKflistBuilder> {
+
+        @GET
+        @Path("https://api.weixin.qq.com/cgi-bin/customservice/getkflist")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        Observable<GetKflistResponse> call();
+    }
+
+    public GetKflistBuilder getKflist();
 }
