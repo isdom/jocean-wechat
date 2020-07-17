@@ -225,4 +225,53 @@ public interface WechatMPAPI {
     }
 
     public GetKflistBuilder getKflist();
+
+    public interface InviteWorkerResponse extends WXAPIResponse {
+    }
+
+    public class InviteWorkerRequest {
+        // 完整客服帐号，格式为：帐号前缀@公众号微信号
+        @JSONField(name="kf_account")
+        public String getKfaccount() {
+            return this.kf_account;
+        }
+
+        // 完整客服帐号，格式为：帐号前缀@公众号微信号
+        @JSONField(name="kf_account")
+        public void setKfaccount(final String account) {
+            this.kf_account = account;
+        }
+
+        // 接收绑定邀请的客服微信号
+        @JSONField(name="invite_wx")
+        public String getInvitewx() {
+            return this.invite_wx;
+        }
+
+        // 接收绑定邀请的客服微信号
+        @JSONField(name="invite_wx")
+        public void setInvitewx(final String wx) {
+            this.invite_wx = wx;
+        }
+
+        private String kf_account;
+        private String invite_wx;
+    }
+
+    // 新添加的客服帐号是不能直接使用的，只有客服人员用微信号绑定了客服账号后，方可登录Web客服进行操作。
+    // 此接口发起一个绑定邀请到客服人员微信号，客服人员需要在微信客户端上用该微信号确认后帐号才可用。
+    // 尚未绑定微信号的帐号可以进行绑定邀请操作，邀请未失效时不能对该帐号进行再次绑定微信号邀请。
+    interface InviteWorkerBuilder extends NeedAccessToken<InviteWorkerBuilder> {
+
+        @Produces(MediaType.APPLICATION_JSON)
+        InviteWorkerBuilder body(final InviteWorkerRequest req);
+
+        @POST
+        @Path("https://api.weixin.qq.com/customservice/kfaccount/inviteworker")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        Observable<InviteWorkerResponse> call();
+    }
+
+    public InviteWorkerBuilder inviteWorker();
 }
