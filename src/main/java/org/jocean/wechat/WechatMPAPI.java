@@ -274,4 +274,22 @@ public interface WechatMPAPI {
     }
 
     public InviteWorkerBuilder inviteWorker();
+
+    public interface DelkfResponse extends WXAPIResponse {
+    }
+
+    interface DelkfBuilder extends NeedAccessToken<DelkfBuilder> {
+
+        // 完整客服帐号，格式为：帐号前缀@公众号微信号
+        @QueryParam("kf_account")
+        DelkfBuilder kfaccount(final String account);
+
+        @GET
+        @Path("https://api.weixin.qq.com/customservice/kfaccount/del")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        Observable<DelkfResponse> call();
+    }
+
+    public DelkfBuilder delkf();
 }
