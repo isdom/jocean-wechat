@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 import org.jocean.http.FullMessage;
 import org.jocean.rpc.annotation.ConstParams;
 import org.jocean.rpc.annotation.OnResponse;
+import org.jocean.rpc.annotation.RpcBuilder;
 import org.jocean.wechat.WXProtocol.Code2SessionResponse;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
@@ -28,6 +29,7 @@ public interface WechatMPAPI {
         BUILDER accessToken(final String accessToken);
     }
 
+    @RpcBuilder
     interface GetUserInfoBuilder extends NeedAccessToken<GetUserInfoBuilder> {
 
         @QueryParam("openid")
@@ -43,6 +45,7 @@ public interface WechatMPAPI {
 
     public GetUserInfoBuilder getUserInfo();
 
+    @RpcBuilder
     interface GetSnsUserInfoBuilder extends NeedAccessToken<GetSnsUserInfoBuilder> {
 
         @QueryParam("openid")
@@ -58,6 +61,7 @@ public interface WechatMPAPI {
 
     public GetSnsUserInfoBuilder getSnsUserInfo();
 
+    @RpcBuilder
     interface GetJsapiTicketBuilder extends NeedAccessToken<GetJsapiTicketBuilder> {
 
         @GET
@@ -69,6 +73,7 @@ public interface WechatMPAPI {
 
     public GetJsapiTicketBuilder getJsapiTicket();
 
+    @RpcBuilder
     interface GetOAuthAccessTokenBuilder {
         @QueryParam("appid")
         GetOAuthAccessTokenBuilder authorizerAppid(final String authorizerAppid);
@@ -92,6 +97,7 @@ public interface WechatMPAPI {
 
     public GetOAuthAccessTokenBuilder getOAuthAccessToken();
 
+    @RpcBuilder
     interface Code2SessionBuilder {
         @QueryParam("appid")
         Code2SessionBuilder authorizerAppid(final String authorizerAppid);
@@ -117,6 +123,7 @@ public interface WechatMPAPI {
     // refer: https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1492585163_FtTNA&token=&lang=zh_CN
     public Code2SessionBuilder code2session();
 
+    @RpcBuilder
     interface DownloadMediaBuilder extends NeedAccessToken<GetUserInfoBuilder> {
         @QueryParam("media_id")
         DownloadMediaBuilder mediaId(final String mediaId);
@@ -161,6 +168,7 @@ public interface WechatMPAPI {
         public void setShortUrl(final String url);
     }
 
+    @RpcBuilder
     interface GetShorturlBuilder extends NeedAccessToken<GetShorturlBuilder> {
         @Produces(MediaType.APPLICATION_JSON)
         GetUserInfoBuilder body(final ShorturlReq req);
@@ -215,6 +223,7 @@ public interface WechatMPAPI {
     }
 
     // https://developers.weixin.qq.com/doc/offiaccount/Customer_Service/Customer_Service_Management.html#0
+    @RpcBuilder
     interface GetKflistBuilder extends NeedAccessToken<GetKflistBuilder> {
 
         @GET
@@ -261,6 +270,7 @@ public interface WechatMPAPI {
     // 新添加的客服帐号是不能直接使用的，只有客服人员用微信号绑定了客服账号后，方可登录Web客服进行操作。
     // 此接口发起一个绑定邀请到客服人员微信号，客服人员需要在微信客户端上用该微信号确认后帐号才可用。
     // 尚未绑定微信号的帐号可以进行绑定邀请操作，邀请未失效时不能对该帐号进行再次绑定微信号邀请。
+    @RpcBuilder
     interface InviteWorkerBuilder extends NeedAccessToken<InviteWorkerBuilder> {
 
         @Produces(MediaType.APPLICATION_JSON)
@@ -278,6 +288,7 @@ public interface WechatMPAPI {
     public interface DelkfResponse extends WXAPIResponse {
     }
 
+    @RpcBuilder
     interface DelkfBuilder extends NeedAccessToken<DelkfBuilder> {
 
         // 完整客服帐号，格式为：帐号前缀@公众号微信号
