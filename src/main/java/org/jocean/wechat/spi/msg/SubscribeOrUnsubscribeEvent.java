@@ -15,12 +15,24 @@ public class SubscribeOrUnsubscribeEvent extends BaseWXMessage {
         this._event = event;
     }
 
+    @JSONField(name="EventKey")
+    public String getEventKey() {
+        return _eventKey;
+    }
+
+    @JSONField(name="EventKey")
+    public void setEventKey(final String eventKey) {
+        _eventKey = eventKey;
+    }
+
     private String  _event;
+    private String  _eventKey;
 
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         builder.append("SubscribeOrUnsubscribeEvent [event=").append(_event)
+                .append(", eventKey=").append(_eventKey)
                 .append(", base=").append(super.toString()).append("]");
         return builder.toString();
     }
