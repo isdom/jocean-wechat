@@ -34,13 +34,16 @@ public class WXUtil {
         //      &response_type=code&scope=SCOPE&state=STATE&component_appid=component_appid#wechat_redirect
         return getstate.map(state -> {
                 try {
-                    return ResponseUtil.redirectOnly("https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + mp.getAppid()
+                    String location = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + mp.getAppid()
                             + "&redirect_uri=" + URLEncoder.encode(redirect_uri, "UTF-8")
                             + "&response_type=code"
                             + "&scope=" + scope
-                            + "&state=" + URLEncoder.encode(state, "UTF-8")
-                            + "&component_appid=" + mp.getComponentAppid()
-                            + "#wechat_redirect");
+                            + "&state=" + URLEncoder.encode(state, "UTF-8");
+                    if (null != mp.getComponentAppid()) {
+                        location += "&component_appid=" + mp.getComponentAppid();
+                    }
+                    location += "#wechat_redirect";
+                    return ResponseUtil.redirectOnly(location);
                 } catch (final UnsupportedEncodingException e) {
                     throw new RuntimeException(e);
                 }
