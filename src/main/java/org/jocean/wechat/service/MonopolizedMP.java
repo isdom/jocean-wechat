@@ -23,6 +23,10 @@ public class MonopolizedMP implements AuthorizedMP {
         return this._appid;
     }
 
+    public String getSecret() {
+        return this._secret;
+    }
+
     @Override
     public String getAccessToken() {
         return this._token;
@@ -47,6 +51,9 @@ public class MonopolizedMP implements AuthorizedMP {
 
     @Value("${mp.appid}")
     String _appid;
+
+    @Value("${mp.secret}")
+    String _secret;
 
     @Value("${mp.token}")
     String _token;
