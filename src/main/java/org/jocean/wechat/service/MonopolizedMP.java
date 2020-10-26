@@ -8,16 +8,14 @@ public class MonopolizedMP implements AuthorizedMP {
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        builder.append("DefaultAuthorizedMP [componentAppid=").append(_componentAppid).append(", appid=")
-                .append(_appid).append(", token=").append(_token).append(", tokenExpireInMs=")
-                .append(_tokenExpireInMs).append(", refreshToken=").append(_refreshToken).append(", jsapiTicket=")
-                .append(_jsapiTicket).append("]");
+        builder.append("MonopolizedMP [appid=").append(_appid).append(", token=").append(_token)
+                .append(", jsapiTicket=").append(_jsapiTicket).append("]");
         return builder.toString();
     }
 
     @Override
     public String getComponentAppid() {
-        return this._componentAppid;
+        return null;
     }
 
     @Override
@@ -32,12 +30,14 @@ public class MonopolizedMP implements AuthorizedMP {
 
     @Override
     public String getRefreshToken() {
-        return this._refreshToken;
+//        return this._refreshToken;
+        return null;
     }
 
     @Override
     public long getAccessTokenExpireInMs() {
-        return this._tokenExpireInMs;
+//        return this._tokenExpireInMs;
+        return 0;
     }
 
     @Override
@@ -45,21 +45,18 @@ public class MonopolizedMP implements AuthorizedMP {
         return this._jsapiTicket;
     }
 
-    @Value("${wxopen.appid}")
-    String _componentAppid;
-
     @Value("${mp.appid}")
     String _appid;
 
     @Value("${mp.token}")
     String _token;
 
-    @Value("${mp.token.expire}")
-    long _tokenExpireInMs;
+//    @Value("${mp.token.expire}")
+//    long _tokenExpireInMs;
 
-    @Value("${mp.refreshToken}")
-    String _refreshToken;
+//    @Value("${mp.refreshToken}")
+//    String _refreshToken;
 
-    @Value("${mp.jsapiTicket}")
+    @Value("${mp.ticket}")
     String _jsapiTicket;
 }
