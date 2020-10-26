@@ -74,6 +74,27 @@ public interface WechatMPAPI {
     public GetJsapiTicketBuilder getJsapiTicket();
 
     @RpcBuilder
+    interface GetMonopolizedOAuthAccessTokenBuilder {
+        @QueryParam("appid")
+        GetMonopolizedOAuthAccessTokenBuilder appid(final String appid);
+
+        @QueryParam("code")
+        GetMonopolizedOAuthAccessTokenBuilder code(final String code);
+
+        @QueryParam("secret")
+        GetMonopolizedOAuthAccessTokenBuilder secret(final String secret);
+
+        @GET
+        @Path("https://api.weixin.qq.com/sns/oauth2/access_token")
+        @ConstParams({"grant_type", "authorization_code"})
+        @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        Observable<OAuthAccessTokenResponse> call();
+    }
+
+    public GetMonopolizedOAuthAccessTokenBuilder getMonopolizedOAuthAccessToken();
+
+    @RpcBuilder
     interface GetOAuthAccessTokenBuilder {
         @QueryParam("appid")
         GetOAuthAccessTokenBuilder authorizerAppid(final String authorizerAppid);
