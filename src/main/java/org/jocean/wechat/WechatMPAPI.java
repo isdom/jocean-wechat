@@ -145,7 +145,7 @@ public interface WechatMPAPI {
     public Code2SessionBuilder code2session();
 
     @RpcBuilder
-    interface DownloadMediaBuilder extends NeedAccessToken<GetUserInfoBuilder> {
+    interface DownloadMediaBuilder extends NeedAccessToken<DownloadMediaBuilder> {
         @QueryParam("media_id")
         DownloadMediaBuilder mediaId(final String mediaId);
 
