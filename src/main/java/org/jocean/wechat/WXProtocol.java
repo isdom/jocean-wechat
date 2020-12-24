@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
-import rx.functions.Action1;
+import rx.Observable.Transformer;
 
 public class WXProtocol {
     private static final Logger LOG = LoggerFactory.getLogger(WXProtocol.class);
@@ -39,12 +39,17 @@ public class WXProtocol {
         public void setErrmsg(final String errmsg);
     }
 
-    public static final Action1<WXAPIResponse> CHECK_WXRESP = resp-> {
-        LOG.debug("in CHECK_WXRESP");
-        if (null != resp.getErrcode() && !resp.getErrcode().equals("0")) {
-            throw new WXRespError(resp, resp.toString());
-        }
-    };
+    public static final Transformer<WXAPIResponse, WXAPIResponse> CHECK_WXRESP = resps -> resps.doOnNext( resp -> {
+            LOG.debug("in CHECK_WXRESP");
+            if (null != resp.getErrcode() && !resp.getErrcode().equals("0")) {
+                throw new WXRespError(resp, resp.toString());
+            }
+        });
+
+    @SuppressWarnings("unchecked")
+    public static <T extends WXAPIResponse> Transformer<T, T> checkWXResp() {
+        return (Transformer<T, T>) CHECK_WXRESP;
+    }
 
     public interface WXUserInfo {
 

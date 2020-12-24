@@ -64,7 +64,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
                     .paramAsQuery("openid", openid)
                     .paramAsQuery("lang", "zh_CN")
                     .responseAs(ContentUtil.ASJSON, UserInfoResponse.class)
-                    .doOnNext(WXProtocol.CHECK_WXRESP);
+                    .compose(WXProtocol.checkWXResp());
             } catch (final Exception e) {
                 return Observable.error(e);
             }
@@ -83,7 +83,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
                     .paramAsQuery("openid", openid)
                     .paramAsQuery("lang", "zh_CN")
                     .responseAs(ContentUtil.ASJSON, UserInfoResponse.class)
-                    .doOnNext(WXProtocol.CHECK_WXRESP);
+                    .compose(WXProtocol.checkWXResp());
             } catch (final Exception e) {
                 return Observable.error(e);
             }
@@ -200,7 +200,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             .paramAsQuery("access_token", accessToken)
             .body(req, ContentUtil.TOJSON)
             .responseAs(ContentUtil.ASJSON, WXAPIResponse.class)
-            .doOnNext(WXProtocol.CHECK_WXRESP);
+            .compose(WXProtocol.checkWXResp());
     }
 
     static class ShorturlReq {
@@ -241,7 +241,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
                     .paramAsQuery("access_token", accessToken)
                     .body(new ShorturlReq(url), ContentUtil.TOJSON)
                     .responseAs(ContentUtil.ASJSON, ShorturlResponse.class)
-                    .doOnNext(WXProtocol.CHECK_WXRESP)
+                    .compose(WXProtocol.checkWXResp())
                     .map(resp -> resp.getShorturl());
             } catch (final Exception e) {
                 return Observable.error(e);
@@ -286,7 +286,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
                 .paramAsQuery("type", "image")
                 .body(media.compose(tomultipart(name, filename)))
                 .responseAs(ContentUtil.ASJSON, UploadTempMediaResponse.class)
-                .doOnNext(WXProtocol.CHECK_WXRESP)));
+                .compose(WXProtocol.checkWXResp())));
     }
 
     private static String getNewMultipartDelimiter() {
@@ -420,7 +420,7 @@ public class DefaultWXCommonAPI implements WXCommonAPI {
             reqAndBody.setScenestr(scenestr);
 
             return interact.method(HttpMethod.POST).reqbean(reqAndBody).body(reqAndBody, ContentUtil.TOJSON)
-                .responseAs(ContentUtil.ASJSON, CreateQrcodeResponse.class).doOnNext(WXProtocol.CHECK_WXRESP)
+                .responseAs(ContentUtil.ASJSON, CreateQrcodeResponse.class).compose(WXProtocol.checkWXResp())
                 .map(resp-> "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + urlencodeAsUtf8(resp.getTicket()));
         }));
     }

@@ -97,7 +97,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
 
             try {
                 return interact.reqbean(reqbean).responseAs(ContentUtil.ASJSON, OAuthAccessTokenResponse.class)
-                    .doOnNext(WXProtocol.CHECK_WXRESP);
+                    .compose(WXProtocol.checkWXResp());
             } catch (final Exception e) {
                 return Observable.error(e);
             }
@@ -116,7 +116,7 @@ public class DefaultWechatAPI implements WechatAPI, MBeanRegisterAware {
 
             try {
                 return interact.method(HttpMethod.POST).reqbean(reqAndBody).body(reqAndBody, ContentUtil.TOJSON)
-                    .responseAs(ContentUtil.ASJSON, CreateQrcodeResponse.class).doOnNext(WXProtocol.CHECK_WXRESP)
+                    .responseAs(ContentUtil.ASJSON, CreateQrcodeResponse.class).compose(WXProtocol.checkWXResp())
                     .map(resp-> "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + urlencodeAsUtf8(resp.getTicket()));
             } catch (final Exception e) {
                 return Observable.error(e);

@@ -66,7 +66,7 @@ public class DefaultWechatMinaAPI implements WechatMinaAPI, MBeanRegisterAware {
                     .paramAsQuery("js_code", code)
                     .paramAsQuery("grant_type", "authorization_code")
                     .responseAs(ContentUtil.ASJSON, Code2SessionResponse.class)
-                    .doOnNext(WXProtocol.CHECK_WXRESP);
+                    .compose(WXProtocol.checkWXResp());
             } catch (final Exception e) {
                 return Observable.error(e);
             }

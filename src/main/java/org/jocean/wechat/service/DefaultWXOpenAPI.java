@@ -103,7 +103,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                         .paramAsQuery("component_access_token", this._componentToken)
                         .body(req, ContentUtil.TOJSON)
                         .responseAs(ContentUtil.ASJSON, PreAuthCodeResponse.class)
-                        .doOnNext(WXProtocol.CHECK_WXRESP);
+                        .compose(WXProtocol.checkWXResp());
             } catch (final Exception e) {
                 return Observable.error(e);
             }
@@ -232,7 +232,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                         .paramAsQuery("component_access_token", this._componentToken)
                         .body(req, ContentUtil.TOJSON)
                         .responseAs(ContentUtil.ASJSON, QueryAuthResponse.class)
-                        .doOnNext(WXProtocol.CHECK_WXRESP);
+                        .compose(WXProtocol.checkWXResp());
             } catch (final Exception e) {
                 return Observable.error(e);
             }
@@ -328,7 +328,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                         .paramAsQuery("component_access_token", this._componentToken)
                         .body(req, ContentUtil.TOJSON)
                         .responseAs(ContentUtil.ASJSON, AuthorizerTokenResponse.class)
-                        .doOnNext(WXProtocol.CHECK_WXRESP);
+                        .compose(WXProtocol.checkWXResp());
             } catch (final Exception e) {
                 return Observable.error(e);
             }
@@ -462,7 +462,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                         .paramAsQuery("component_access_token", this._componentToken)
                         .body(req, ContentUtil.TOJSON)
                         .responseAs(ContentUtil.ASJSON, AuthorizerInfoResponse.class)
-                        .doOnNext(WXProtocol.CHECK_WXRESP);
+                        .compose(WXProtocol.checkWXResp());
             } catch (final Exception e) {
                 return Observable.error(e);
             }
@@ -481,7 +481,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                         .paramAsQuery("component_appid", this._appid)
                         .paramAsQuery("component_access_token", this._componentToken)
                         .responseAs(ContentUtil.ASJSON, OAuthAccessTokenResponse.class)
-                        .doOnNext(WXProtocol.CHECK_WXRESP);
+                        .compose(WXProtocol.checkWXResp());
             } catch (final Exception e) {
                 return Observable.error(e);
             }
@@ -504,7 +504,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
                     .paramAsQuery("component_appid", this._appid)
                     .paramAsQuery("component_access_token", this._componentToken)
                     .responseAs(ContentUtil.ASJSON, Code2SessionResponse.class)
-                    .doOnNext(WXProtocol.CHECK_WXRESP);
+                    .compose(WXProtocol.checkWXResp());
             } catch (final Exception e) {
                 return Observable.error(e);
             }
