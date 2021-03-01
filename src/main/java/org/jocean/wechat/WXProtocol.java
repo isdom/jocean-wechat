@@ -141,6 +141,20 @@ public class WXProtocol {
     public interface UserInfoResponse extends WXAPIResponse, WXUserInfo {
     }
 
+    public interface AccessTokenResponse extends WXAPIResponse {
+        @JSONField(name="expires_in")
+        public int getExpiresIn();
+
+        @JSONField(name="expires_in")
+        public void setExpiresIn(final int expiresIn);
+
+        @JSONField(name="access_token")
+        public String getAccessToken();
+
+        @JSONField(name="access_token")
+        public void setAccessToken(final String accessToken);
+    }
+
     public interface TokenOpenidScope {
         @JSONField(name="expires_in")
         public int getExpiresIn();

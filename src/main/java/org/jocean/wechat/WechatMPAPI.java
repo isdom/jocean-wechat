@@ -12,6 +12,7 @@ import org.jocean.http.FullMessage;
 import org.jocean.rpc.annotation.ConstParams;
 import org.jocean.rpc.annotation.OnResponse;
 import org.jocean.rpc.annotation.RpcBuilder;
+import org.jocean.wechat.WXProtocol.AccessTokenResponse;
 import org.jocean.wechat.WXProtocol.Code2SessionResponse;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
@@ -72,6 +73,24 @@ public interface WechatMPAPI {
     }
 
     public GetJsapiTicketBuilder getJsapiTicket();
+
+    @RpcBuilder
+    interface GetMonopolizedAccessTokenBuilder {
+        @QueryParam("appid")
+        GetMonopolizedAccessTokenBuilder appid(final String appid);
+
+        @QueryParam("secret")
+        GetMonopolizedAccessTokenBuilder secret(final String secret);
+
+        @GET
+        @Path("https://api.weixin.qq.com/cgi-bin/token")
+        @ConstParams({"grant_type", "client_credential"})
+        @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        Observable<AccessTokenResponse> call();
+    }
+
+    public GetMonopolizedAccessTokenBuilder getMonopolizedAccessToken();
 
     @RpcBuilder
     interface GetMonopolizedOAuthAccessTokenBuilder {
