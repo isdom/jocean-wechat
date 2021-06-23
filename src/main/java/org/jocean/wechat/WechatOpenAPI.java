@@ -17,13 +17,13 @@ public interface WechatOpenAPI {
     @RpcBuilder
     interface FetchComponentTokenBuilder {
         @JSONField(name="component_appid")
-        public FetchComponentTokenBuilder setComponentAppid(final String appid);
+        public FetchComponentTokenBuilder componentAppid(final String appid);
 
         @JSONField(name="component_appsecret")
-        public FetchComponentTokenBuilder setComponentSecret(final String secret);
+        public FetchComponentTokenBuilder componentSecret(final String secret);
 
         @JSONField(name="component_verify_ticket")
-        public FetchComponentTokenBuilder setComponentVerifyTicket(final String ticket);
+        public FetchComponentTokenBuilder componentVerifyTicket(final String ticket);
 
         @POST
         @Path("https://api.weixin.qq.com/cgi-bin/component/api_component_token")
