@@ -3,21 +3,27 @@ package org.jocean.wechat;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.jocean.rpc.annotation.OnResponse;
 import org.jocean.rpc.annotation.RpcBuilder;
-import org.jocean.wechat.spi.FetchComponentTokenRequest;
 import org.jocean.wechat.spi.FetchComponentTokenResponse;
+
+import com.alibaba.fastjson.annotation.JSONField;
 
 import rx.Observable;
 
 public interface WechatOpenAPI {
     @RpcBuilder
     interface FetchComponentTokenBuilder {
-        @Produces(MediaType.APPLICATION_JSON)
-        FetchComponentTokenBuilder body(final FetchComponentTokenRequest req);
+        @JSONField(name="component_appid")
+        public FetchComponentTokenBuilder setComponentAppid(final String appid);
+
+        @JSONField(name="component_appsecret")
+        public FetchComponentTokenBuilder setComponentSecret(final String secret);
+
+        @JSONField(name="component_verify_ticket")
+        public FetchComponentTokenBuilder setComponentVerifyTicket(final String ticket);
 
         @POST
         @Path("https://api.weixin.qq.com/cgi-bin/component/api_component_token")
