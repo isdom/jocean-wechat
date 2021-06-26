@@ -7,6 +7,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.jocean.rpc.annotation.OnResponse;
 import org.jocean.rpc.annotation.RpcBuilder;
+import org.jocean.wechat.WXOpenAPI.PreAuthCodeResponse;
 import org.jocean.wechat.spi.FetchComponentTokenResponse;
 
 import com.alibaba.fastjson.annotation.JSONField;
@@ -34,4 +35,11 @@ public interface WechatOpenAPI {
 
     public FetchComponentTokenBuilder fetchComponentToken();
 
+    @RpcBuilder
+    interface CreatePreAuthCodeBuilder {
+
+        Observable<PreAuthCodeResponse> call();
+    }
+
+    public CreatePreAuthCodeBuilder createPreAuthCode();
 }
