@@ -9,6 +9,7 @@ import javax.ws.rs.core.MediaType;
 import org.jocean.rpc.annotation.OnResponse;
 import org.jocean.rpc.annotation.RpcBuilder;
 import org.jocean.wechat.WXOpenAPI.PreAuthCodeResponse;
+import org.jocean.wechat.WXOpenAPI.QueryAuthResponse;
 import org.jocean.wechat.spi.FetchComponentTokenResponse;
 
 import com.alibaba.fastjson.annotation.JSONField;
@@ -54,4 +55,25 @@ public interface WechatOpenAPI {
     }
 
     public CreatePreAuthCodeBuilder createPreAuthCode();
+
+    @RpcBuilder
+    interface QueryAuthBuilder {
+
+        @QueryParam("component_access_token")
+        public QueryAuthBuilder componentAccessToken(final String accessToken);
+
+        @JSONField(name = "component_appid")
+        public QueryAuthBuilder componentAppid(final String appid);
+
+        @JSONField(name = "authorization_code")
+        public QueryAuthBuilder authorizationCode(final String code);
+
+        @POST
+        @Path("https://api.weixin.qq.com/cgi-bin/component/api_query_auth")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        Observable<QueryAuthResponse> call();
+    }
+
+    public QueryAuthBuilder queryAuth();
 }
