@@ -7,10 +7,13 @@ import org.jocean.http.ContentUtil;
 import org.jocean.http.RpcRunner;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
-import org.jocean.wechat.OldWXOpenAPI;
 import org.jocean.wechat.WXProtocol;
 import org.jocean.wechat.WXProtocol.Code2SessionResponse;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
+import org.jocean.wechat.WechatOpenAPI.AuthorizerInfoResponse;
+import org.jocean.wechat.WechatOpenAPI.AuthorizerTokenResponse;
+import org.jocean.wechat.WechatOpenAPI.PreAuthCodeResponse;
+import org.jocean.wechat.WechatOpenAPI.QueryAuthResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +30,7 @@ import rx.Observable.Transformer;
  * @deprecated use {@link org.jocean.wechat.service.DefaultWXOpenComponent} instead.
  */
 @Deprecated
-public class DefaultWXOpenAPI implements OldWXOpenAPI, MBeanRegisterAware {
+public class DefaultWXOpenAPI implements MBeanRegisterAware {
 
     @SuppressWarnings("unused")
     private static final Logger LOG = LoggerFactory.getLogger(DefaultWXOpenAPI.class);
@@ -61,7 +64,6 @@ public class DefaultWXOpenAPI implements OldWXOpenAPI, MBeanRegisterAware {
 //            }});
     }
 
-    @Override
     public String getAppid() {
         return this._appid;
     }
@@ -96,7 +98,6 @@ public class DefaultWXOpenAPI implements OldWXOpenAPI, MBeanRegisterAware {
         private String _componentAppid;
     }
 
-    @Override
     public Transformer<RpcRunner, PreAuthCodeResponse> createPreAuthCode() {
         return runners -> runners.flatMap(runner -> runner.name("wxopen.createPreAuthCode").execute(interact -> {
             try {
@@ -224,7 +225,6 @@ public class DefaultWXOpenAPI implements OldWXOpenAPI, MBeanRegisterAware {
      *
      * @see org.jocean.wechat.OldWXOpenAPI#queryAuth(java.lang.String)
      */
-    @Override
     public Transformer<RpcRunner, QueryAuthResponse> queryAuth(final String authorizationCode) {
         return runners -> runners.flatMap(runner -> runner.name("wxopen.queryAuth").execute(interact -> {
             try {
@@ -319,7 +319,6 @@ public class DefaultWXOpenAPI implements OldWXOpenAPI, MBeanRegisterAware {
      * authorizer_refresh_token    刷新令牌
      *
      */
-    @Override
     public Transformer<RpcRunner, AuthorizerTokenResponse> authorizerToken(final String authorizerAppid, final String refreshToken) {
         return runners -> runners.flatMap(runner -> runner.name("wxopen.authorizerToken").execute(interact -> {
             try {
@@ -454,7 +453,6 @@ public class DefaultWXOpenAPI implements OldWXOpenAPI, MBeanRegisterAware {
      *                         请注意： 1）该字段的返回不会考虑公众号是否具备该权限集的权限（因为可能部分具备），
      *                                 请根据公众号的帐号类型和认证情况，来判断公众号的接口权限。
      */
-    @Override
     public Transformer<RpcRunner, AuthorizerInfoResponse> getAuthorizerInfo(final String authorizerAppid) {
         return runners -> runners.flatMap(runner -> runner.name("wxopen.getAuthorizerInfo").execute(interact -> {
             try {
@@ -474,7 +472,6 @@ public class DefaultWXOpenAPI implements OldWXOpenAPI, MBeanRegisterAware {
         }));
     }
 
-    @Override
     public Transformer<RpcRunner, OAuthAccessTokenResponse> getOAuthAccessToken(final String authorizerAppid, final String code) {
         return runners -> runners.flatMap(runner -> runner.name("wxopen.getOAuthAccessToken").execute(interact -> {
             try {
@@ -495,7 +492,6 @@ public class DefaultWXOpenAPI implements OldWXOpenAPI, MBeanRegisterAware {
 
     // 小程序: Mina
     // refer: https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1492585163_FtTNA&token=&lang=zh_CN
-    @Override
     public Transformer<RpcRunner, Code2SessionResponse> code2session(final String minaAppid, final String code) {
         return runners -> runners.flatMap( runner -> runner.name("wxopen.code2session").execute(
         interact-> {

@@ -7,11 +7,6 @@ import org.jocean.http.RpcRunner;
 import org.jocean.idiom.BeanFinder;
 import org.jocean.svr.ResponseBean;
 import org.jocean.svr.ResponseUtil;
-import org.jocean.wechat.OldWXOpenAPI.AuthorizerInfoResponse;
-import org.jocean.wechat.OldWXOpenAPI.AuthorizerTokenResponse;
-import org.jocean.wechat.OldWXOpenAPI.QueryAuthResponse;
-import org.jocean.wechat.WXProtocol.Code2SessionResponse;
-import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
 import org.jocean.wechat.WXProtocol.WXAPIResponse;
 
@@ -50,13 +45,13 @@ public class WXUtil {
             });
     }
 
-    public static Observable<Transformer<RpcRunner, OAuthAccessTokenResponse>> code2tos(
-            final BeanFinder finder,
-            final String mpappid,
-            final String code) {
-        return finder.find(mpappid, AuthorizedMP.class).flatMap(mp -> finder.find(mp.getComponentAppid(), OldWXOpenAPI.class)
-                .map(api -> api.getOAuthAccessToken(mp.getAppid(), code)));
-    }
+//    public static Observable<Transformer<RpcRunner, OAuthAccessTokenResponse>> code2tos(
+//            final BeanFinder finder,
+//            final String mpappid,
+//            final String code) {
+//        return finder.find(mpappid, AuthorizedMP.class).flatMap(mp -> finder.find(mp.getComponentAppid(), OldWXOpenAPI.class)
+//                .map(api -> api.getOAuthAccessToken(mp.getAppid(), code)));
+//    }
 
     public static Observable<Transformer<RpcRunner, UserInfoResponse>> tos2userinfo(
             final BeanFinder finder,
@@ -94,6 +89,7 @@ public class WXUtil {
         return finder.find(WXCommonAPI.class).map(wcapi -> wcapi.getSnsUserInfo(oauth2Token, openid));
     }
 
+    /*
     public static Observable<Transformer<RpcRunner, Code2SessionResponse>> component_code2session(
             final BeanFinder finder,
             final String minaAppid,
@@ -123,6 +119,7 @@ public class WXUtil {
             final String authorizerAppid) {
         return finder.find(componentAppid, OldWXOpenAPI.class).map(woapi-> woapi.getAuthorizerInfo(authorizerAppid));
     }
+    */
 
     public static Observable<Transformer<RpcRunner, WXAPIResponse>> common_sendCustomMessageInText(
             final BeanFinder finder,

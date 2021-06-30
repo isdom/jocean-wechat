@@ -6,13 +6,13 @@ import org.junit.Test;
 
 import com.alibaba.fastjson.JSON;
 
-public class WXOpenAPITestCase {
+public class WechatOpenAPITestCase {
 
     @Test
     public final void testDecodeJson() {
 
         final String text = "{\"pre_auth_code\":\"preauthcode\",\"expires_in\":1800}";
-        final OldWXOpenAPI.PreAuthCodeResponse resp = JSON.parseObject(text, OldWXOpenAPI.PreAuthCodeResponse.class);
+        final WechatOpenAPI.PreAuthCodeResponse resp = JSON.parseObject(text, WechatOpenAPI.PreAuthCodeResponse.class);
         assertEquals("preauthcode", resp.getPreAuthCode());
         assertEquals(1800, resp.getExpires());
     }
