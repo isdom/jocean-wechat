@@ -7,9 +7,9 @@ import org.jocean.http.RpcRunner;
 import org.jocean.idiom.BeanFinder;
 import org.jocean.svr.ResponseBean;
 import org.jocean.svr.ResponseUtil;
-import org.jocean.wechat.WXOpenAPI.AuthorizerInfoResponse;
-import org.jocean.wechat.WXOpenAPI.AuthorizerTokenResponse;
-import org.jocean.wechat.WXOpenAPI.QueryAuthResponse;
+import org.jocean.wechat.OldWXOpenAPI.AuthorizerInfoResponse;
+import org.jocean.wechat.OldWXOpenAPI.AuthorizerTokenResponse;
+import org.jocean.wechat.OldWXOpenAPI.QueryAuthResponse;
 import org.jocean.wechat.WXProtocol.Code2SessionResponse;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.WXProtocol.UserInfoResponse;
@@ -54,7 +54,7 @@ public class WXUtil {
             final BeanFinder finder,
             final String mpappid,
             final String code) {
-        return finder.find(mpappid, AuthorizedMP.class).flatMap(mp -> finder.find(mp.getComponentAppid(), WXOpenAPI.class)
+        return finder.find(mpappid, AuthorizedMP.class).flatMap(mp -> finder.find(mp.getComponentAppid(), OldWXOpenAPI.class)
                 .map(api -> api.getOAuthAccessToken(mp.getAppid(), code)));
     }
 
@@ -98,7 +98,7 @@ public class WXUtil {
             final BeanFinder finder,
             final String minaAppid,
             final String code) {
-        return finder.find(minaAppid, AuthorizedMP.class).flatMap(mp -> finder.find(mp.getComponentAppid(), WXOpenAPI.class))
+        return finder.find(minaAppid, AuthorizedMP.class).flatMap(mp -> finder.find(mp.getComponentAppid(), OldWXOpenAPI.class))
                 .map(wxopen -> wxopen.code2session(minaAppid, code));
     }
 
@@ -106,7 +106,7 @@ public class WXUtil {
             final BeanFinder finder,
             final String componentAppid,
             final String authorizationCode) {
-        return finder.find(componentAppid, WXOpenAPI.class).map(woapi-> woapi.queryAuth(authorizationCode));
+        return finder.find(componentAppid, OldWXOpenAPI.class).map(woapi-> woapi.queryAuth(authorizationCode));
     }
 
     public static Observable<Transformer<RpcRunner, AuthorizerTokenResponse>> component_authorizerToken(
@@ -114,14 +114,14 @@ public class WXUtil {
             final String componentAppid,
             final String authorizerAppid,
             final String refreshToken) {
-        return finder.find(componentAppid, WXOpenAPI.class).map(woapi-> woapi.authorizerToken(authorizerAppid, refreshToken));
+        return finder.find(componentAppid, OldWXOpenAPI.class).map(woapi-> woapi.authorizerToken(authorizerAppid, refreshToken));
     }
 
     public static Observable<Transformer<RpcRunner, AuthorizerInfoResponse>> component_getAuthorizerInfo(
             final BeanFinder finder,
             final String componentAppid,
             final String authorizerAppid) {
-        return finder.find(componentAppid, WXOpenAPI.class).map(woapi-> woapi.getAuthorizerInfo(authorizerAppid));
+        return finder.find(componentAppid, OldWXOpenAPI.class).map(woapi-> woapi.getAuthorizerInfo(authorizerAppid));
     }
 
     public static Observable<Transformer<RpcRunner, WXAPIResponse>> common_sendCustomMessageInText(

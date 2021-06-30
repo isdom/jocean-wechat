@@ -7,7 +7,7 @@ import org.jocean.http.ContentUtil;
 import org.jocean.http.RpcRunner;
 import org.jocean.idiom.jmx.MBeanRegister;
 import org.jocean.idiom.jmx.MBeanRegisterAware;
-import org.jocean.wechat.WXOpenAPI;
+import org.jocean.wechat.OldWXOpenAPI;
 import org.jocean.wechat.WXProtocol;
 import org.jocean.wechat.WXProtocol.Code2SessionResponse;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
@@ -27,7 +27,7 @@ import rx.Observable.Transformer;
  * @deprecated use {@link org.jocean.wechat.service.DefaultWXOpenComponent} instead.
  */
 @Deprecated
-public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
+public class DefaultWXOpenAPI implements OldWXOpenAPI, MBeanRegisterAware {
 
     @SuppressWarnings("unused")
     private static final Logger LOG = LoggerFactory.getLogger(DefaultWXOpenAPI.class);
@@ -222,7 +222,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
      *    请注意： 1）该字段的返回不会考虑公众号是否具备该权限集的权限（因为可能部分具备），请根据公众号的帐号类型和认证情况，来判断公众号的接口权限。
      *
      *
-     * @see org.jocean.wechat.WXOpenAPI#queryAuth(java.lang.String)
+     * @see org.jocean.wechat.OldWXOpenAPI#queryAuth(java.lang.String)
      */
     @Override
     public Transformer<RpcRunner, QueryAuthResponse> queryAuth(final String authorizationCode) {
@@ -281,7 +281,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
     }
 
     /* (non-Javadoc)
-     * @see org.jocean.wechat.WXOpenAPI#authorizerToken(java.lang.String, java.lang.String)
+     * @see org.jocean.wechat.OldWXOpenAPI#authorizerToken(java.lang.String, java.lang.String)
      * https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1453779503&token=&lang=zh_CN
      * 5、获取（刷新）授权公众号或小程序的接口调用凭据（令牌）
      * 该API用于在授权方令牌（authorizer_access_token）失效时，可用刷新令牌（authorizer_refresh_token）获取新的令牌。
@@ -366,7 +366,7 @@ public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
     }
 
     /* (non-Javadoc)
-     * @see org.jocean.wechat.WXOpenAPI#getAuthorizerInfo(java.lang.String)
+     * @see org.jocean.wechat.OldWXOpenAPI#getAuthorizerInfo(java.lang.String)
      * https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1453779503&token=&lang=zh_CN
      * 获取授权方的帐号基本信息
      * 该API用于获取授权方的基本信息，包括头像、昵称、帐号类型、认证类型、微信号、原始ID和二维码图片URL。
