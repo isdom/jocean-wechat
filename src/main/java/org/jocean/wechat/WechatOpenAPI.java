@@ -14,6 +14,7 @@ import org.jocean.wechat.WXOpenAPI.AuthorizerInfoResponse;
 import org.jocean.wechat.WXOpenAPI.AuthorizerTokenResponse;
 import org.jocean.wechat.WXOpenAPI.PreAuthCodeResponse;
 import org.jocean.wechat.WXOpenAPI.QueryAuthResponse;
+import org.jocean.wechat.WXProtocol.Code2SessionResponse;
 import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.FetchComponentTokenResponse;
 
@@ -152,4 +153,31 @@ public interface WechatOpenAPI {
     }
 
     public GetOAuthAccessTokenBuilder getOAuthAccessToken(final String authorizerAppid, final String code);
+
+    @RpcBuilder
+    interface Code2SessionBuilder {
+
+        @QueryParam("component_access_token")
+        public Code2SessionBuilder componentAccessToken(final String accessToken);
+
+        @QueryParam("component_appid")
+        public Code2SessionBuilder componentAppid(final String appid);
+
+        @QueryParam("appid")
+        public GetOAuthAccessTokenBuilder minaAppid(final String minaAppid);
+
+        @QueryParam("js_code")
+        public GetOAuthAccessTokenBuilder code(final String code);
+
+        @GET
+        @Path("https://api.weixin.qq.com/sns/component/jscode2session")
+        @ConstParams({"grant_type", "authorization_code"})
+        @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        Observable<Code2SessionResponse> call();
+    }
+    // 小程序: Mina
+    // https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/Mini_Programs/WeChat_login.html
+    // refer: https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1492585163_FtTNA&token=&lang=zh_CN
+    public Code2SessionBuilder code2session();
 }
