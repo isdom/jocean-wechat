@@ -22,6 +22,11 @@ import rx.Observable;
 import rx.Observable.Transformer;
 
 
+/**
+ * @author isdom
+ * @deprecated use {@link org.jocean.wechat.service.DefaultWXOpenComponent} instead.
+ */
+@Deprecated
 public class DefaultWXOpenAPI implements WXOpenAPI, MBeanRegisterAware {
 
     @SuppressWarnings("unused")

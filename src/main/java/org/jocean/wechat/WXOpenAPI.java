@@ -10,6 +10,10 @@ import com.alibaba.fastjson.annotation.JSONField;
 
 import rx.Observable.Transformer;
 
+/**
+ * @deprecated use {@link org.jocean.wechat.WXOpenComponent} instead.
+ */
+@Deprecated
 public interface WXOpenAPI {
 
     public String getAppid();

@@ -9,11 +9,8 @@
     ${component.token}
     ${component.token.expire}
     ${component.verify.ticket}
-    ${api.retrytimes}
-    ${api.retryinterval}
-    ${api.timeoutInMs}
     -->
     
-    <bean id="wxopen" class="org.jocean.wechat.service.DefaultWXOpenAPI"/>
+    <bean id="wxopen" class="org.jocean.wechat.service.DefaultWXOpenComponent"/>
     <alias name="wxopen" alias="${wxopen.appid}"/>
 </beans>
