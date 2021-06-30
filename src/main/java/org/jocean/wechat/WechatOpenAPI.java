@@ -8,6 +8,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.jocean.rpc.annotation.OnResponse;
 import org.jocean.rpc.annotation.RpcBuilder;
+import org.jocean.wechat.WXOpenAPI.AuthorizerInfoResponse;
 import org.jocean.wechat.WXOpenAPI.AuthorizerTokenResponse;
 import org.jocean.wechat.WXOpenAPI.PreAuthCodeResponse;
 import org.jocean.wechat.WXOpenAPI.QueryAuthResponse;
@@ -102,4 +103,25 @@ public interface WechatOpenAPI {
     }
 
     public AuthorizerTokenBuilder authorizerToken();
+
+    @RpcBuilder
+    interface GetAuthorizerInfoBuilder {
+
+        @QueryParam("component_access_token")
+        public GetAuthorizerInfoBuilder componentAccessToken(final String accessToken);
+
+        @JSONField(name = "component_appid")
+        public GetAuthorizerInfoBuilder componentAppid(final String appid);
+
+        @JSONField(name = "authorizer_appid")
+        public GetAuthorizerInfoBuilder authorizerAppid(final String authorizerAppid);
+
+        @POST
+        @Path("https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        Observable<AuthorizerInfoResponse> call();
+    }
+
+    public GetAuthorizerInfoBuilder getAuthorizerInfo();
 }
