@@ -94,9 +94,6 @@ public interface WechatOpenAPI {
         @JSONField(name = "authorizer_refresh_token")
         public AuthorizerTokenBuilder authorizerRefreshToken(final String refreshToken);
 
-        @JSONField(name = "authorization_code")
-        public AuthorizerTokenBuilder authorizationCode(final String code);
-
         @POST
         @Path("https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token")
         @Consumes(MediaType.APPLICATION_JSON)
