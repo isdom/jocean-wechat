@@ -1,17 +1,20 @@
 package org.jocean.wechat;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.jocean.rpc.annotation.ConstParams;
 import org.jocean.rpc.annotation.OnResponse;
 import org.jocean.rpc.annotation.RpcBuilder;
 import org.jocean.wechat.WXOpenAPI.AuthorizerInfoResponse;
 import org.jocean.wechat.WXOpenAPI.AuthorizerTokenResponse;
 import org.jocean.wechat.WXOpenAPI.PreAuthCodeResponse;
 import org.jocean.wechat.WXOpenAPI.QueryAuthResponse;
+import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 import org.jocean.wechat.spi.FetchComponentTokenResponse;
 
 import com.alibaba.fastjson.annotation.JSONField;
@@ -124,4 +127,29 @@ public interface WechatOpenAPI {
     }
 
     public GetAuthorizerInfoBuilder getAuthorizerInfo();
+
+    @RpcBuilder
+    interface GetOAuthAccessTokenBuilder {
+
+        @QueryParam("component_access_token")
+        public GetOAuthAccessTokenBuilder componentAccessToken(final String accessToken);
+
+        @QueryParam("component_appid")
+        public GetOAuthAccessTokenBuilder componentAppid(final String appid);
+
+        @QueryParam("appid")
+        public GetOAuthAccessTokenBuilder authorizerAppid(final String authorizerAppid);
+
+        @QueryParam("code")
+        public GetOAuthAccessTokenBuilder code(final String code);
+
+        @GET
+        @Path("https://api.weixin.qq.com/sns/oauth2/component/access_token")
+        @ConstParams({"grant_type", "authorization_code"})
+        @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        Observable<OAuthAccessTokenResponse> call();
+    }
+
+    public GetOAuthAccessTokenBuilder getOAuthAccessToken(final String authorizerAppid, final String code);
 }
