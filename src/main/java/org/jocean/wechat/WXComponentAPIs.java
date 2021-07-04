@@ -8,6 +8,11 @@ import org.jocean.wechat.WXProtocol.OAuthAccessTokenResponse;
 
 import rx.Observable.Transformer;
 
+/**
+ * @author isdom
+ * @deprecated use {@link org.jocean.wechat.WechatOpenAPI} instead.
+ */
+@Deprecated
 public class WXComponentAPIs {
     private WXComponentAPIs() {
         throw new IllegalStateException("No instances!");
