@@ -135,6 +135,10 @@ public interface WechatMPAPI {
         Observable<OAuthAccessTokenResponse> call();
     }
 
+    /**
+     * @deprecated use {@link org.jocean.wechat.WechatOpenAPI.getOAuthAccessToken} instead.
+     */
+    @Deprecated
     public GetOAuthAccessTokenBuilder getOAuthAccessToken();
 
     @RpcBuilder
@@ -159,6 +163,10 @@ public interface WechatMPAPI {
         Observable<Code2SessionResponse> call();
     }
 
+    /**
+     * @deprecated use {@link org.jocean.wechat.WechatOpenAPI.code2session} instead.
+     */
+    @Deprecated
     // 小程序: Mina
     // refer: https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1492585163_FtTNA&token=&lang=zh_CN
     public Code2SessionBuilder code2session();
