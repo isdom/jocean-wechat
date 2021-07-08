@@ -8,6 +8,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.jocean.rpc.annotation.ConstParams;
+import org.jocean.rpc.annotation.OnBuild;
 import org.jocean.rpc.annotation.OnResponse;
 import org.jocean.rpc.annotation.RpcBuilder;
 import org.jocean.wechat.WXProtocol.Code2SessionResponse;
@@ -18,6 +19,7 @@ import org.jocean.wechat.spi.FetchComponentTokenResponse;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import rx.Observable;
+import rx.functions.Action2;
 
 public interface WechatOpenAPI {
 
@@ -226,14 +228,45 @@ public interface WechatOpenAPI {
 
     public FetchComponentTokenBuilder fetchComponentToken();
 
-    @RpcBuilder
-    interface CreatePreAuthCodeBuilder {
+    public static Action2<OpenComponentableQJ<?>, WXOpenComponent> SET_WXC_QJ = (openComponentable, wxc) -> {
+        openComponentable.componentAccessToken(wxc.getComponentToken());
+        openComponentable.componentAppid(wxc.getComponentAppid());
+    };
 
+    interface OpenComponentableQJ<BUILDER> {
         @QueryParam("component_access_token")
-        public CreatePreAuthCodeBuilder componentAccessToken(final String accessToken);
+        BUILDER componentAccessToken(final String accessToken);
 
         @JSONField(name = "component_appid")
-        public CreatePreAuthCodeBuilder componentAppid(final String appid);
+        BUILDER componentAppid(final String appid);
+
+        @OnBuild("org.jocean.wechat.WechatOpenAPI.SET_WXC_QJ")
+        BUILDER wxOpenComponent(final WXOpenComponent wxc);
+    }
+
+    public static Action2<OpenComponentableQJ<?>, WXOpenComponent> SET_WXC_QQ = (openComponentable, wxc) -> {
+        openComponentable.componentAccessToken(wxc.getComponentToken());
+        openComponentable.componentAppid(wxc.getComponentAppid());
+    };
+
+    interface OpenComponentableQQ<BUILDER> {
+        @QueryParam("component_access_token")
+        BUILDER componentAccessToken(final String accessToken);
+
+        @QueryParam("component_appid")
+        BUILDER componentAppid(final String appid);
+
+        @OnBuild("org.jocean.wechat.WechatOpenAPI.SET_WXC_QQ")
+        BUILDER wxOpenComponent(final WXOpenComponent wxc);
+    }
+
+    @RpcBuilder
+    interface CreatePreAuthCodeBuilder extends OpenComponentableQJ<CreatePreAuthCodeBuilder> {
+//        @QueryParam("component_access_token")
+//        public CreatePreAuthCodeBuilder componentAccessToken(final String accessToken);
+
+//        @JSONField(name = "component_appid")
+//        public CreatePreAuthCodeBuilder componentAppid(final String appid);
 
         @POST
         @Path("https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode")
@@ -327,13 +360,13 @@ public interface WechatOpenAPI {
     *
     */
     @RpcBuilder
-    interface QueryAuthBuilder {
+    interface QueryAuthBuilder extends OpenComponentableQJ<QueryAuthBuilder> {
 
-        @QueryParam("component_access_token")
-        public QueryAuthBuilder componentAccessToken(final String accessToken);
-
-        @JSONField(name = "component_appid")
-        public QueryAuthBuilder componentAppid(final String appid);
+//        @QueryParam("component_access_token")
+//        public QueryAuthBuilder componentAccessToken(final String accessToken);
+//
+//        @JSONField(name = "component_appid")
+//        public QueryAuthBuilder componentAppid(final String appid);
 
         @JSONField(name = "authorization_code")
         public QueryAuthBuilder authorizationCode(final String code);
@@ -386,13 +419,13 @@ public interface WechatOpenAPI {
     *
     */
     @RpcBuilder
-    interface AuthorizerTokenBuilder {
+    interface AuthorizerTokenBuilder extends OpenComponentableQJ<AuthorizerTokenBuilder> {
 
-        @QueryParam("component_access_token")
-        public AuthorizerTokenBuilder componentAccessToken(final String accessToken);
-
-        @JSONField(name = "component_appid")
-        public AuthorizerTokenBuilder componentAppid(final String appid);
+//        @QueryParam("component_access_token")
+//        public AuthorizerTokenBuilder componentAccessToken(final String accessToken);
+//
+//        @JSONField(name = "component_appid")
+//        public AuthorizerTokenBuilder componentAppid(final String appid);
 
         @JSONField(name = "authorizer_appid")
         public AuthorizerTokenBuilder authorizerAppid(final String authorizerAppid);
@@ -498,13 +531,13 @@ public interface WechatOpenAPI {
      *                                 请根据公众号的帐号类型和认证情况，来判断公众号的接口权限。
      */
     @RpcBuilder
-    interface GetAuthorizerInfoBuilder {
+    interface GetAuthorizerInfoBuilder extends OpenComponentableQJ<GetAuthorizerInfoBuilder> {
 
-        @QueryParam("component_access_token")
-        public GetAuthorizerInfoBuilder componentAccessToken(final String accessToken);
-
-        @JSONField(name = "component_appid")
-        public GetAuthorizerInfoBuilder componentAppid(final String appid);
+//        @QueryParam("component_access_token")
+//        public GetAuthorizerInfoBuilder componentAccessToken(final String accessToken);
+//
+//        @JSONField(name = "component_appid")
+//        public GetAuthorizerInfoBuilder componentAppid(final String appid);
 
         @JSONField(name = "authorizer_appid")
         public GetAuthorizerInfoBuilder authorizerAppid(final String authorizerAppid);
@@ -519,13 +552,13 @@ public interface WechatOpenAPI {
     public GetAuthorizerInfoBuilder getAuthorizerInfo();
 
     @RpcBuilder
-    interface GetOAuthAccessTokenBuilder {
+    interface GetOAuthAccessTokenBuilder extends OpenComponentableQQ<GetOAuthAccessTokenBuilder> {
 
-        @QueryParam("component_access_token")
-        public GetOAuthAccessTokenBuilder componentAccessToken(final String accessToken);
-
-        @QueryParam("component_appid")
-        public GetOAuthAccessTokenBuilder componentAppid(final String appid);
+//        @QueryParam("component_access_token")
+//        public GetOAuthAccessTokenBuilder componentAccessToken(final String accessToken);
+//
+//        @QueryParam("component_appid")
+//        public GetOAuthAccessTokenBuilder componentAppid(final String appid);
 
         @QueryParam("appid")
         public GetOAuthAccessTokenBuilder authorizerAppid(final String authorizerAppid);
@@ -544,13 +577,13 @@ public interface WechatOpenAPI {
     public GetOAuthAccessTokenBuilder getOAuthAccessToken();
 
     @RpcBuilder
-    interface Code2SessionBuilder {
+    interface Code2SessionBuilder extends OpenComponentableQQ<Code2SessionBuilder> {
 
-        @QueryParam("component_access_token")
-        public Code2SessionBuilder componentAccessToken(final String accessToken);
-
-        @QueryParam("component_appid")
-        public Code2SessionBuilder componentAppid(final String appid);
+//        @QueryParam("component_access_token")
+//        public Code2SessionBuilder componentAccessToken(final String accessToken);
+//
+//        @QueryParam("component_appid")
+//        public Code2SessionBuilder componentAppid(final String appid);
 
         @QueryParam("appid")
         public GetOAuthAccessTokenBuilder minaAppid(final String minaAppid);
