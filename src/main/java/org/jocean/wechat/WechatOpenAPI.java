@@ -228,12 +228,10 @@ public interface WechatOpenAPI {
 
     public FetchComponentTokenBuilder fetchComponentToken();
 
-    public static Action2<OpenComponentableQJ<?>, WXOpenComponent> SET_WXC_QJ = (openComponentable, wxc) -> {
-        openComponentable.componentAccessToken(wxc.getComponentToken());
-        openComponentable.componentAppid(wxc.getComponentAppid());
-    };
+    public static Action2<OpenComponentableQJ<?>, WXOpenComponent> SET_WXC_QJ = (openComponentable, wxc) ->
+        openComponentable.componentAccessToken(wxc.getComponentToken()).componentAppid(wxc.getComponentAppid());
 
-    interface OpenComponentableQJ<BUILDER> {
+    interface OpenComponentableQJ<BUILDER extends OpenComponentableQJ<?>> {
         @QueryParam("component_access_token")
         BUILDER componentAccessToken(final String accessToken);
 
@@ -244,12 +242,10 @@ public interface WechatOpenAPI {
         BUILDER wxOpenComponent(final WXOpenComponent wxc);
     }
 
-    public static Action2<OpenComponentableQJ<?>, WXOpenComponent> SET_WXC_QQ = (openComponentable, wxc) -> {
-        openComponentable.componentAccessToken(wxc.getComponentToken());
-        openComponentable.componentAppid(wxc.getComponentAppid());
-    };
+    public static Action2<OpenComponentableQQ<?>, WXOpenComponent> SET_WXC_QQ = (openComponentable, wxc) ->
+        openComponentable.componentAccessToken(wxc.getComponentToken()).componentAppid(wxc.getComponentAppid());
 
-    interface OpenComponentableQQ<BUILDER> {
+    interface OpenComponentableQQ<BUILDER extends OpenComponentableQQ<?>> {
         @QueryParam("component_access_token")
         BUILDER componentAccessToken(final String accessToken);
 
