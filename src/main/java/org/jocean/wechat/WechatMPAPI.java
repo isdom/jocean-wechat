@@ -351,4 +351,39 @@ public interface WechatMPAPI {
     }
 
     public DelkfBuilder delkf();
+
+    static class Text {
+        @JSONField(name = "content")
+        public String getContent() {
+            return this._content;
+        }
+
+        @JSONField(name = "content")
+        public void setContent(final String content) {
+            this._content = content;
+        }
+
+        private String _content;
+    }
+
+    @RpcBuilder
+    interface SendCustomMessageInTextBuilder extends NeedAccessToken<SendCustomMessageInTextBuilder> {
+
+        @JSONField(name = "touser")
+        public void toUser(final String touser);
+
+        @JSONField(name = "msgtype")
+        public void msgType(final String msgtype);
+
+        @JSONField(name = "text")
+        public Text text(final Text text);
+
+        @POST
+        @Path("https://api.weixin.qq.com/cgi-bin/message/custom/send")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        Observable<WXAPIResponse> call();
+    }
+
+    public SendCustomMessageInTextBuilder sendCustomMessageInText();
 }

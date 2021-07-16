@@ -89,38 +89,6 @@ public class WXUtil {
         return finder.find(WXCommonAPI.class).map(wcapi -> wcapi.getSnsUserInfo(oauth2Token, openid));
     }
 
-    /*
-    public static Observable<Transformer<RpcRunner, Code2SessionResponse>> component_code2session(
-            final BeanFinder finder,
-            final String minaAppid,
-            final String code) {
-        return finder.find(minaAppid, AuthorizedMP.class).flatMap(mp -> finder.find(mp.getComponentAppid(), OldWXOpenAPI.class))
-                .map(wxopen -> wxopen.code2session(minaAppid, code));
-    }
-
-    public static Observable<Transformer<RpcRunner, QueryAuthResponse>> component_queryAuth(
-            final BeanFinder finder,
-            final String componentAppid,
-            final String authorizationCode) {
-        return finder.find(componentAppid, OldWXOpenAPI.class).map(woapi-> woapi.queryAuth(authorizationCode));
-    }
-
-    public static Observable<Transformer<RpcRunner, AuthorizerTokenResponse>> component_authorizerToken(
-            final BeanFinder finder,
-            final String componentAppid,
-            final String authorizerAppid,
-            final String refreshToken) {
-        return finder.find(componentAppid, OldWXOpenAPI.class).map(woapi-> woapi.authorizerToken(authorizerAppid, refreshToken));
-    }
-
-    public static Observable<Transformer<RpcRunner, AuthorizerInfoResponse>> component_getAuthorizerInfo(
-            final BeanFinder finder,
-            final String componentAppid,
-            final String authorizerAppid) {
-        return finder.find(componentAppid, OldWXOpenAPI.class).map(woapi-> woapi.getAuthorizerInfo(authorizerAppid));
-    }
-    */
-
     public static Observable<Transformer<RpcRunner, WXAPIResponse>> common_sendCustomMessageInText(
             final BeanFinder finder,
             final String accessToken,
