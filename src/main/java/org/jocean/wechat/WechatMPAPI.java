@@ -370,13 +370,13 @@ public interface WechatMPAPI {
     interface SendCustomMessageInTextBuilder extends NeedAccessToken<SendCustomMessageInTextBuilder> {
 
         @JSONField(name = "touser")
-        public void toUser(final String touser);
+        public SendCustomMessageInTextBuilder toUser(final String touser);
 
         @JSONField(name = "msgtype")
-        public void msgType(final String msgtype);
+        public SendCustomMessageInTextBuilder msgType(final String msgtype);
 
         @JSONField(name = "text")
-        public Text text(final Text text);
+        public SendCustomMessageInTextBuilder text(final Text text);
 
         @POST
         @Path("https://api.weixin.qq.com/cgi-bin/message/custom/send")
