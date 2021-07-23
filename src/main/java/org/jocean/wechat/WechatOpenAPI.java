@@ -138,6 +138,66 @@ public interface WechatOpenAPI {
         public void setOpenShake(final int valid);
     }
 
+    interface MiniProgramInfo {
+        // "network":{"RequestDomain":["https:xxx","https:xxxx","https:xxx"],"WsRequestDomain":[],
+        //              "UploadDomain":[],"DownloadDomain":[],"BizDomain":[],"UDPDomain":[]},
+
+        interface Network {
+            @JSONField(name = "RequestDomain")
+            public String[] getRequestDomain();
+
+            @JSONField(name = "RequestDomain")
+            public void setRequestDomain(final String[] domains);
+
+            @JSONField(name = "WsRequestDomain")
+            public String[] getWsRequestDomain();
+
+            @JSONField(name = "WsRequestDomain")
+            public void setWsRequestDomain(final String[] domains);
+
+            @JSONField(name = "UploadDomain")
+            public String[] getUploadDomain();
+
+            @JSONField(name = "UploadDomain")
+            public void setUploadDomain(final String[] domains);
+
+            @JSONField(name = "DownloadDomain")
+            public String[] getDownloadDomain();
+
+            @JSONField(name = "DownloadDomain")
+            public void setDownloadDomain(final String[] domains);
+
+            @JSONField(name = "BizDomain")
+            public String[] getBizDomain();
+
+            @JSONField(name = "BizDomain")
+            public void setBizDomain(final String[] domains);
+
+            @JSONField(name = "UDPDomain")
+            public String[] getUDPDomain();
+
+            @JSONField(name = "UDPDomain")
+            public void setUDPDomain(final String[] domains);
+        }
+
+        //  "categories":[{"first":"工具","second":"效率"}]
+        interface Categories {
+
+        }
+
+        @JSONField(name = "network")
+        public Network getNetwork();
+
+        @JSONField(name = "network")
+        public void setNetwork(final Network network);
+
+        @JSONField(name = "categories")
+        public Categories getCategories();
+
+        @JSONField(name = "categories")
+        public void setCategories(final Categories categories);
+    }
+
     interface AuthorizerInfo {
         @JSONField(name = "nick_name")
         public String getNickName();
@@ -192,6 +252,13 @@ public interface WechatOpenAPI {
 
         @JSONField(name = "qrcode_url")
         public void setQrcodeUrl(final String url);
+
+        @JSONField(name = "MiniProgramInfo")
+        public String getMiniProgramInfo();
+
+        @JSONField(name = "MiniProgramInfo")
+        public void setMiniProgramInfo(final MiniProgramInfo miniProgramInfo);
+
     }
 
     public interface AuthorizerInfoResponse extends WXAPIResponse {
@@ -440,6 +507,10 @@ public interface WechatOpenAPI {
 
     /*
      * https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1453779503&token=&lang=zh_CN
+     *
+     * Update 2021-07-23
+     * https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/api/ThirdParty/token/api_get_authorizer_info.html
+     *
      * 获取授权方的帐号基本信息
      * 该API用于获取授权方的基本信息，包括头像、昵称、帐号类型、认证类型、微信号、原始ID和二维码图片URL。
 
@@ -529,12 +600,6 @@ public interface WechatOpenAPI {
     @RpcBuilder
     interface GetAuthorizerInfoBuilder extends OpenComponentableQJ<GetAuthorizerInfoBuilder> {
 
-//        @QueryParam("component_access_token")
-//        public GetAuthorizerInfoBuilder componentAccessToken(final String accessToken);
-//
-//        @JSONField(name = "component_appid")
-//        public GetAuthorizerInfoBuilder componentAppid(final String appid);
-
         @JSONField(name = "authorizer_appid")
         public GetAuthorizerInfoBuilder authorizerAppid(final String authorizerAppid);
 
@@ -549,12 +614,6 @@ public interface WechatOpenAPI {
 
     @RpcBuilder
     interface GetOAuthAccessTokenBuilder extends OpenComponentableQQ<GetOAuthAccessTokenBuilder> {
-
-//        @QueryParam("component_access_token")
-//        public GetOAuthAccessTokenBuilder componentAccessToken(final String accessToken);
-//
-//        @QueryParam("component_appid")
-//        public GetOAuthAccessTokenBuilder componentAppid(final String appid);
 
         @QueryParam("appid")
         public GetOAuthAccessTokenBuilder authorizerAppid(final String authorizerAppid);
