@@ -182,9 +182,21 @@ public interface WechatOpenAPI {
 
         //  "categories":[{"first":"工具","second":"效率"}]
         interface Categories {
+            @JSONField(name = "first")
+            public String getFirst();
 
+            @JSONField(name = "first")
+            public void setFirst(final String first);
+
+            @JSONField(name = "second")
+            public String getSecond();
+
+            @JSONField(name = "second")
+            public void setSecond(final String second);
         }
 
+        // {"network":{"RequestDomain":["https:xxx","https:xxxx","https:xxx"],"WsRequestDomain":[],"UploadDomain":[],"DownloadDomain":[],"BizDomain":[],"UDPDomain":[]},
+        // "categories":[{"first":"工具","second":"效率"}],"visit_status":0}}
         @JSONField(name = "network")
         public Network getNetwork();
 
@@ -196,6 +208,12 @@ public interface WechatOpenAPI {
 
         @JSONField(name = "categories")
         public void setCategories(final Categories categories);
+
+        @JSONField(name = "visit_status")
+        public int getVisitStatus();
+
+        @JSONField(name = "visit_status")
+        public void setVisitStatus(final int status);
     }
 
     interface AuthorizerInfo {
