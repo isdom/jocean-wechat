@@ -272,7 +272,7 @@ public interface WechatOpenAPI {
         public void setQrcodeUrl(final String url);
 
         @JSONField(name = "MiniProgramInfo")
-        public String getMiniProgramInfo();
+        public MiniProgramInfo getMiniProgramInfo();
 
         @JSONField(name = "MiniProgramInfo")
         public void setMiniProgramInfo(final MiniProgramInfo miniProgramInfo);
