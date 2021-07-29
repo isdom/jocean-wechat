@@ -343,11 +343,6 @@ public interface WechatOpenAPI {
 
     @RpcBuilder
     interface CreatePreAuthCodeBuilder extends OpenComponentableQJ<CreatePreAuthCodeBuilder> {
-//        @QueryParam("component_access_token")
-//        public CreatePreAuthCodeBuilder componentAccessToken(final String accessToken);
-
-//        @JSONField(name = "component_appid")
-//        public CreatePreAuthCodeBuilder componentAppid(final String appid);
 
         @POST
         @Path("https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode")
@@ -443,12 +438,6 @@ public interface WechatOpenAPI {
     @RpcBuilder
     interface QueryAuthBuilder extends OpenComponentableQJ<QueryAuthBuilder> {
 
-//        @QueryParam("component_access_token")
-//        public QueryAuthBuilder componentAccessToken(final String accessToken);
-//
-//        @JSONField(name = "component_appid")
-//        public QueryAuthBuilder componentAppid(final String appid);
-
         @JSONField(name = "authorization_code")
         public QueryAuthBuilder authorizationCode(final String code);
 
@@ -501,12 +490,6 @@ public interface WechatOpenAPI {
     */
     @RpcBuilder
     interface AuthorizerTokenBuilder extends OpenComponentableQJ<AuthorizerTokenBuilder> {
-
-//        @QueryParam("component_access_token")
-//        public AuthorizerTokenBuilder componentAccessToken(final String accessToken);
-//
-//        @JSONField(name = "component_appid")
-//        public AuthorizerTokenBuilder componentAppid(final String appid);
 
         @JSONField(name = "authorizer_appid")
         public AuthorizerTokenBuilder authorizerAppid(final String authorizerAppid);
@@ -651,12 +634,6 @@ public interface WechatOpenAPI {
 
     @RpcBuilder
     interface Code2SessionBuilder extends OpenComponentableQQ<Code2SessionBuilder> {
-
-//        @QueryParam("component_access_token")
-//        public Code2SessionBuilder componentAccessToken(final String accessToken);
-//
-//        @QueryParam("component_appid")
-//        public Code2SessionBuilder componentAppid(final String appid);
 
         @QueryParam("appid")
         public GetOAuthAccessTokenBuilder minaAppid(final String minaAppid);
