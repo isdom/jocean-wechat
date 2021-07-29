@@ -181,7 +181,7 @@ public interface WechatOpenAPI {
         }
 
         //  "categories":[{"first":"工具","second":"效率"}]
-        interface Categories {
+        interface Category {
             @JSONField(name = "first")
             public String getFirst();
 
@@ -204,10 +204,10 @@ public interface WechatOpenAPI {
         public void setNetwork(final Network network);
 
         @JSONField(name = "categories")
-        public Categories getCategories();
+        public Category[] getCategories();
 
         @JSONField(name = "categories")
-        public void setCategories(final Categories categories);
+        public void setCategories(final Category[] categories);
 
         @JSONField(name = "visit_status")
         public int getVisitStatus();
