@@ -65,11 +65,12 @@ public interface WechatOpenAPI {
         @JSONField(name = "authorizer_refresh_token")
         public void setAuthorizerRefreshToken(final String refreshToken);
 
+        // expires_in 字段可能不存在, 因此只能用 Integer 代替 int
         @JSONField(name = "expires_in")
-        public int getExpires();
+        public Integer getExpires();
 
         @JSONField(name = "expires_in")
-        public void setExpires(final int expires);
+        public void setExpires(final Integer expires);
     }
 
     interface AuthorizationInfo extends AuthorizerTokenInfo {
@@ -355,6 +356,8 @@ public interface WechatOpenAPI {
 
     /*
     * https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1453779503&token=&lang=zh_CN
+    * Update 2021.07.30:
+    *      https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/api/ThirdParty/token/authorization_info.html
     * 4、使用授权码换取公众号或小程序的接口调用凭据和授权信息
     * 该API用于使用授权码换取授权公众号或小程序的授权信息，并换取authorizer_access_token和authorizer_refresh_token。
     * 授权码的获取，需要在用户在第三方平台授权页中完成授权流程后，在回调URI中通过URL参数提供给第三方平台方。
