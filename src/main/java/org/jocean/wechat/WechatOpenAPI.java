@@ -40,16 +40,44 @@ public interface WechatOpenAPI {
     interface FuncscopeCategory {
         @JSONField(name = "id")
         public int getId();
+
         @JSONField(name = "id")
         public void setId(final int id);
     }
 
+    interface ConfirmInfo {
+        @JSONField(name = "need_confirm")
+        public int getNeedConfirm();
+
+        @JSONField(name = "need_confirm")
+        public void setNeedConfirm(final int status);
+
+        @JSONField(name = "already_confirm")
+        public int getAlreadyConfirm();
+
+        @JSONField(name = "already_confirm")
+        public void setAlreadyConfirm(final int status);
+
+        @JSONField(name = "can_confirm")
+        public int getCanConfirm();
+
+        @JSONField(name = "can_confirm")
+        public void setCanConfirm(final int status);
+    }
+
+    // {"funcscope_category":{"id":25},"confirm_info":{"need_confirm":0,"already_confirm":0,"can_confirm":0}}
     interface FuncInfo {
         @JSONField(name = "funcscope_category")
         public FuncscopeCategory getCategory();
 
         @JSONField(name = "funcscope_category")
         public void setCategory(final FuncscopeCategory category);
+
+        @JSONField(name = "confirm_info")
+        public ConfirmInfo getConfirmInfo();
+
+        @JSONField(name = "confirm_info")
+        public void setConfirmInfo(final ConfirmInfo confirminfo);
     }
 
     interface AuthorizerTokenInfo {
