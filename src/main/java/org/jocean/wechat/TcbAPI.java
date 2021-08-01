@@ -14,7 +14,7 @@ import org.jocean.wechat.WXProtocol.WXAPIResponse;
 import rx.Observable;
 
 public interface TcbAPI {
-    interface NeedAccessToken<BUILDER> {
+    interface NeedAccessToken<BUILDER extends NeedAccessToken<?>> {
         @QueryParam("access_token")
         BUILDER accessToken(final String accessToken);
     }
