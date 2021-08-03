@@ -45,14 +45,6 @@ public class WXUtil {
             });
     }
 
-//    public static Observable<Transformer<RpcRunner, OAuthAccessTokenResponse>> code2tos(
-//            final BeanFinder finder,
-//            final String mpappid,
-//            final String code) {
-//        return finder.find(mpappid, AuthorizedMP.class).flatMap(mp -> finder.find(mp.getComponentAppid(), OldWXOpenAPI.class)
-//                .map(api -> api.getOAuthAccessToken(mp.getAppid(), code)));
-//    }
-
     public static Observable<Transformer<RpcRunner, UserInfoResponse>> tos2userinfo(
             final BeanFinder finder,
             final String scope,
