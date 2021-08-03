@@ -663,6 +663,7 @@ public interface WechatOpenAPI {
 
     public GetOAuthAccessTokenBuilder getOAuthAccessToken();
 
+    // ref: https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/login.html
     @RpcBuilder
     interface Code2SessionBuilder extends OpenComponentableQQ<Code2SessionBuilder> {
 
