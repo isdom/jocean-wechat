@@ -322,6 +322,11 @@ public interface WechatOpenAPI {
         public void setAuthorizationInfo(final AuthorizationInfo info);
     }
 
+    /**
+     * REF DOC: https://someoneiscoding.com/2018/05/31/about-wechat-authorize3rd-component_verify_ticket&component_access_token/
+     * @author isdom
+     *
+     */
     @RpcBuilder
     interface FetchComponentTokenBuilder {
         @JSONField(name="component_appid")
