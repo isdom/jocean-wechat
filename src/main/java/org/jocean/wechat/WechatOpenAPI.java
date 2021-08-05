@@ -324,6 +324,49 @@ public interface WechatOpenAPI {
 
     /**
      * REF DOC: https://someoneiscoding.com/2018/05/31/about-wechat-authorize3rd-component_verify_ticket&component_access_token/
+     * https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/api/ThirdParty/token/component_access_token.html
+     * 令牌
+        令牌（component_access_token）是第三方平台接口的调用凭据。令牌的获取是有限制的，每个令牌的有效期为 2 小时，请自行做好令牌的管理，在令牌快过期时（比如1小时50分），重新调用接口获取。
+
+        如未特殊说明，令牌一般作为被调用接口的 GET 参数 component_access_token 的值使用
+
+        请求地址
+        POST https://api.weixin.qq.com/cgi-bin/component/api_component_token
+        请求参数说明
+        参数  类型  必填  说明
+        component_appid string  是   第三方平台 appid
+        component_appsecret string  是   第三方平台 appsecret
+        component_verify_ticket string  是   微信后台推送的 ticket
+        POST 数据示例：
+
+        {
+          "component_appid":  "appid_value" ,
+          "component_appsecret":  "appsecret_value",
+          "component_verify_ticket": "ticket_value"
+        }
+        结果参数说明
+        参数  类型  说明
+        component_access_token  string  第三方平台 access_token
+        expires_in  number  有效期，单位：秒
+
+        返回结果示例：
+        {
+          "component_access_token": "61W3mEpU66027wgNZ_MhGHNQDHnFATkDa9-2llqrMBjUwxRSNPbVsMmyD-yq8wZETSoE5NQgecigDrSHkPtIYA",
+          "expires_in": 7200
+        }
+        返回码说明
+        错误码 英文描述    中文描述
+        61004   access clientip is not registered   0
+        61005   component ticket is expired 0
+        41004   appsecret missing   缺少 secret 参数
+        40125   invalid appsecret   无效的appsecret
+        61006   component ticket is invalid 0
+        61011   invalid component   0
+        45009   reach max api daily quota limit 接口调用超过限制
+        47001   data format error   解析 JSON/XML 内容错误
+        40001   invalid credential, access_token is invalid or not latest   获取 access_token 时 AppSecret 错误，或者 access_token 无效。请认真比对 AppSecret 的正确性，或查看是否正在为恰当的公众号调用接口
+        48001   api unauthorized    api 功能未授权，请确认公众号/小程序已获得该接口，可以在公众平台官网 - 开发者中心页中查看接口权限
+        其他错误码       请查看全局错误码
      * @author isdom
      *
      */
