@@ -741,6 +741,46 @@ public interface WechatOpenAPI {
 
     public GetAuthorizerInfoBuilder getAuthorizerInfo();
 
+    /**
+     * 第二步：通过code换取网页授权access_token
+        首先请注意，这里通过code换取的是一个特殊的网页授权access_token,与基础支持中的access_token（该access_token用于调用其他接口）不同。公众号可通过下述接口来获取网页授权access_token。如果网页授权的作用域为snsapi_base，则本步骤中获取到网页授权access_token的同时，也获取到了openid，snsapi_base式的网页授权流程即到此为止。
+
+        尤其注意：由于公众号的secret和获取到的access_token安全级别都非常高，必须只保存在服务器，不允许传给客户端。后续刷新access_token、通过access_token获取用户信息等步骤，也必须从服务器发起。
+
+        请求方法
+
+        获取code后，请求以下链接获取access_token： https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
+
+        参数说明
+
+        参数  是否必须    说明
+        appid   是   公众号的唯一标识
+        secret  是   公众号的appsecret
+        code    是   填写第一步获取的code参数
+        grant_type  是   填写为authorization_code
+        返回说明
+
+        正确时返回的JSON数据包如下：
+
+        {
+          "access_token":"ACCESS_TOKEN",
+          "expires_in":7200,
+          "refresh_token":"REFRESH_TOKEN",
+          "openid":"OPENID",
+          "scope":"SCOPE"
+        }
+        参数  描述
+        access_token    网页授权接口调用凭证,注意：此access_token与基础支持的access_token不同
+        expires_in  access_token接口调用凭证超时时间，单位（秒）
+        refresh_token   用户刷新access_token
+        openid  用户唯一标识，请注意，在未关注公众号时，用户访问公众号的网页，也会产生一个用户和公众号唯一的OpenID
+        scope   用户授权的作用域，使用逗号（,）分隔
+        错误时微信会返回JSON数据包如下（示例为Code无效错误）:
+
+        {"errcode":40029,"errmsg":"invalid code"}
+     * @author isdom
+     *
+     */
     @RpcBuilder
     interface GetOAuthAccessTokenBuilder extends OpenComponentableQQ<GetOAuthAccessTokenBuilder> {
 
