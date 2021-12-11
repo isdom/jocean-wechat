@@ -31,5 +31,5 @@ dependencies {
     compile 'org.jocean:jocean-svr:0.0.1-SNAPSHOT'
     compile('org.jocean:jocean-j2se:0.0.4-SNAPSHOT') { transitive = false }
     
-    testCompile 'junit:junit:4.12'
+    testCompile 'junit:junit:4.13.2'
 }
