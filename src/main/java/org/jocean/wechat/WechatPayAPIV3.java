@@ -21,6 +21,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import rx.Observable;
 import rx.functions.Action2;
 
+// ref: https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay2_0.shtml
 public interface WechatPayAPIV3 {
 
 
