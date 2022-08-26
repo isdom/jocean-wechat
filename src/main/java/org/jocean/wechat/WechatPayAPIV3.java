@@ -25,6 +25,22 @@ import rx.functions.Action2;
 //      https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay2_0.shtml
 
 public interface WechatPayAPIV3 {
+	
+	// https://pay.weixin.qq.com/wiki/doc/apiv3/open/pay/chapter4_3_3.shtml
+	// 商家转账到零钱开发指引
+    public interface PreAuthCodeResponse extends WXAPIResponse {
+        @JSONField(name = "pre_auth_code")
+        public String getPreAuthCode();
+
+        @JSONField(name = "pre_auth_code")
+        public void setPreAuthCode(final String code);
+
+        @JSONField(name = "expires_in")
+        public int getExpires();
+
+        @JSONField(name = "expires_in")
+        public void setExpires(final int expires);
+    }
 
 
 }
