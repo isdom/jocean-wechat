@@ -32,5 +32,7 @@ public interface WechatPayAPIV3 {
     public interface V3TransferBatchesResponse extends WXAPIResponse {
     }
 
+    public interface V3TransferDetailElectronicReceipts extends WXAPIResponse {
+    }
 
 }
