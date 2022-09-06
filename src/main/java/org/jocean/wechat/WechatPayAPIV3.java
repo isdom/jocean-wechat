@@ -246,6 +246,9 @@ public interface WechatPayAPIV3 {
         @HeaderParam("User-Agent")
         public TransferBatchesBuilder hdrUserAgent(final String ua);
 
+        @HeaderParam("Accept-Language")
+        public TransferBatchesBuilder hdrAcceptLanguage(final String lang);
+
         @POST
         @Path("https://api.mch.weixin.qq.com/v3/transfer/batches")
         @Consumes(MediaType.APPLICATION_JSON)
