@@ -10,6 +10,7 @@ import org.jocean.http.Interact;
 import org.jocean.rpc.annotation.OnInteract;
 import org.jocean.rpc.annotation.RpcBuilder;
 import org.jocean.rpc.annotation.RpcResource;
+import org.jocean.rpc.annotation.StatusCodeAware;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -50,6 +51,20 @@ public interface WechatPayAPIV3 {
         // message：错误描述，使用易理解的文字表示错误的原因。
         @JSONField(name = "message")
         public void setMessage(final String message);
+
+        @JSONField(serialize = false)
+        public String getWechatpaySerial();
+
+        @JSONField(deserialize = false)
+        @HeaderParam("Wechatpay-Serial")
+        public void setWechatpaySerial(final String serial);
+
+        @JSONField(serialize = false)
+        public String getStatusCode();
+
+        @JSONField(deserialize = false)
+        @StatusCodeAware
+        public void setStatusCode(final String code);
     }
 
 	// https://pay.weixin.qq.com/wiki/doc/apiv3/open/pay/chapter4_3_3.shtml
