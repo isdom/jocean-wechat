@@ -5,15 +5,20 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 
+import org.jocean.http.Interact;
+import org.jocean.rpc.annotation.OnInteract;
 import org.jocean.rpc.annotation.RpcBuilder;
+import org.jocean.rpc.annotation.RpcResource;
 import org.jocean.wechat.WXProtocol.WXAPIResponse;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
 import rx.Observable;
+import rx.Observable.Transformer;
 
 // ref: https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay-1.shtml
 //      https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay2_0.shtml
+//      https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay2_0.shtml#part-6
 
 public interface WechatPayAPIV3 {
     //  错误信息
@@ -184,7 +189,7 @@ public interface WechatPayAPIV3 {
         //  必填：         是
         //  描述：         商户系统内部的商家批次单号，要求此参数只能由数字、大小写字母组成，在商户系统内部唯一
         //  示例值:        plfk2020042013
-        @JSONField(name="appid")
+        @JSONField(name="out_batch_no")
         public TransferBatchesBuilder outBatchNo(final String out_batch_no);
 
         //  批次名称
@@ -212,7 +217,7 @@ public interface WechatPayAPIV3 {
         //  描述：         转账金额单位为“分”。转账总金额必须与批次内所有明细转账金额之和保持一致，否则无法发起转账操作
         //  示例值:        4000000
         @JSONField(name="total_amount")
-        public TransferBatchesBuilder totalAmount(final String total_amount);
+        public TransferBatchesBuilder totalAmount(final int total_amount);
 
         //  转账总笔数
         //  字段名：       total_num
@@ -221,7 +226,7 @@ public interface WechatPayAPIV3 {
         //  描述：         一个转账批次单最多发起三千笔转账。转账总笔数必须与批次内所有明细之和保持一致，否则无法发起转账操作
         //  示例值:        200
         @JSONField(name="total_num")
-        public TransferBatchesBuilder totalNum(final String total_num);
+        public TransferBatchesBuilder totalNum(final int total_num);
 
         //  转账明细列表
         //  字段名：       transfer_detail_list
@@ -231,10 +236,14 @@ public interface WechatPayAPIV3 {
         @JSONField(name="transfer_detail_list")
         public TransferBatchesBuilder transfer_detail_list(final TransferDetail[] transfer_detail_list);
 
+        @RpcResource("signer")
+        public TransferBatchesBuilder signer(final Transformer<Interact, Interact> signer);
+
         @POST
         @Path("https://api.mch.weixin.qq.com/v3/transfer/batches")
         @Consumes(MediaType.APPLICATION_JSON)
         // @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        @OnInteract("signer")
         Observable<TransferBatchesResponse> call();
     }
 }

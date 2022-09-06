@@ -31,5 +31,8 @@ dependencies {
     compile 'org.jocean:jocean-svr:0.0.1-SNAPSHOT'
     compile('org.jocean:jocean-j2se:0.0.4-SNAPSHOT') { transitive = false }
     
+    compile 'com.github.wechatpay-apiv3:wechatpay-apache-httpclient:0.4.8'
+    compile 'commons-io:commons-io:2.11.0'
+    
     testCompile 'junit:junit:4.13.2'
 }
