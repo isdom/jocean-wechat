@@ -60,11 +60,11 @@ public interface WechatPayAPIV3 {
         public void setWechatpaySerial(final String serial);
 
         @JSONField(serialize = false)
-        public String getStatusCode();
+        public int getStatusCode();
 
         @JSONField(deserialize = false)
         @StatusCodeAware
-        public void setStatusCode(final String code);
+        public void setStatusCode(final int code);
     }
 
 	// https://pay.weixin.qq.com/wiki/doc/apiv3/open/pay/chapter4_3_3.shtml
