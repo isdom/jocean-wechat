@@ -268,7 +268,7 @@ public interface WechatPayAPIV3 {
         //  必填：         是
         //  描述：         发起批量转账的明细列表，最多三千笔
         @JSONField(name="transfer_detail_list")
-        public TransferBatchesBuilder transfer_detail_list(final TransferDetail[] transfer_detail_list);
+        public TransferBatchesBuilder transferDetails(final TransferDetail[] transfer_detail_list);
 
         @RpcResource("signer")
         public TransferBatchesBuilder signer(final Transformer<Interact, Interact> signer);
