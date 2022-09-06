@@ -10,7 +10,6 @@ import org.jocean.http.Interact;
 import org.jocean.rpc.annotation.OnInteract;
 import org.jocean.rpc.annotation.RpcBuilder;
 import org.jocean.rpc.annotation.RpcResource;
-import org.jocean.wechat.WXProtocol.WXAPIResponse;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -32,16 +31,31 @@ public interface WechatPayAPIV3 {
     // 错误码和错误提示
     // 当请求处理失败时，除了HTTP状态码表示错误之外，API将在消息体返回错误相应说明具体的错误原因。
 
-    // code：详细错误码
-    // message：错误描述，使用易理解的文字表示错误的原因。
     // field: 指示错误参数的位置。当错误参数位于请求body的JSON时，填写指向参数的JSON Pointer 。当错误参数位于请求的url或者querystring时，填写参数的变量名。
     // value:错误的值
     // issue:具体错误原因
+    public interface PayAPIV3Response {
+        // code：详细错误码
+        @JSONField(name = "code")
+        public String getCode();
+
+        // code：详细错误码
+        @JSONField(name = "code")
+        public void setCode(final String code);
+
+        // message：错误描述，使用易理解的文字表示错误的原因。
+        @JSONField(name = "message")
+        public String getMessage();
+
+        // message：错误描述，使用易理解的文字表示错误的原因。
+        @JSONField(name = "message")
+        public void setMessage(final String message);
+    }
 
 	// https://pay.weixin.qq.com/wiki/doc/apiv3/open/pay/chapter4_3_3.shtml
 	// 商家转账到零钱开发指引
 	// https://api.mch.weixin.qq.com/v3/transfer/batches
-    public interface TransferBatchesResponse extends WXAPIResponse {
+    public interface TransferBatchesResponse extends PayAPIV3Response {
         // 错误码
         // 状态码 错误码 描述  解决方案
         // 500 SYSTEM_ERROR    系统错误    请勿更换商家转账批次单号，请使用相同参数再次调用API。否则可能造成资金损失
