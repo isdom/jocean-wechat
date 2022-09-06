@@ -95,7 +95,20 @@ public interface WechatPayAPIV3 {
         public void setCreateTime(final String create_time);
     }
 
-    interface TransferDetail {
+    class TransferDetail {
+        private String out_detail_no;
+        private int transfer_amount;
+        private String transfer_remark;
+        private String openid;
+        private String user_name = null;
+
+        public TransferDetail(final String out_detail_no, final int transfer_amount, final String transfer_remark, final String openid) {
+            this.out_detail_no = out_detail_no;
+            this.transfer_amount = transfer_amount;
+            this.transfer_remark = transfer_remark;
+            this.openid = openid;
+        }
+
         //  商家明细单号
         //  字段名：       out_detail_no
         //  类型[长度限制]  string[1,32]
@@ -103,10 +116,14 @@ public interface WechatPayAPIV3 {
         //  描述：         商户系统内部区分转账批次单下不同转账明细单的唯一标识，要求此参数只能由数字、大小写字母组成
         //  示例值:        x23zy545Bd5436
         @JSONField(name = "out_detail_no")
-        public String getOutDetailNo();
+        public String getOutDetailNo() {
+            return this.out_detail_no;
+        }
 
         @JSONField(name = "out_detail_no")
-        public void setOutDetailNo(final String out_detail_no);
+        public void setOutDetailNo(final String out_detail_no) {
+            this.out_detail_no = out_detail_no;
+        }
 
         //  转账金额
         //  字段名：       transfer_amount
@@ -115,10 +132,14 @@ public interface WechatPayAPIV3 {
         //  描述：         转账金额单位为分
         //  示例值:        200000
         @JSONField(name = "transfer_amount")
-        public int getTransferAmount();
+        public int getTransferAmount() {
+            return this.transfer_amount;
+        }
 
         @JSONField(name = "transfer_amount")
-        public void setTransferAmount(final int transfer_amount);
+        public void setTransferAmount(final int transfer_amount) {
+            this.transfer_amount = transfer_amount;
+        }
 
         //  转账备注
         //  字段名：       transfer_remark
@@ -127,10 +148,14 @@ public interface WechatPayAPIV3 {
         //  描述：         单条转账备注（微信用户会收到该备注），UTF8编码，最多允许32个字符
         //  示例值:        2020年4月报销
         @JSONField(name = "transfer_remark")
-        public String gettransfer_remark();
+        public String gettransfer_remark() {
+            return this.transfer_remark;
+        }
 
         @JSONField(name = "transfer_remark")
-        public void settransfer_remark(final String transfer_remark);
+        public void settransfer_remark(final String transfer_remark) {
+            this.transfer_remark = transfer_remark;
+        }
 
         //  用户在直连商户应用下的用户标示
         //  字段名：       openid
@@ -139,10 +164,14 @@ public interface WechatPayAPIV3 {
         //  描述：         openid是微信用户在公众号appid下的唯一用户标识（appid不同，则获取到的openid就不同），可用于永久标记一个用户
         //  示例值:        o-MYE42l80oelYMDE34nYD456Xoy
         @JSONField(name = "openid")
-        public String getOpenid();
+        public String getOpenid() {
+            return this.openid;
+        }
 
         @JSONField(name = "openid")
-        public void setOpenid(final String openid);
+        public void setOpenid(final String openid) {
+            this.openid = openid;
+        }
 
         //  收款用户姓名
         //  字段名：       user_name
@@ -156,10 +185,14 @@ public interface WechatPayAPIV3 {
         //                6、商户需确保收集用户的姓名信息，以及向微信支付传输用户姓名和账号标识信息做一致性校验已合法征得用户授权
         //  示例值:        o-MYE42l80oelYMDE34nYD456Xoy
         @JSONField(name = "user_name")
-        public String getUserName();
+        public String getUserName() {
+            return this.user_name;
+        }
 
         @JSONField(name = "user_name")
-        public void setUserName(final String user_name);
+        public void setUserName(final String user_name) {
+            this.user_name = user_name;
+        }
     }
 
     // https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter4_3_1.shtml
