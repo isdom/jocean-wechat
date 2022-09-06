@@ -1,6 +1,7 @@
 package org.jocean.wechat;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
@@ -238,6 +239,12 @@ public interface WechatPayAPIV3 {
 
         @RpcResource("signer")
         public TransferBatchesBuilder signer(final Transformer<Interact, Interact> signer);
+
+        @HeaderParam("Accept")
+        public TransferBatchesBuilder hdrAccept(final String accept);
+
+        @HeaderParam("User-Agent")
+        public TransferBatchesBuilder hdrUserAgent(final String ua);
 
         @POST
         @Path("https://api.mch.weixin.qq.com/v3/transfer/batches")
