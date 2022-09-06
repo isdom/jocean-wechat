@@ -10,7 +10,7 @@ import org.jocean.http.Interact;
 import org.jocean.rpc.annotation.OnInteract;
 import org.jocean.rpc.annotation.RpcBuilder;
 import org.jocean.rpc.annotation.RpcResource;
-import org.jocean.rpc.annotation.StatusCodeAware;
+import org.jocean.rpc.bean.BasicResponse;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -35,7 +35,7 @@ public interface WechatPayAPIV3 {
     // field: 指示错误参数的位置。当错误参数位于请求body的JSON时，填写指向参数的JSON Pointer 。当错误参数位于请求的url或者querystring时，填写参数的变量名。
     // value:错误的值
     // issue:具体错误原因
-    public interface PayAPIV3Response {
+    public interface PayAPIV3Response extends BasicResponse {
         // code：详细错误码
         @JSONField(name = "code")
         public String getCode();
@@ -53,6 +53,34 @@ public interface WechatPayAPIV3 {
         public void setMessage(final String message);
 
         @JSONField(serialize = false)
+        public String getRequestID();
+
+        @JSONField(deserialize = false)
+        @HeaderParam("Request-ID")
+        public void setRequestID(final String id);
+
+        @JSONField(serialize = false)
+        public String getWechatpayNonce();
+
+        @JSONField(deserialize = false)
+        @HeaderParam("Wechatpay-Nonce")
+        public void setWechatpayNonce(final String nonce);
+
+        @JSONField(serialize = false)
+        public String getWechatpaySignature();
+
+        @JSONField(deserialize = false)
+        @HeaderParam("Wechatpay-Signature")
+        public void setWechatpaySignature(final String signature);
+
+        @JSONField(serialize = false)
+        public String getWechatpayTimestamp();
+
+        @JSONField(deserialize = false)
+        @HeaderParam("Wechatpay-Timestamp")
+        public void setWechatpayTimestamp(final String timestamp);
+
+        @JSONField(serialize = false)
         public String getWechatpaySerial();
 
         @JSONField(deserialize = false)
@@ -60,11 +88,11 @@ public interface WechatPayAPIV3 {
         public void setWechatpaySerial(final String serial);
 
         @JSONField(serialize = false)
-        public int getStatusCode();
+        public String getWechatpaySignatureType();
 
         @JSONField(deserialize = false)
-        @StatusCodeAware
-        public void setStatusCode(final int code);
+        @HeaderParam("Wechatpay-Signature-Type")
+        public void setWechatpaySignatureType(final String signatureType);
     }
 
 	// https://pay.weixin.qq.com/wiki/doc/apiv3/open/pay/chapter4_3_3.shtml
