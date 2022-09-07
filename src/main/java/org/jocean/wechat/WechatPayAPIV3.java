@@ -1,6 +1,7 @@
 package org.jocean.wechat;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -50,7 +51,7 @@ public interface WechatPayAPIV3 {
     // field: 指示错误参数的位置。当错误参数位于请求body的JSON时，填写指向参数的JSON Pointer 。当错误参数位于请求的url或者querystring时，填写参数的变量名。
     // value:错误的值
     // issue:具体错误原因
-    public interface PayAPIV3Response extends BasicResponse {
+    interface PayAPIV3Response extends BasicResponse {
         // code：详细错误码
         @JSONField(name = "code")
         public String getCode();
@@ -113,7 +114,7 @@ public interface WechatPayAPIV3 {
 	// https://pay.weixin.qq.com/wiki/doc/apiv3/open/pay/chapter4_3_3.shtml
 	// 商家转账到零钱开发指引
 	// https://api.mch.weixin.qq.com/v3/transfer/batches
-    public interface TransferBatchesResponse extends PayAPIV3Response {
+    interface TransferBatchesResponse extends PayAPIV3Response {
         // 错误码
         // 状态码 错误码 描述  解决方案
         // 500 SYSTEM_ERROR    系统错误    请勿更换商家转账批次单号，请使用相同参数再次调用API。否则可能造成资金损失
@@ -348,5 +349,75 @@ public interface WechatPayAPIV3 {
         // @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
         @OnInteract("signer")
         Observable<TransferBatchesResponse> call();
+    }
+
+    interface EncryptCertificate {
+        @JSONField(name = "algorithm")
+        public String getAlgorithm();
+
+        @JSONField(name = "algorithm")
+        public void getAlgorithm(final String algorithm);
+
+        @JSONField(name = "nonce")
+        public String getNonce();
+
+        @JSONField(name = "nonce")
+        public void setNonce(final String nonce);
+
+        @JSONField(name = "associated_data")
+        public String getAssociatedData();
+
+        @JSONField(name = "associated_data")
+        public void setAssociatedData(final String associated_data);
+
+        @JSONField(name = "ciphertext")
+        public String getCiphertext();
+
+        @JSONField(name = "ciphertext")
+        public void setCiphertext(final String ciphertext);
+    }
+
+    interface CertificateInfo {
+        @JSONField(name = "serial_no")
+        public String getSerialNo();
+
+        @JSONField(name = "serial_no")
+        public void setSerialNo(final String serial_no);
+
+        @JSONField(name = "effective_time")
+        public String getEffectiveTime();
+
+        @JSONField(name = "effective_time")
+        public void setEffectiveTime(final String effective_time);
+
+        @JSONField(name = "expire_time")
+        public String getExpireTime();
+
+        @JSONField(name = "expire_time")
+        public void setExpireTime(final String expire_time);
+
+        @JSONField(name = "encrypt_certificate")
+        public EncryptCertificate getEncryptCertificate();
+
+        @JSONField(name = "encrypt_certificate")
+        public void setEncryptCertificate(final EncryptCertificate encrypt_certificate);
+    }
+
+    interface CertificatesResponse extends PayAPIV3Response {
+        @JSONField(name = "data")
+        public CertificateInfo[] getCertificateInfos();
+
+        @JSONField(name = "data")
+        public void setCertificateInfos(final CertificateInfo[] infos);
+    }
+
+    @RpcBuilder
+    interface CertificatesBuilder extends PayAPIV3Builder<CertificatesBuilder> {
+        @GET
+        @Path("https://api.mch.weixin.qq.com/v3/certificates")
+        @Consumes(MediaType.APPLICATION_JSON)
+        // @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        @OnInteract("signer")
+        Observable<CertificatesResponse> call();
     }
 }
