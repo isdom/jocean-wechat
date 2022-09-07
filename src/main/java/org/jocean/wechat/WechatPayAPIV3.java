@@ -22,6 +22,21 @@ import rx.Observable.Transformer;
 //      https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay2_0.shtml#part-6
 
 public interface WechatPayAPIV3 {
+
+    interface PayAPIV3Builder<BUILDER> {
+        @RpcResource("signer")
+        public BUILDER signer(final Transformer<Interact, Interact> signer);
+
+        @HeaderParam("Accept")
+        public BUILDER hdrAccept(final String accept);
+
+        @HeaderParam("User-Agent")
+        public BUILDER hdrUserAgent(final String ua);
+
+        @HeaderParam("Accept-Language")
+        public BUILDER hdrAcceptLanguage(final String lang);
+    }
+
     //  错误信息
     // 微信支付API v3使用HTTP状态码来表示请求处理的结果。
 
@@ -264,7 +279,7 @@ public interface WechatPayAPIV3 {
     //   • 请商户在自身的系统中合理设置转账频次并做好并发控制，防范错付风险。
     //   • 因商户自身系统设置存在问题导致的资金损失，由商户自行承担。
     @RpcBuilder
-    interface TransferBatchesBuilder {
+    interface TransferBatchesBuilder extends PayAPIV3Builder<TransferBatchesBuilder> {
         //  直连商户的appid
         //  字段名：       appid
         //  类型[长度限制]  string[1,32]
@@ -326,18 +341,6 @@ public interface WechatPayAPIV3 {
         //  描述：         发起批量转账的明细列表，最多三千笔
         @JSONField(name="transfer_detail_list")
         public TransferBatchesBuilder transferDetails(final TransferDetail[] transfer_detail_list);
-
-        @RpcResource("signer")
-        public TransferBatchesBuilder signer(final Transformer<Interact, Interact> signer);
-
-        @HeaderParam("Accept")
-        public TransferBatchesBuilder hdrAccept(final String accept);
-
-        @HeaderParam("User-Agent")
-        public TransferBatchesBuilder hdrUserAgent(final String ua);
-
-        @HeaderParam("Accept-Language")
-        public TransferBatchesBuilder hdrAcceptLanguage(final String lang);
 
         @POST
         @Path("https://api.mch.weixin.qq.com/v3/transfer/batches")
