@@ -5,6 +5,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.jocean.http.Interact;
@@ -419,5 +421,220 @@ public interface WechatPayAPIV3 {
         // @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
         @OnInteract("signer")
         Observable<CertificatesResponse> call();
+    }
+
+    //    "mchid": "1900001109",
+    //    "out_batch_no": "plfk2020042013",
+    //    "batch_id": "1030000071100999991182020050700019480001",
+    //    "appid": "wxf636efh567hg4356",
+    //    "batch_status": "ACCEPTED",
+    //    "batch_type": "API",
+    //    "batch_name": "2019年1月深圳分部报销单",
+    //    "batch_remark": "2019年1月深圳分部报销单",
+    //    "close_reason": "OVERDUE_CLOSE",
+    //    "total_amount": 4000000,
+    //    "total_num": 200,
+    //    "create_time": "2015-05-20T13:29:35.120+08:00",
+    //    "update_time": "2015-05-20T13:29:35.120+08:00",
+    //    "success_amount": 3900000,
+    //    "success_num": 199,
+    //    "fail_amount": 100000,
+    //    "fail_num": 1
+    interface TransferBatch {
+        @JSONField(name = "mchid")
+        public String getMchid();
+
+        @JSONField(name = "mchid")
+        public void setMchid(final String mchid);
+
+        @JSONField(name = "out_batch_no")
+        public String getOutBatchNo();
+
+        @JSONField(name = "out_batch_no")
+        public void setOutBatchNo(final String out_batch_no);
+
+        @JSONField(name = "batch_id")
+        public String getBatchId();
+
+        @JSONField(name = "batch_id")
+        public void getBatchId(final String batch_id);
+
+        @JSONField(name = "appid")
+        public String getAppid();
+
+        @JSONField(name = "appid")
+        public void setAppid(final String appid);
+
+        @JSONField(name = "batch_status")
+        public String getBatchStatus();
+
+        @JSONField(name = "batch_status")
+        public void setBatchStatus(final String batch_status);
+
+        @JSONField(name = "batch_type")
+        public String getBatchType();
+
+        @JSONField(name = "batch_type")
+        public void setBatchType(final String batch_type);
+
+        @JSONField(name = "batch_name")
+        public String getBatchName();
+
+        @JSONField(name = "batch_name")
+        public void setBatchName(final String batch_name);
+
+        @JSONField(name = "batch_remark")
+        public String getBatchRemark();
+
+        @JSONField(name = "batch_remark")
+        public void setBatchRemark(final String batch_remark);
+
+        @JSONField(name = "close_reason")
+        public String getCloseReason();
+
+        @JSONField(name = "close_reason")
+        public void setCloseReason(final String close_reason);
+
+        @JSONField(name = "total_amount")
+        public String getTotalAmount();
+
+        @JSONField(name = "total_amount")
+        public void setTotalAmount(final int total_amount);
+
+        @JSONField(name = "total_num")
+        public String getTotalNum();
+
+        @JSONField(name = "total_num")
+        public void setTotalNum(final int total_num);
+
+        @JSONField(name = "success_amount")
+        public String getSuccessAmount();
+
+        @JSONField(name = "success_amount")
+        public void setSuccessAmount(final int success_amount);
+
+        @JSONField(name = "success_num")
+        public String getSuccessNum();
+
+        @JSONField(name = "success_num")
+        public void setSuccessNum(final int success_num);
+
+        @JSONField(name = "fail_amount")
+        public String getFailAmount();
+
+        @JSONField(name = "fail_amount")
+        public void setFailAmount(final int fail_amount);
+
+        @JSONField(name = "fail_num")
+        public String getFailNum();
+
+        @JSONField(name = "fail_num")
+        public void setFailNum(final int fail_num);
+
+        @JSONField(name = "create_time")
+        public String getCreateTime();
+
+        @JSONField(name = "create_time")
+        public void setCreateTime(final String create_time);
+
+        @JSONField(name = "update_time")
+        public String getUpdateTime();
+
+        @JSONField(name = "update_time")
+        public void setUpdateTime(final String update_time);
+    }
+
+    interface TransferDetailStatus {
+        @JSONField(name = "detail_id")
+        public String getDetailId();
+
+        @JSONField(name = "detail_id")
+        public void setDetailId(final String detail_id);
+
+        //  商家明细单号
+        //  字段名：       out_detail_no
+        //  类型[长度限制]  string[1,32]
+        //  必填：         是
+        //  描述：         商户系统内部区分转账批次单下不同转账明细单的唯一标识，要求此参数只能由数字、大小写字母组成
+        //  示例值:        x23zy545Bd5436
+        @JSONField(name = "out_detail_no")
+        public String getOutDetailNo();
+
+        @JSONField(name = "out_detail_no")
+        public void setOutDetailNo(final String out_detail_no);
+
+        @JSONField(name = "detail_status")
+        public String getDetailStatus();
+
+        @JSONField(name = "detail_status")
+        public void setDetailStatus(final String detail_status);
+    }
+
+    interface QueryTransferBatchesByOutBatchNoResponse extends PayAPIV3Response {
+        @JSONField(name = "limit")
+        public int getLimit();
+
+        @JSONField(name = "limit")
+        public void setLimit(final int limit);
+
+        @JSONField(name = "offset")
+        public int getOffset();
+
+        @JSONField(name = "offset")
+        public void setOffset(final int offset);
+
+        @JSONField(name = "transfer_batch")
+        public TransferBatch getTransferBatch();
+
+        @JSONField(name = "transfer_batch")
+        public void setTransferBatch(final TransferBatch transfer_batch);
+
+        @JSONField(name = "transfer_detail_list")
+        public TransferDetailStatus[] getTransferDetails();
+
+        @JSONField(name = "transfer_detail_list")
+        public void setTransferDetails(final TransferDetailStatus[] transferDetails);
+    }
+
+    @RpcBuilder
+    interface QueryTransferBatchesByOutBatchNoBuilder extends PayAPIV3Builder<QueryTransferBatchesByOutBatchNoBuilder> {
+
+        // 商家批次单号   out_batch_no    string[1,32]    是   商户系统内部的商家批次单号，要求此参数只能由数字、大小写字母组成，在商户系统内部唯一
+        @PathParam("out_batch_no")
+        public QueryTransferBatchesByOutBatchNoBuilder outBatchNo(final String out_batch_no);
+
+        // 是否查询转账明细单    need_query_detail   boolean 是   枚举值：
+        //  true：是；
+        //  false：否，默认否。
+        //  商户可选择是否查询指定状态的转账明细单，当转账批次单状态为“FINISHED”（已完成）时，才会返回满足条件的转账明细单
+        @QueryParam("need_query_detail")
+        public QueryTransferBatchesByOutBatchNoBuilder needQueryDetail(final boolean need_query_detail);
+
+        // 请求资源起始位置 offset  int 否   该次请求资源（转账明细单）的起始位置，从0开始，默认值为0
+        //  示例值：1
+        @QueryParam("offset")
+        public QueryTransferBatchesByOutBatchNoBuilder offset(final int offset);
+
+        // 最大资源条数  limit   int 否
+        //  该次请求可返回的最大资源（转账明细单）条数，最小20条，最大100条，不传则默认20条。不足20条按实际条数返回
+        //  示例值：20
+        @QueryParam("limit")
+        public QueryTransferBatchesByOutBatchNoBuilder limit(final int limit);
+
+        // 明细状态    detail_status   string[1,32]    否
+        // 查询指定状态的转账明细单，当need_query_detail为true时，该字段必填
+        //      ALL：全部。需要同时查询转账成功和转账失败的明细单
+        //      SUCCESS：转账成功。只查询转账成功的明细单
+        //      FAIL：转账失败。只查询转账失败的明细单
+        //      示例值：FAIL
+        @QueryParam("detail_status")
+        public QueryTransferBatchesByOutBatchNoBuilder detailStatus(final int detail_status);
+
+        @GET
+        @Path("https://api.mch.weixin.qq.com/v3/transfer/batches/out-batch-no/{out_batch_no}")
+        @Consumes(MediaType.APPLICATION_JSON)
+        // @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        @OnInteract("signer")
+        Observable<QueryTransferBatchesByOutBatchNoResponse> call();
     }
 }
