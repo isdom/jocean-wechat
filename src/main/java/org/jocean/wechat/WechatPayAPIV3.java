@@ -654,6 +654,15 @@ public interface WechatPayAPIV3 {
     //        "update_time": "2015-05-20T13:29:35.120+08:00"
     //    }
     interface QueryTransferDetailResponse extends PayAPIV3Response {
+
+        // 商户号  mchid   string[1,32]    是   微信支付分配的商户号
+        // 示例值：1900001109
+        @JSONField(name = "mchid")
+        public String getMchid();
+
+        @JSONField(name = "mchid")
+        public void setMchid(final String mchid);
+
         // 商家批次单号  out_batch_no    string[1,32]    是   商户系统内部的商家批次单号，在商户系统内部唯一
         // 示例值：plfk2020042013
         @JSONField(name = "out_batch_no")
@@ -784,12 +793,9 @@ public interface WechatPayAPIV3 {
 
     // 商家明细单号查询明细单API
     // 商户可以通过该接口查询单笔转账明细单。
-
     // 注意：
     // • API只支持查询最近30天内的转账明细单，30天之前的转账明细单请登录商户平台查询。
-
     // • 转账明细单中涉及金额的字段单位为“分”。
-
     // • 如果查询单号对应的数据不存在，那么数据不存在的原因可能是：
     //    （1）转账还在处理中；
     //    （2）转账批次单受理失败或还未开始处理导致转账明细单没有落地。
@@ -812,6 +818,95 @@ public interface WechatPayAPIV3 {
 
         @GET
         @Path("https://api.mch.weixin.qq.com/v3/transfer/batches/out-batch-no/{out_batch_no}/details/out-detail-no/{out_detail_no}")
+        @Consumes(MediaType.APPLICATION_JSON)
+        // @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        @OnInteract("signer")
+        Observable<QueryTransferDetailResponse> call();
+    }
+
+    // 微信批次单号查询批次单API
+    // 商户可以通过该接口查询转账批次单以及指定状态的转账明细单。
+    // 注意：
+    //  • API只支持查询最近30天内的转账批次单，30天之前的转账批次单请登录商户平台查询。
+    //  • 转账明细单只会在批次单完成的情况下返回，如果需要在批次处理过程中查询转账明细单，请通过转账明细单查询接口来查询。
+    //  • 转账批次单中涉及金额的字段单位为“分”。
+    //  • 如果查询单号对应的数据不存在，那么数据不存在的原因可能是：
+    //    （1）批次还在受理中；
+    //    （2）批次受理失败导致转账批次单没有落地。
+    //    在上述情况下，商户首先需要检查该商家批次单号是否确实是自己发起的，如果商户确认是自己发起的，则请商户不要直接当做受理失败处理，请商户隔几分钟
+    //      再尝试查询（请勿转账和查询并发处理），或者商户可以通过相同的商家批次单号再次发起转账。如果商户误把还在受理中的批次单直接当受理失败处理，
+    //      商户应当自行承担因此产生的所有损失和责任。
+    //  接口限频： 单个商户 50QPS，如果超过频率限制，会报错FREQUENCY_LIMITED，请降低频率请求。
+    @RpcBuilder
+    interface QueryTransferBatchesByBatchIdBuilder extends PayAPIV3Builder<QueryTransferBatchesByBatchIdBuilder> {
+
+        // 微信批次单号  batch_id    string[1,64]    是   微信批次单号，微信商家转账系统返回的唯一标识
+        //  示例值：1030000071100999991182020050700019480001
+        @PathParam("batch_id")
+        public QueryTransferBatchesByBatchIdBuilder batchId(final String batch_id);
+
+        // 是否查询转账明细单    need_query_detail   boolean 是   枚举值：
+        //  true：是；
+        //  false：否，默认否。
+        //  商户可选择是否查询指定状态的转账明细单，当转账批次单状态为“FINISHED”（已完成）时，才会返回满足条件的转账明细单
+        @QueryParam("need_query_detail")
+        public QueryTransferBatchesByBatchIdBuilder needQueryDetail(final boolean need_query_detail);
+
+        // 请求资源起始位置 offset  int 否   该次请求资源（转账明细单）的起始位置，从0开始，默认值为0
+        //  示例值：1
+        @QueryParam("offset")
+        public QueryTransferBatchesByBatchIdBuilder offset(final int offset);
+
+        // 最大资源条数  limit   int 否
+        //  该次请求可返回的最大资源（转账明细单）条数，最小20条，最大100条，不传则默认20条。不足20条按实际条数返回
+        //  示例值：20
+        @QueryParam("limit")
+        public QueryTransferBatchesByBatchIdBuilder limit(final int limit);
+
+        // 明细状态    detail_status   string[1,32]    否
+        // 查询指定状态的转账明细单，当need_query_detail为true时，该字段必填
+        //      ALL：全部。需要同时查询转账成功和转账失败的明细单
+        //      SUCCESS：转账成功。只查询转账成功的明细单
+        //      FAIL：转账失败。只查询转账失败的明细单
+        //      示例值：FAIL
+        @QueryParam("detail_status")
+        public QueryTransferBatchesByBatchIdBuilder detailStatus(final String detail_status);
+
+        @GET
+        @Path("https://api.mch.weixin.qq.com/v3/transfer/batches/batch-id/{batch_id}")
+        @Consumes(MediaType.APPLICATION_JSON)
+        // @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
+        @OnInteract("signer")
+        Observable<QueryTransferBatchesResponse> call();
+    }
+
+    // 微信明细单号查询明细单API
+    // 商户可以通过该接口查询单笔转账明细单。
+    // 注意：
+    // • API只支持查询最近30天内的转账明细单，30天之前的转账明细单请登录商户平台查询。
+    // • 转账明细单中涉及金额的字段单位为“分”。
+    // • 如果查询单号对应的数据不存在，那么数据不存在的原因可能是：
+    //    （1）转账还在处理中；
+    //    （2）转账批次单受理失败或还未开始处理导致转账明细单没有落地。
+    // 在上述情况下，商户首先需要检查该商家明细单号是否确实是自己发起，以及是否是该批次下的，如果商户确认是自己发起且是该批次下的，
+    // 则请商户不要直接当做转账失败处理，请商户隔几分钟再尝试查询（请勿转账和查询并发处理）。如果商户误把还在转账处理中的明细单直接当转账失败处理，
+    // 商户应当自行承担因此产生的所有损失和责任。
+    // 接口限频： 单个商户 50QPS，如果超过频率限制，会报错FREQUENCY_LIMITED，请降低频率请求。
+    @RpcBuilder
+    interface QueryTransferDetailByDetailIdBuilder extends PayAPIV3Builder<QueryTransferDetailByDetailIdBuilder> {
+
+        // 微信批次单号   batch_id    string[1,64]    是   微信批次单号，微信商家转账系统返回的唯一标识
+        // 示例值：1030000071100999991182020050700019480001
+        @PathParam("batch_id")
+        public QueryTransferDetailByDetailIdBuilder batchId(final String batch_id);
+
+        // 微信明细单号   detail_id   string[1,64]    是   微信支付系统内部区分转账批次单下不同转账明细单的唯一标识
+        // 示例值：1040000071100999991182020050700019500100
+        @PathParam("detail_id")
+        public QueryTransferDetailByDetailIdBuilder detailId(final String detail_id);
+
+        @GET
+        @Path("https://api.mch.weixin.qq.com/v3/transfer/batches/batch-id/{batch_id}/details/detail-id/{detail_id}")
         @Consumes(MediaType.APPLICATION_JSON)
         // @OnResponse("org.jocean.wechat.WXProtocol.CHECK_WXRESP")
         @OnInteract("signer")
