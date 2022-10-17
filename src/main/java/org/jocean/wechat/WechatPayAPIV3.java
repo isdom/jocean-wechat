@@ -35,6 +35,7 @@ import rx.Observable.Transformer;
 //      https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay7_2.shtml
 //      https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay2_0.shtml
 //      https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay2_0.shtml#part-6
+//      https://pay.weixin.qq.com/docs/merchant/development/shangmi/introduction.html
 
 public interface WechatPayAPIV3 {
 
