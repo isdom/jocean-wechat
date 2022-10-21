@@ -429,6 +429,8 @@ public interface WechatPayAPIV3 {
         public void setCertificateInfos(final CertificateInfo[] infos);
     }
 
+    // https://pay.weixin.qq.com/wiki/doc/apiv3/apis/wechatpay5_1.shtml
+    // GET 获取平台证书列表
     @RpcBuilder
     interface CertificatesBuilder extends PayAPIV3Builder<CertificatesBuilder> {
         @GET
