@@ -614,6 +614,7 @@ public interface WechatPayAPIV3 {
         public void setTransferDetails(final TransferDetailStatus[] transferDetails);
     }
 
+    // https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter4_3_5.shtml
     @RpcBuilder
     interface QueryTransferBatchesByOutBatchNoBuilder extends PayAPIV3Builder<QueryTransferBatchesByOutBatchNoBuilder> {
 
