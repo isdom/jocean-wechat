@@ -810,6 +810,7 @@ public interface WechatPayAPIV3 {
         public void setUpdateTime(final String update_time);
     }
 
+    // https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter4_3_6.shtml
     // 商家明细单号查询明细单API
     // 商户可以通过该接口查询单笔转账明细单。
     // 注意：
