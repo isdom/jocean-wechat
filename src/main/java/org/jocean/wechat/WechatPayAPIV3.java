@@ -844,6 +844,7 @@ public interface WechatPayAPIV3 {
         Observable<QueryTransferDetailResponse> call();
     }
 
+    // https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter4_3_2.shtml
     // 微信批次单号查询批次单API
     // 商户可以通过该接口查询转账批次单以及指定状态的转账明细单。
     // 注意：
