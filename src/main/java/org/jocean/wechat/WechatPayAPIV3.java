@@ -901,6 +901,7 @@ public interface WechatPayAPIV3 {
         Observable<QueryTransferBatchesResponse> call();
     }
 
+    // https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter4_3_3.shtml
     // 微信明细单号查询明细单API
     // 商户可以通过该接口查询单笔转账明细单。
     // 注意：
