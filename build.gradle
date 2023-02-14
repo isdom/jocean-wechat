@@ -18,7 +18,7 @@ configurations {
 dependencies {
     
     compile "com.alibaba:fastjson:${fastjsonVersion}"
-    compile 'javax.ws.rs:javax.ws.rs-api:2.0'
+    compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
     compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonVersion}"
     compile 'org.apache.commons:commons-lang3:3.12.0'
